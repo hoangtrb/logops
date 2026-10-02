@@ -1,0 +1,3 @@
+event_id,load_id,trip_id,event_type,facility_id,scheduled_datetime,actual_datetime,detention_minutes,on_time_flag,location_city,location_state
+EVT00000001,LOAD00000001,TRIP00000001,Pickup,FAC00034,2022-01-01 18:00:00.000000,2022-01-01 20:58:55.918185,0,False,Houston,TX
+EVT00000002,LOAD00000001,TRIP00000001,Delivery,,2022-01-02 18:00:00,2022-01-02 17:41:02.5,35,True,Chicago,IL

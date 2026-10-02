@@ -1,0 +1,30 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+.pytest_cache/
+.ruff_cache/
+
+# Secrets
+.env
+
+# Generated data & outputs (rebuilt from dataset/ by the pipeline)
+data/
+reports/output/
+.cache/
+
+# Raw data is not redistributed — download from Kaggle (see README / SPEC-data-platform.md):
+# https://www.kaggle.com/datasets/yogape/logistics-operations-database
+dataset/
+archive.zip
+
+# OS / IDE
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Local Markdown previews
+SPEC-*.html
+docs/*.html
+tasks/*.html
