@@ -42,6 +42,7 @@ logistics-ops/
 │   ├── 00-project-journal.*        ← this file: progress log
 │   ├── 00-analytical-approach.*    Theory and reasons behind each method
 │   ├── 01-business-understanding.* CRISP-DM phase 1: director's questions → KPIs → success criteria
+│   ├── 02-data-model.*             (generated) ER diagram + data dictionary, from schema.py
 │   └── 02-…                        (coming) data-quality report + data analysis
 ├── tasks/
 │   ├── roadmap.md / .vi.md         3-day schedule for all 6 modules
@@ -54,7 +55,8 @@ logistics-ops/
 │       ├── schema.py               Column types, primary and foreign keys of the 14 tables (single source of truth)
 │       ├── ingest.py               CSV → typed Parquet, clear error on a type mismatch
 │       ├── warehouse.py            Parquet → DuckDB warehouse
-│       └── quality.py              Data-quality rules → `dq_issues` column + `dq_findings` table
+│       ├── quality.py              Data-quality rules → `dq_issues` column + `dq_findings` table
+│       └── data_model_doc.py       Generates `docs/02-data-model` from schema.py
 ├── tests/
 │   ├── fixtures/                   Tiny hand-made CSVs with deliberate defects
 │   ├── test_smoke.py               CLI and paths
@@ -196,6 +198,18 @@ Module 1 progress: ████░░░░░ 4/9 tasks.
     ranking drivers and trucks. That's exactly why rows are flagged instead of deleted.
   - Each run sorts tables by primary key, so results are stable between builds.
 
+### Sat 10-03 · Data model diagram (addition) ✅
+- **Why:** DBeaver shows no primary/foreign keys because the warehouse deliberately declares no
+  physical constraints. A test showed that DuckDB constraints stop the build on a bad row and
+  block rebuilding parent tables.
+- **Done:** `logops docs` generates `docs/02-data-model.md` / `.vi.md` from `schema.py`: a Mermaid
+  diagram (rendered by GitHub) and a data dictionary. A test fails if the doc drifts from
+  `schema.py`.
+- **Rejected:** real PK/FK constraints in DuckDB (kept for Task 8 if time allows); DBeaver virtual
+  keys (manual, one machine only).
+- **Docs addition:** `00-analytical-approach` §3.4 on missing data (Rubin: MCAR/MAR/MNAR). The
+  check shows missing `driver_id` is MCAR, so rows are kept and handled per analysis.
+
 ## 6. In progress
 
 **Task 5: value rules** (`range`, `amount_mismatch`, `time_order`, `geo_mismatch`). Each rule is
@@ -247,6 +261,7 @@ Full reasoning for each is in [00-analytical-approach.md](00-analytical-approach
 ```powershell
 python -m uv sync                        # install dependencies
 python -m uv run logops build            # rebuild the warehouse from dataset/
+python -m uv run logops docs             # regenerate the data model diagram
 python -m uv run pytest                  # all tests (including real-data tests)
 python -m uv run pytest -m "not slow"    # unit tests only
 python -m uv run ruff check .            # lint

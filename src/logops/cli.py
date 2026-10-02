@@ -6,6 +6,7 @@ import duckdb
 import typer
 
 from logops import config
+from logops.data_platform.data_model_doc import write_docs
 from logops.data_platform.ingest import IngestError, ingest_table
 from logops.data_platform.quality import key_rules, run_quality
 from logops.data_platform.schema import TABLES
@@ -45,3 +46,10 @@ def build() -> None:
         target = f"{table}.{column}" if column else table
         typer.echo(f"  [{severity:<5}] {rule:<12} {target:<36} {n:>8,} rows")
     typer.echo(f"Built {config.WAREHOUSE_PATH} in {time.perf_counter() - start:.1f} s")
+
+
+@app.command()
+def docs() -> None:
+    """Regenerate docs/02-data-model (EN + VI): ER diagram and data dictionary from schema.py."""
+    for path in write_docs(TABLES.values(), config.DOCS_DIR):
+        typer.echo(f"Wrote {path.relative_to(config.REPO_ROOT)}")

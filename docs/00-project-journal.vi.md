@@ -39,6 +39,7 @@ logistics-ops/
 │   ├── 00-project-journal.*        ← file này: nhật ký tiến độ
 │   ├── 00-analytical-approach.*    Cơ sở lý thuyết và lý do chọn phương pháp
 │   ├── 01-business-understanding.* CRISP-DM pha 1: câu hỏi của giám đốc → KPI → tiêu chí thành công
+│   ├── 02-data-model.*             (tự sinh) sơ đồ quan hệ ER + từ điển dữ liệu, từ schema.py
 │   └── 02-…                        (sẽ có) báo cáo chất lượng dữ liệu + phân tích dữ liệu
 ├── tasks/
 │   ├── roadmap.md / .vi.md         Lịch 3 ngày cho cả 6 module
@@ -51,7 +52,8 @@ logistics-ops/
 │       ├── schema.py               Kiểu cột, khóa chính, khóa ngoại của 14 bảng (nguồn chuẩn duy nhất)
 │       ├── ingest.py               CSV → Parquet có kiểu, báo lỗi rõ khi sai kiểu
 │       ├── warehouse.py            Parquet → kho DuckDB
-│       └── quality.py              Quy tắc chất lượng dữ liệu → cột `dq_issues` + bảng `dq_findings`
+│       ├── quality.py              Quy tắc chất lượng dữ liệu → cột `dq_issues` + bảng `dq_findings`
+│       └── data_model_doc.py       Sinh `docs/02-data-model` từ schema.py
 ├── tests/
 │   ├── fixtures/                   CSV nhỏ tự tạo, có lỗi cố ý để test
 │   ├── test_smoke.py               CLI và đường dẫn
@@ -190,6 +192,17 @@ Tiến độ module 1: ████░░░░░ 4/9 việc.
     hạng tài xế và xe. Đây chính là lý do đánh dấu thay vì xóa.
   - Mỗi lần chạy, các bảng được sắp theo khóa chính, nên kết quả ổn định giữa các lần build.
 
+### T7 03/10 · Sơ đồ mô hình dữ liệu (bổ sung) ✅
+- **Vì sao:** DBeaver không hiện khóa chính/khóa ngoại, vì kho cố ý không khai báo ràng buộc vật
+  lý. Thử nghiệm cho thấy ràng buộc trong DuckDB làm build dừng khi gặp dòng lỗi và chặn việc
+  dựng lại bảng cha.
+- **Đã làm:** `logops docs` sinh `docs/02-data-model.md` / `.vi.md` từ `schema.py`, gồm sơ đồ
+  Mermaid (GitHub tự vẽ) và từ điển dữ liệu. Có test báo lỗi nếu tài liệu lệch khỏi `schema.py`.
+- **Phương án đã bỏ:** khai báo PK/FK thật trong DuckDB (để dành cho Việc 8 nếu còn thời gian);
+  khóa ảo trong DBeaver (thủ công, chỉ có trên một máy).
+- **Bổ sung tài liệu:** `00-analytical-approach` §3.4 về xử lý dữ liệu thiếu (Rubin: MCAR/MAR/MNAR).
+  Kiểm tra cho thấy `driver_id` thiếu là MCAR, nên giữ dòng và xử lý theo từng phép phân tích.
+
 ## 6. Đang làm
 
 **Việc 5: quy tắc giá trị** (`range`, `amount_mismatch`, `time_order`, `geo_mismatch`). Mỗi quy
@@ -241,6 +254,7 @@ Mỗi quyết định có lý do đầy đủ trong [00-analytical-approach.vi.m
 ```powershell
 python -m uv sync                        # cài thư viện
 python -m uv run logops build            # dựng lại kho từ dataset/
+python -m uv run logops docs             # sinh lại sơ đồ mô hình dữ liệu
 python -m uv run pytest                  # toàn bộ test (cả test trên dữ liệu thật)
 python -m uv run pytest -m "not slow"    # chỉ unit test
 python -m uv run ruff check .            # kiểm tra code
