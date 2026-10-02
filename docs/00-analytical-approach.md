@@ -170,6 +170,45 @@ non-specialists to read, and is the standard that BI tools expect.
 chain's data by swapping the engine for Spark, Databricks or BigQuery. The SQL logic stays almost
 unchanged.
 
+### 3.4 Handling missing data
+
+**Theory:** Rubin (1976) distinguishes 3 kinds of missing data. The right treatment depends on
+the kind:
+
+| Kind | Meaning | Does dropping the missing rows bias the result? |
+|---|---|---|
+| **MCAR**: missing completely at random | Missingness is unrelated to anything | No bias, just slightly less data |
+| **MAR**: missing at random | Missingness depends on an *observed* variable (e.g. one year, one lane) | Can bias; adjust for that variable |
+| **MNAR**: missing not at random | Missingness depends on the missing value itself (e.g. poor drivers "forget" to log their name) | Biased, and the data alone can't fix it |
+
+**Evidence in the data:** about 2% of trips have no `driver_id`, and the missingness is **MCAR**:
+
+| Check | Trips with a driver | Trips without a driver |
+|---|---|---|
+| Missing rate by year 2022 / 2023 / 2024 | — | 2.01% / 1.98% / 2.03% |
+| Missing rate across the 58 lanes | — | 1.1% to 2.9% (within random variation for ~1,500 trips per lane) |
+| Average MPG | 6.50 | 6.49 |
+| Average distance | 1,430 miles | 1,439 miles |
+| On-time delivery % | 44.6% | 44.2% |
+
+Trips without a driver look exactly like the others on every measured dimension. So leaving them
+out of driver rankings does not bias those rankings.
+
+**Policy: keep the rows, decide per analysis**
+
+| Analysis | Treatment | Reason |
+|---|---|---|
+| Fleet totals: cost, fuel, miles, revenue | **Keep** every row | Dropping would understate fuel by $3.76M (3.9%) |
+| Fleet-wide rate KPIs (MPG, on-time %) | **Keep** | The trip's values are valid even if the driver is unknown |
+| Rankings and savings per driver/truck | **Exclude** rows missing the ID (complete-case analysis) | They can't be attributed. No bias because the data is MCAR. Each driver loses only ~14 of ~675 trips |
+| Delay-risk model | **Keep** rows; treat a missing ID as an "unknown" category | Gradient boosting handles missing values natively |
+| Reports by driver/truck | Add an **"Unattributed"** line | Drivers + "unattributed" = fleet total, so the numbers always reconcile |
+
+**Why not impute:** `driver_id` is an identifier, not a measurement. Filling in the "most likely"
+driver would **invent accountability** for someone who didn't drive that trip, and would corrupt
+the very ranking it's meant to support. Imputation only makes sense for measurements (a missing
+MPG, say), and this data has no such case.
+
 ---
 
 ## 4. Focus area 1: cost-to-serve and lane profitability
@@ -383,5 +422,6 @@ run), are hard to audit, cost tokens, and are prone to arithmetic errors.
 - Friedman, J. H. (2001). Greedy function approximation: A gradient boosting machine. *Annals of Statistics*, 29(5).
 - Lundberg, S. M., Lee, S.-I. (2017). A unified approach to interpreting model predictions. *NeurIPS*.
 - Grinsztajn, L., Oyallon, E., Varoquaux, G. (2022). Why do tree-based models still outperform deep learning on typical tabular data? *NeurIPS Datasets and Benchmarks*.
+- Rubin, D. B. (1976). Inference and missing data. *Biometrika*, 63(3).
 - Tukey, J. W. (1977). *Exploratory Data Analysis*. Addison-Wesley.
 - Leys, C. et al. (2013). Detecting outliers: Do not use standard deviation around the mean, use absolute deviation around the median. *Journal of Experimental Social Psychology*, 49(4).

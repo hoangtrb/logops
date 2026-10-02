@@ -1,7 +1,7 @@
 # 00 · Project Journal
 
 > Vietnamese: [00-project-journal.vi.md](00-project-journal.vi.md) · Analytical approach: [00-analytical-approach.md](00-analytical-approach.md)
-> **Last updated:** Fri 2026-10-02, after Task 3 (module `data-platform`).
+> **Last updated:** Fri 2026-10-02, after Task 4 (module `data-platform`).
 
 **How to use this file**
 - First read: §1–§4 explain what the project is, what's in the folder, which workflow it
@@ -53,7 +53,8 @@ logistics-ops/
 │   └── data_platform/
 │       ├── schema.py               Column types, primary and foreign keys of the 14 tables (single source of truth)
 │       ├── ingest.py               CSV → typed Parquet, clear error on a type mismatch
-│       └── warehouse.py            Parquet → DuckDB warehouse
+│       ├── warehouse.py            Parquet → DuckDB warehouse
+│       └── quality.py              Data-quality rules → `dq_issues` column + `dq_findings` table
 ├── tests/
 │   ├── fixtures/                   Tiny hand-made CSVs with deliberate defects
 │   ├── test_smoke.py               CLI and paths
@@ -73,8 +74,8 @@ logistics-ops/
 
 **Conventions**
 - Every doc has two files: English `name.md` and Vietnamese `name.vi.md`.
-- **You commit.** Claude only runs `git add` and suggests a message. Planning docs are committed
-  together with the README at the end of the project.
+- **You commit and push** (repo: https://github.com/hoangtrb/logops). Claude only runs `git add`
+  and suggests a message after each task.
 - Raw data is never edited. Bad rows are **flagged, not deleted**.
 - Lean modules: one test per rule or engine, one integration test per module.
 - Commands use `uv`. If `uv` isn't on PATH, use `python -m uv`.
@@ -84,7 +85,7 @@ logistics-ops/
 | # | Module | CRISP-DM phase | Planned | Status |
 |---|---|---|---|---|
 | — | Business understanding (`docs/01`) | 1 | Thu 10-01 | ✅ Done |
-| 1 | `data-platform` | 2, 3 | Fri 10-02 | 🔄 In progress: Tasks 1–3 done, at Checkpoint A |
+| 1 | `data-platform` | 2, 3 | Fri 10-02 | 🔄 In progress: Tasks 1–4 done, Task 5 next |
 | 2 | `metrics` | 3 | Sat 10-03 AM | ⏳ Not started |
 | 3 | `optimize` | 4, 5 | Sat 10-03 PM | ⏳ |
 | 4 | `insights` | 6 | Sun 10-04 AM | ⏳ |
@@ -92,7 +93,7 @@ logistics-ops/
 | 6 | `reports` | 6 | Sun 10-04 PM | ⏳ |
 | — | Demo, evaluation, freeze | 5 | Sun 10-04 evening | ⏳ |
 
-Module 1 progress: ███░░░░░░ 3/9 tasks.
+Module 1 progress: ████░░░░░ 4/9 tasks.
 
 ## 5. Done (chronological)
 
@@ -152,11 +153,53 @@ Module 1 progress: ███░░░░░░ 3/9 tasks.
   The on-time rate is unusually low. Tasks 7 and 9 need to check whether that's an artefact of
   the synthetic data or a real improvement opportunity.
 
+### Fri 10-02 · Checkpoint A and first commit ✅
+- The warehouse passed Checkpoint A. The first commit `61e34a7` is pushed to
+  [github.com/hoangtrb/logops](https://github.com/hoangtrb/logops).
+- `*.html` Markdown previews were added to `.gitignore`.
+
+### Fri 10-02 · Task 4: Data-quality engine + key rules ✅
+- **Done:**
+  - `quality.py`: each rule is data, `Rule(table, id, severity, predicate, column)`, where
+    `predicate` is a SQL condition that is TRUE when a row violates the rule.
+  - The 3 key rules are **generated** from the primary and foreign keys declared in `schema.py`:
+    `pk_unique` (error), `fk_missing` (warn), `fk_orphan` (error). 50 rules across the 14 tables (14 primary keys, 18 foreign keys × 2).
+  - Every table gets a `dq_issues` column listing the row's problems (empty when clean). The
+    `dq_findings` table records each rule's violation count and 3 sample keys, including rules
+    with 0 violations.
+  - `logops build` runs this step and prints a summary.
+- **Result:** 17 tests green. Building all 14 tables with the checks takes 5.4 s. No rows deleted.
+- **Findings on the real data:**
+  - **No duplicate primary keys and no orphan foreign keys** in any of the 14 tables: the
+    relationships between tables are intact.
+  - Only empty foreign keys (warnings):
+
+    | Column | Empty rows |
+    |---|---:|
+    | `fuel_purchases.driver_id` | 3,988 |
+    | `fuel_purchases.truck_id` | 3,880 |
+    | `trips.driver_id` | 1,714 |
+    | `trips.trailer_id` | 1,680 |
+    | `trips.truck_id` | 1,672 |
+    | `safety_incidents.truck_id` / `driver_id` | 1 / 1 |
+
+  - **The pattern looks random**, about 2% per column: 4,838 trips miss one ID, 114 miss two,
+    none miss all three. That's typical of deliberate noise in synthetic data, not a systemic
+    error.
+  - Missing drivers on fuel purchases **can't be recovered** from the trip: every fuel purchase
+    without a driver belongs to a trip that also has no driver.
+  - **Impact:** $3.76M of the $95.6M fuel spend (3.9%) can't be attributed to a driver or truck.
+- **Decisions:**
+  - `fk_missing` is a *warn*, while `pk_unique` and `fk_orphan` are *errors*. A missing ID is
+    missing information; a duplicate key or an orphan ID is wrong data.
+  - Later modules will **keep** these rows when totalling fleet costs but **exclude** them when
+    ranking drivers and trucks. That's exactly why rows are flagged instead of deleted.
+  - Each run sorts tables by primary key, so results are stable between builds.
+
 ## 6. In progress
 
-**Checkpoint A: the warehouse builds.** Tests and ruff are green. It's waiting for your review of
-the warehouse, for example with `duckdb -ui data/warehouse.duckdb`, before the data-quality work
-starts.
+**Task 5: value rules** (`range`, `amount_mismatch`, `time_order`, `geo_mismatch`). Each rule is
+one more `Rule(...)` line in `quality.py`, reusing the Task 4 engine.
 
 ## 7. Next
 
@@ -164,7 +207,6 @@ starts.
 
 | Task | Content | Cut if late? |
 |---|---|---|
-| 4 | DQ engine + key rules: `pk_unique`, `fk_missing`, `fk_orphan` | No |
 | 5 | Value rules: `range`, `amount_mismatch`, `time_order`, `geo_mismatch` | No |
 | 6 | `agg_drift`: compare monthly metrics with values recomputed from trips | **Yes** |
 | 7 | DQ report EN/VI + baselines (total cost, on-time %, MPG, utilization) | No |

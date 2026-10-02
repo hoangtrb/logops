@@ -35,3 +35,20 @@ def test_all_tables_load_with_csv_row_counts(tmp_path):
         for table in TABLES.values():
             rows = con.execute(f'SELECT count(*) FROM "{table.name}"').fetchone()[0]
             assert rows == csv_record_count(table), table.name
+
+
+def test_key_rules_run_on_real_data_without_dropping_rows(tmp_path):
+    from logops.data_platform.quality import key_rules, run_quality
+
+    for table in TABLES.values():
+        ingest_table(table, config.DATASET_DIR, tmp_path / "parquet")
+    db_path = tmp_path / "warehouse.duckdb"
+    load_warehouse(TABLES.values(), tmp_path / "parquet", db_path)
+    run_quality(db_path, TABLES.values(), key_rules(TABLES.values()))
+
+    with duckdb.connect(str(db_path), read_only=True) as con:
+        rules = con.execute("SELECT count(*) FROM dq_findings").fetchone()[0]
+        assert rules == len(key_rules(TABLES.values()))
+        for table in TABLES.values():
+            rows = con.execute(f'SELECT count(*) FROM "{table.name}"').fetchone()[0]
+            assert rows == csv_record_count(table), table.name

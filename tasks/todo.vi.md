@@ -46,8 +46,8 @@ gian có phần micro giây, giá trị logic lưu dạng "True"/"False", và kh
 **Quy mô:** M
 
 ## Điểm kiểm tra A: Kho dữ liệu dựng được
-- [ ] Toàn bộ test + ruff đều qua
-- [ ] Chủ dự án xem lại trước khi làm phần kiểm tra chất lượng
+- [x] Toàn bộ test + ruff đều qua
+- [x] Chủ dự án xem lại trước khi làm phần kiểm tra chất lượng
 
 ## Việc 4: Bộ máy kiểm tra + quy tắc khóa
 **Mô tả:** `quality.py` với `Rule(table, id, severity, predicate)`. Bộ máy thêm cột `dq_issues`
@@ -56,9 +56,9 @@ tắc: `pk_unique`, `fk_missing`, `fk_orphan`, sinh tự động từ khai báo 
 `schema.py`.
 
 **Tiêu chí chấp nhận:**
-- [ ] Dữ liệu mẫu có khóa chính trùng, khóa ngoại rỗng và khóa ngoại không khớp → mỗi lỗi được đánh dấu đúng một lần
-- [ ] Các dòng mẫu sạch có `dq_issues` rỗng
-- [ ] Không xóa dòng nào
+- [x] Dữ liệu mẫu có khóa chính trùng, khóa ngoại rỗng và khóa ngoại không khớp → mỗi lỗi được đánh dấu đúng một lần
+- [x] Các dòng mẫu sạch có `dq_issues` rỗng
+- [x] Không xóa dòng nào
 
 **Kiểm chứng:** `uv run pytest tests/data_platform/test_quality_keys.py`
 **Phụ thuộc:** Việc 3

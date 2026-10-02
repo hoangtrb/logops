@@ -166,6 +166,44 @@ không chuyên, và là chuẩn của các công cụ BI.
 của một chuỗi bán lẻ bằng cách đổi engine sang Spark, Databricks hoặc BigQuery. Logic SQL giữ
 gần như nguyên vẹn.
 
+### 3.4 Xử lý dữ liệu thiếu
+
+**Lý thuyết:** Rubin (1976) chia dữ liệu thiếu thành 3 loại. Cách xử lý đúng phụ thuộc vào loại:
+
+| Loại | Ý nghĩa | Bỏ dòng thiếu có làm lệch kết quả? |
+|---|---|---|
+| **MCAR**: thiếu hoàn toàn ngẫu nhiên | Việc thiếu không liên quan đến bất kỳ yếu tố nào | Không lệch, chỉ mất một ít dữ liệu |
+| **MAR**: thiếu ngẫu nhiên có điều kiện | Việc thiếu phụ thuộc vào một biến *quan sát được* (ví dụ một năm, một tuyến) | Có thể lệch, cần điều chỉnh theo biến đó |
+| **MNAR**: thiếu không ngẫu nhiên | Việc thiếu phụ thuộc vào chính giá trị bị thiếu (ví dụ tài xế kém hay "quên" ghi tên) | Lệch, và không sửa được chỉ bằng dữ liệu |
+
+**Bằng chứng trong dữ liệu:** khoảng 2% chuyến thiếu `driver_id`, và việc thiếu là **MCAR**:
+
+| Kiểm tra | Chuyến có tài xế | Chuyến thiếu tài xế |
+|---|---|---|
+| Tỷ lệ thiếu theo năm 2022 / 2023 / 2024 | — | 2,01% / 1,98% / 2,03% |
+| Tỷ lệ thiếu theo 58 tuyến | — | 1,1% đến 2,9% (trong biên dao động ngẫu nhiên khi mỗi tuyến có khoảng 1.500 chuyến) |
+| MPG trung bình | 6,50 | 6,49 |
+| Quãng đường trung bình | 1.430 dặm | 1.439 dặm |
+| % giao đúng giờ | 44,6% | 44,2% |
+
+Chuyến thiếu tài xế giống hệt các chuyến khác về mọi mặt đo được. Vì vậy loại chúng khỏi phép
+xếp hạng tài xế không làm lệch kết quả.
+
+**Chính sách: giữ dòng, quyết định theo từng phép phân tích**
+
+| Phép phân tích | Xử lý | Lý do |
+|---|---|---|
+| Tổng chi phí, nhiên liệu, quãng đường, doanh thu của đội xe | **Giữ** mọi dòng | Bỏ đi sẽ tính thiếu 3,76 triệu USD nhiên liệu (3,9%) |
+| KPI tỷ lệ của cả đội xe (MPG, % đúng giờ) | **Giữ** | Giá trị của chuyến vẫn đúng, dù không biết ai lái |
+| Xếp hạng và tiết kiệm theo tài xế/xe | **Loại** dòng thiếu mã (complete-case analysis) | Không gán được. Không lệch vì là MCAR. Mỗi tài xế chỉ mất khoảng 14 trên khoảng 675 chuyến |
+| Mô hình dự báo trễ | **Giữ** dòng, coi mã thiếu là nhóm "không rõ" | Gradient boosting xử lý giá trị thiếu trực tiếp |
+| Báo cáo theo tài xế/xe | Thêm dòng **"Không gán được"** | Tổng các tài xế + "không gán được" = tổng đội xe, nên số liệu luôn khớp |
+
+**Vì sao không điền giá trị thiếu (imputation):** `driver_id` là một mã định danh, không phải số
+đo. Điền một tài xế "có khả năng nhất" là **bịa ra trách nhiệm** cho người không lái chuyến đó, và
+sẽ làm sai chính phép xếp hạng cần dùng nó. Điền giá trị chỉ hợp lý với số đo, ví dụ MPG bị thiếu,
+và dữ liệu này không có trường hợp đó.
+
 ---
 
 ## 4. Lĩnh vực 1: Cost-to-serve và lợi nhuận tuyến
@@ -376,5 +414,6 @@ khác), khó kiểm toán, tốn token, và dễ sai số học.
 - Friedman, J. H. (2001). Greedy function approximation: A gradient boosting machine. *Annals of Statistics*, 29(5).
 - Lundberg, S. M., Lee, S.-I. (2017). A unified approach to interpreting model predictions. *NeurIPS*.
 - Grinsztajn, L., Oyallon, E., Varoquaux, G. (2022). Why do tree-based models still outperform deep learning on typical tabular data? *NeurIPS Datasets and Benchmarks*.
+- Rubin, D. B. (1976). Inference and missing data. *Biometrika*, 63(3).
 - Tukey, J. W. (1977). *Exploratory Data Analysis*. Addison-Wesley.
 - Leys, C. và cộng sự (2013). Detecting outliers: Do not use standard deviation around the mean, use absolute deviation around the median. *Journal of Experimental Social Psychology*, 49(4).

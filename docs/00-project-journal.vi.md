@@ -1,7 +1,7 @@
 # 00 · Nhật ký dự án
 
 > Bản tiếng Anh: [00-project-journal.md](00-project-journal.md) · Cơ sở phân tích: [00-analytical-approach.vi.md](00-analytical-approach.vi.md)
-> **Cập nhật lần cuối:** Thứ 6 02/10/2026, sau Việc 3 (module `data-platform`).
+> **Cập nhật lần cuối:** Thứ 6 02/10/2026, sau Việc 4 (module `data-platform`).
 
 **Cách dùng file này**
 - Lần đầu đọc: đọc §1 → §4 để nắm dự án là gì, thư mục có gì, làm theo quy trình nào, đang ở đâu.
@@ -50,7 +50,8 @@ logistics-ops/
 │   └── data_platform/
 │       ├── schema.py               Kiểu cột, khóa chính, khóa ngoại của 14 bảng (nguồn chuẩn duy nhất)
 │       ├── ingest.py               CSV → Parquet có kiểu, báo lỗi rõ khi sai kiểu
-│       └── warehouse.py            Parquet → kho DuckDB
+│       ├── warehouse.py            Parquet → kho DuckDB
+│       └── quality.py              Quy tắc chất lượng dữ liệu → cột `dq_issues` + bảng `dq_findings`
 ├── tests/
 │   ├── fixtures/                   CSV nhỏ tự tạo, có lỗi cố ý để test
 │   ├── test_smoke.py               CLI và đường dẫn
@@ -70,8 +71,8 @@ logistics-ops/
 
 **Quy ước**
 - Mọi tài liệu có 2 file: tiếng Anh `name.md` và tiếng Việt `name.vi.md`.
-- **Bạn tự commit.** Claude chỉ `git add` và gợi ý message. Các tài liệu kế hoạch sẽ được commit
-  cùng README ở cuối dự án.
+- **Bạn tự commit và push** (repo: https://github.com/hoangtrb/logops). Claude chỉ `git add` và
+  gợi ý message sau mỗi việc.
 - Dữ liệu gốc không bao giờ bị sửa. Dòng lỗi được **đánh dấu, không xóa**.
 - Module gọn nhẹ: mỗi quy tắc/engine một test, mỗi module một test tích hợp.
 - Các lệnh dùng `uv`. Nếu `uv` chưa có trong PATH thì dùng `python -m uv`.
@@ -81,7 +82,7 @@ logistics-ops/
 | # | Module | Pha CRISP-DM | Ngày dự kiến | Trạng thái |
 |---|---|---|---|---|
 | — | Hiểu nghiệp vụ (`docs/01`) | 1 | T5 01/10 | ✅ Xong |
-| 1 | `data-platform` | 2, 3 | T6 02/10 | 🔄 Đang làm: Việc 1–3 xong, đang ở Checkpoint A |
+| 1 | `data-platform` | 2, 3 | T6 02/10 | 🔄 Đang làm: Việc 1–4 xong, tiếp theo Việc 5 |
 | 2 | `metrics` | 3 | Sáng T7 03/10 | ⏳ Chưa bắt đầu |
 | 3 | `optimize` | 4, 5 | Chiều T7 03/10 | ⏳ |
 | 4 | `insights` | 6 | Sáng CN 04/10 | ⏳ |
@@ -89,7 +90,7 @@ logistics-ops/
 | 6 | `reports` | 6 | Chiều CN 04/10 | ⏳ |
 | — | Demo, đánh giá, đóng băng | 5 | Tối CN 04/10 | ⏳ |
 
-Tiến độ module 1: ███░░░░░░ 3/9 việc.
+Tiến độ module 1: ████░░░░░ 4/9 việc.
 
 ## 5. Đã làm (theo thời gian)
 
@@ -146,10 +147,53 @@ Tiến độ module 1: ███░░░░░░ 3/9 việc.
   Tỷ lệ đúng giờ thấp bất thường. Cần kiểm tra ở Việc 7 và Việc 9 xem đó là đặc điểm của dữ liệu
   tổng hợp hay một cơ hội cải thiện thật.
 
+### T6 02/10 · Checkpoint A và commit đầu tiên ✅
+- Kho dữ liệu đạt Checkpoint A. Commit đầu tiên `61e34a7` đã push lên
+  [github.com/hoangtrb/logops](https://github.com/hoangtrb/logops).
+- Đã thêm `*.html` (bản xem trước Markdown) vào `.gitignore`.
+
+### T6 02/10 · Việc 4: Engine chất lượng dữ liệu + quy tắc khóa ✅
+- **Đã làm:**
+  - `quality.py`: mỗi quy tắc là dữ liệu, `Rule(table, id, severity, predicate, column)`, trong đó
+    `predicate` là điều kiện SQL, đúng khi dòng vi phạm.
+  - 3 quy tắc khóa được **sinh tự động** từ khóa chính và khóa ngoại khai báo trong `schema.py`:
+    `pk_unique` (error), `fk_missing` (warn), `fk_orphan` (error). Tổng cộng 50 quy tắc cho 14 bảng (14 khóa chính, 18 khóa ngoại × 2).
+  - Mỗi bảng có thêm cột `dq_issues` liệt kê lỗi của dòng (rỗng nếu sạch). Bảng `dq_findings`
+    ghi số vi phạm và 3 khóa mẫu cho từng quy tắc, kể cả quy tắc có 0 vi phạm.
+  - `logops build` chạy bước này và in tóm tắt.
+- **Kết quả:** 17 test xanh. Build cả 14 bảng kèm kiểm tra mất 5,4 giây. Không dòng nào bị xóa.
+- **Phát hiện trên dữ liệu thật:**
+  - **Không có khóa chính trùng, không có khóa ngoại "mồ côi"** ở cả 14 bảng: quan hệ giữa các bảng
+    toàn vẹn.
+  - Chỉ có khóa ngoại rỗng (cảnh báo):
+
+    | Cột | Số dòng rỗng |
+    |---|---:|
+    | `fuel_purchases.driver_id` | 3.988 |
+    | `fuel_purchases.truck_id` | 3.880 |
+    | `trips.driver_id` | 1.714 |
+    | `trips.trailer_id` | 1.680 |
+    | `trips.truck_id` | 1.672 |
+    | `safety_incidents.truck_id` / `driver_id` | 1 / 1 |
+
+  - **Phân bố trông ngẫu nhiên**, mỗi cột khoảng 2%: 4.838 chuyến thiếu 1 mã, 114 chuyến thiếu
+    2 mã, không chuyến nào thiếu cả 3. Đây là kiểu nhiễu cố ý của dữ liệu tổng hợp, không phải lỗi
+    có hệ thống.
+  - Tài xế thiếu trên phiếu nhiên liệu **không khôi phục được** từ chuyến: mọi phiếu thiếu tài xế
+    đều thuộc chuyến cũng thiếu tài xế.
+  - **Tác động:** 3,76 triệu USD trên 95,6 triệu USD chi phí nhiên liệu (3,9%) không gán được cho
+    tài xế hoặc xe.
+- **Quyết định:**
+  - `fk_missing` là *warn*, còn `pk_unique` và `fk_orphan` là *error*. Thiếu mã là thiếu thông tin;
+    trùng khóa hoặc mã mồ côi là dữ liệu sai.
+  - Các module sau sẽ **giữ** các dòng này khi tính tổng chi phí đội xe, nhưng **loại** khi xếp
+    hạng tài xế và xe. Đây chính là lý do đánh dấu thay vì xóa.
+  - Mỗi lần chạy, các bảng được sắp theo khóa chính, nên kết quả ổn định giữa các lần build.
+
 ## 6. Đang làm
 
-**Checkpoint A: kho dữ liệu dựng được.** Test và ruff đã xanh. Còn chờ bạn rà soát kho, ví dụ
-bằng `duckdb -ui data/warehouse.duckdb`, trước khi sang phần chất lượng dữ liệu.
+**Việc 5: quy tắc giá trị** (`range`, `amount_mismatch`, `time_order`, `geo_mismatch`). Mỗi quy
+tắc chỉ là thêm một dòng `Rule(...)` vào `quality.py`, dùng lại engine của Việc 4.
 
 ## 7. Sẽ làm
 
@@ -157,7 +201,6 @@ bằng `duckdb -ui data/warehouse.duckdb`, trước khi sang phần chất lư�
 
 | Việc | Nội dung | Cắt nếu trễ? |
 |---|---|---|
-| 4 | Engine DQ + quy tắc khóa: `pk_unique`, `fk_missing`, `fk_orphan` | Không |
 | 5 | Quy tắc giá trị: `range`, `amount_mismatch`, `time_order`, `geo_mismatch` | Không |
 | 6 | `agg_drift`: so bảng chỉ số tháng với số tính lại từ chuyến | **Có** |
 | 7 | Sinh báo cáo DQ EN/VI + baseline (tổng chi phí, % đúng giờ, MPG, mức sử dụng) | Không |

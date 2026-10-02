@@ -47,11 +47,11 @@ T1 khung dự án
 - [x] T3: Mở rộng lược đồ & phần nạp cho cả 14 bảng · M
 
 ### Điểm kiểm tra A: Kho dữ liệu dựng được
-- [ ] `logops build` tạo `data/warehouse.duckdb` có 14 bảng; số dòng khớp CSV
-- [ ] Test và ruff đều qua · chủ dự án xem lại
+- [x] `logops build` tạo `data/warehouse.duckdb` có 14 bảng; số dòng khớp CSV
+- [x] Test và ruff đều qua · chủ dự án xem lại
 
 ### Giai đoạn 2: Chất lượng dữ liệu
-- [ ] T4: Bộ máy kiểm tra + quy tắc khóa (`pk_unique`, `fk_missing`, `fk_orphan`) · M
+- [x] T4: Bộ máy kiểm tra + quy tắc khóa (`pk_unique`, `fk_missing`, `fk_orphan`) · M
 - [ ] T5: Quy tắc giá trị (`range`, `amount_mismatch`, `time_order`, `geo_mismatch`) · M
 - [ ] T6: Quy tắc `agg_drift` (số liệu tháng so với số tính lại từ trips) · S
 

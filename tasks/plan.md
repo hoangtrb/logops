@@ -46,11 +46,11 @@ T1 scaffold
 - [x] T3: Extend schema & ingest to all 14 tables · M
 
 ### Checkpoint A: Warehouse builds
-- [ ] `logops build` creates `data/warehouse.duckdb` with 14 tables; row counts match CSVs
-- [ ] Tests and ruff green · human review
+- [x] `logops build` creates `data/warehouse.duckdb` with 14 tables; row counts match CSVs
+- [x] Tests and ruff green · human review
 
 ### Phase 2: Data quality
-- [ ] T4: DQ engine + key rules (`pk_unique`, `fk_missing`, `fk_orphan`) · M
+- [x] T4: DQ engine + key rules (`pk_unique`, `fk_missing`, `fk_orphan`) · M
 - [ ] T5: Value rules (`range`, `amount_mismatch`, `time_order`, `geo_mismatch`) · M
 - [ ] T6: `agg_drift` rule (monthly metrics vs recomputed from trips) · S
 

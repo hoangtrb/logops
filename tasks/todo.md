@@ -47,8 +47,8 @@ timestamps with microseconds, booleans stored as "True"/"False", and nullable fo
 **Scope:** M
 
 ## Checkpoint A: Warehouse builds
-- [ ] All tests + ruff green
-- [ ] Human review before DQ work
+- [x] All tests + ruff green
+- [x] Human review before DQ work
 
 ## Task 4: DQ engine + key rules
 **Description:** `quality.py` with `Rule(table, id, severity, predicate)`. The engine adds
@@ -57,9 +57,9 @@ count, sample ids). Rules: `pk_unique`, `fk_missing`, `fk_orphan`, generated fro
 PK/FK declarations in `schema.py`.
 
 **Acceptance criteria:**
-- [ ] Fixture with a duplicate PK, a null FK and an orphan FK → each is flagged exactly once
-- [ ] Clean fixture rows have an empty `dq_issues`
-- [ ] No rows are deleted
+- [x] Fixture with a duplicate PK, a null FK and an orphan FK → each is flagged exactly once
+- [x] Clean fixture rows have an empty `dq_issues`
+- [x] No rows are deleted
 
 **Verification:** `uv run pytest tests/data_platform/test_quality_keys.py`
 **Dependencies:** T3
