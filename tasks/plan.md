@@ -51,17 +51,17 @@ T1 scaffold
 
 ### Phase 2: Data quality
 - [x] T4: DQ engine + key rules (`pk_unique`, `fk_missing`, `fk_orphan`) · M
-- [ ] T5: Value rules (`range`, `amount_mismatch`, `time_order`, `geo_mismatch`) · M
-- [ ] T6: `agg_drift` rule (monthly metrics vs recomputed from trips) · S
+- [x] T5: Value rules (`range`, `amount_mismatch`, `time_order`, `geo_mismatch`) · M
+- [~] ~~T6: `agg_drift` rule~~ · cut: one-off check found 0% drift
 
 ### Checkpoint B: Findings correct
 - [ ] Every rule has a passing fixture test; findings on the real data look plausible
 - [ ] Human review of the false-positive rate (especially `geo_mismatch`)
 
 ### Phase 3: Report & hardening
-- [ ] T7: DQ report generator, EN + VI, with business baselines · M
-- [ ] T8: Dedup logging, `--skip-dq`, idempotency, < 30 s performance · S
-- [ ] T9: Hand-written `02-data-understanding` (EN + VI) · S
+- [x] T7: DQ report generator, EN + VI, with business baselines · M
+- [~] ~~T8: Dedup logging, `--skip-dq`, idempotency, < 30 s~~ · cut: 0 duplicates, already idempotent, 5.4 s
+- [x] T9: Hand-written `02-data-understanding` (EN + VI) · S
 
 ### Checkpoint C: Module complete
 - [ ] All spec success criteria met · ready for `metrics` spec

@@ -43,7 +43,9 @@ for written insights.
 **Assumptions**
 - `revenue` on loads is the price charged to the customer (or, for an in-house fleet, the
   internal transfer price).
-- `on_time_flag` on delivery events is the authoritative service measure.
+- `on_time_flag` on delivery events is the authoritative service measure. *Confirmed in Phase 2:*
+  it means arrival within **±2 hours** of the appointment (matches 100% of events), so arriving
+  more than 2 hours early also counts as a miss.
 
 **Risks & mitigations**
 
@@ -66,12 +68,14 @@ for written insights.
 
 ## 5. Success criteria
 
-*Targets are provisional. Baselines are measured in Phase 2 (Data Understanding) and these
-targets are confirmed or adjusted then.*
+*Baselines were measured in Phase 2 ([02-data-quality-report.md](02-data-quality-report.md)) and
+the targets below are confirmed against them ([02-data-understanding.md](02-data-understanding.md) §6).*
 
 **Business**
 - Identify savings opportunities worth **≥ 3% of total operating cost**, each with an owner
-  action and a $ estimate.
+  action and a $ estimate. Measured operating cost for 2022–2024 is **$104.0M** (fuel, maintenance
+  and safety claims), so the target is **≥ $3.1M over three years (≈ $1.04M per year)**. Driver
+  pay isn't in the data, so the real cost base is larger and this target is conservative.
 - Every recommendation can be traced back to the data behind it.
 
 **Analytical**

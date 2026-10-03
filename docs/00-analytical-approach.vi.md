@@ -244,6 +244,11 @@ hao). Vì vậy:
 **Kỹ thuật**
 - **Bậc mô tả và chẩn đoán:** tính % đúng giờ và số giờ chờ theo kho, tuyến, khung giờ, ngày
   trong tuần. Quy giờ chờ ra tiền: giờ chờ × chi phí giờ của xe và tài xế.
+  - *Điều chỉnh sau pha 2:* "theo kho" dùng **`location_city`** của sự kiện, không dùng
+    `facility_id`, vì `facility_id` chỉ khớp tuyến 3,4% (gần như ngẫu nhiên), còn `location_city`
+    khớp 100%.
+  - *Định nghĩa đúng giờ:* `on_time_flag` = đến trong khung **±2 giờ** so với giờ hẹn (khớp 100%).
+    Báo cáo hiển thị cả tuân thủ khung giờ và tỷ lệ không trễ. Xem `02-data-understanding` §4.
 - **Bậc dự báo:** mô hình phân loại **gradient boosting** (Friedman, 2001) dự báo xác suất trễ
   của từng lô hàng, dùng các thông tin *biết trước khi xe chạy*: tuyến, kho, khung giờ hẹn, loại
   hàng, trọng lượng, tài xế, tuổi xe.
@@ -302,8 +307,11 @@ cách tránh **nghịch lý Simpson**: xu hướng chung có thể ngược vớ
   nhiên liệu. Chỉ tính cho các xe hoặc tài xế *kém hơn* trung vị.
 - **Chạy không tải:** số giờ không tải vượt trung vị × mức tiêu hao mỗi giờ không tải. Mức tiêu
   hao này là **giả định ghi rõ**, vì dữ liệu không có.
-- **Giá mua nhiên liệu:** chênh lệch giá theo địa điểm. Hành động đề xuất là chính sách đổ nhiên
-  liệu ở trạm hoặc khu vực rẻ hơn.
+- ~~**Giá mua nhiên liệu:** chênh lệch giá theo địa điểm.~~ **Đã bỏ sau pha 2:** giá trung bình
+  giữa các thành phố chỉ chênh 0,02 USD/gallon (3,886–3,907), và bang trên phiếu nhiên liệu sai
+  95%. Không có tín hiệu để hứa một khoản tiết kiệm, nên đòn bẩy này không được đưa vào.
+- **Lọc dữ liệu cho phân tích không tải:** loại 7.450 chuyến (8,7%) có thời gian không tải lớn
+  hơn thời gian chuyến (quy tắc `idle_exceeds_duration`).
 
 ---
 

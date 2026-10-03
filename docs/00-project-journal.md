@@ -1,7 +1,7 @@
 # 00 · Project Journal
 
 > Vietnamese: [00-project-journal.vi.md](00-project-journal.vi.md) · Analytical approach: [00-analytical-approach.md](00-analytical-approach.md)
-> **Last updated:** Fri 2026-10-02, after Task 4 (module `data-platform`).
+> **Last updated:** Fri 2026-10-02, after Task 9: module `data-platform` complete.
 
 **How to use this file**
 - First read: §1–§4 explain what the project is, what's in the folder, which workflow it
@@ -43,20 +43,23 @@ logistics-ops/
 │   ├── 00-analytical-approach.*    Theory and reasons behind each method
 │   ├── 01-business-understanding.* CRISP-DM phase 1: director's questions → KPIs → success criteria
 │   ├── 02-data-model.*             (generated) ER diagram + data dictionary, from schema.py
-│   └── 02-…                        (coming) data-quality report + data analysis
+│   ├── 02-data-quality-report.*    (generated) data-quality report + baselines
+│   ├── 02-dq-rule-thresholds.*     The numbers in the rules and tests: why, and their sources
+│   └── 02-data-understanding.*     CRISP-DM phase 2: data analysis, interview talking points
 ├── tasks/
 │   ├── roadmap.md / .vi.md         3-day schedule for all 6 modules
 │   ├── plan.md / .vi.md            Plan for the current module (data-platform)
 │   └── todo.md / .vi.md            Task list; todo.md (English) is the source of truth for checkboxes
 ├── src/logops/
-│   ├── cli.py                      `logops` command (has `build` so far)
+│   ├── cli.py                      `logops build` and `logops docs` commands
 │   ├── config.py                   All paths, resolved from the repo root
 │   └── data_platform/
 │       ├── schema.py               Column types, primary and foreign keys of the 14 tables (single source of truth)
 │       ├── ingest.py               CSV → typed Parquet, clear error on a type mismatch
 │       ├── warehouse.py            Parquet → DuckDB warehouse
 │       ├── quality.py              Data-quality rules → `dq_issues` column + `dq_findings` table
-│       └── data_model_doc.py       Generates `docs/02-data-model` from schema.py
+│       ├── data_model_doc.py       Generates `docs/02-data-model` from schema.py
+│       └── dq_report.py            Generates `docs/02-data-quality-report` from the warehouse
 ├── tests/
 │   ├── fixtures/                   Tiny hand-made CSVs with deliberate defects
 │   ├── test_smoke.py               CLI and paths
@@ -87,7 +90,7 @@ logistics-ops/
 | # | Module | CRISP-DM phase | Planned | Status |
 |---|---|---|---|---|
 | — | Business understanding (`docs/01`) | 1 | Thu 10-01 | ✅ Done |
-| 1 | `data-platform` | 2, 3 | Fri 10-02 | 🔄 In progress: Tasks 1–4 done, Task 5 next |
+| 1 | `data-platform` | 2, 3 | Fri 10-02 | ✅ Done (7 tasks; Tasks 6 and 8 cut). Awaiting Checkpoint C review |
 | 2 | `metrics` | 3 | Sat 10-03 AM | ⏳ Not started |
 | 3 | `optimize` | 4, 5 | Sat 10-03 PM | ⏳ |
 | 4 | `insights` | 6 | Sun 10-04 AM | ⏳ |
@@ -95,7 +98,7 @@ logistics-ops/
 | 6 | `reports` | 6 | Sun 10-04 PM | ⏳ |
 | — | Demo, evaluation, freeze | 5 | Sun 10-04 evening | ⏳ |
 
-Module 1 progress: ████░░░░░ 4/9 tasks.
+Module 1 progress: █████████ complete (7 tasks done, 2 cut with reasons).
 
 ## 5. Done (chronological)
 
@@ -210,22 +213,86 @@ Module 1 progress: ████░░░░░ 4/9 tasks.
 - **Docs addition:** `00-analytical-approach` §3.4 on missing data (Rubin: MCAR/MAR/MNAR). The
   check shows missing `driver_id` is MCAR, so rows are kept and handled per analysis.
 
+### Sat 10-03 · Tasks 6 and 8 cut ✂️
+- **Why:** a one-off check showed both would only report "0 errors". The monthly tables match
+  recomputed values 100% (drivers and trucks, maintenance included); 0 duplicate rows; the build is
+  already stable and takes 5.4 s.
+- **Instead:** both checks appear in the DQ report (Cross-checks section), recomputed by SQL on
+  every build.
+
+### Sat 10-03 · Task 5: Value rules ✅
+- **Done:** 20 value rules in `VALUE_RULES` (`range`, `amount_mismatch`, `time_order`,
+  `geo_mismatch`, `idle_exceeds_duration`); `all_rules()` combines them with the key rules for 70
+  rules in total. `logops build` explains clearly when DBeaver is holding the warehouse file.
+- **Result:** 47 tests green; load + checks take 2.8 s. 14 of 70 rules found violations.
+- **Key findings:**
+  - `on_time_flag` = arrival within **±2 hours** of the appointment (100% match). More than 2 hours
+    early counts as not on time.
+  - `delivery_events.facility_id` is essentially random (3.4% match with the lane);
+    `location_city` matches 100%.
+  - The state on fuel purchases is wrong 95% of the time ("Denver, TX"); fuel prices differ by only
+    $0.02/gallon across cities.
+  - 7,450 trips (8.7%) have idle time longer than the trip itself.
+- **Decisions:** every threshold's source is documented in `docs/02-dq-rule-thresholds`. (The
+  hiring-age rule was later removed; see the entry below.)
+
+### Sat 10-03 · Task 7: Data-quality report ✅
+- **Done:** `dq_report.py` computes every number once with SQL and renders both languages:
+  `docs/02-data-quality-report.md` / `.vi.md`. Summary, baselines, findings with 3 sample keys,
+  rule definitions, cross-checks, missing values. Re-runs are byte-identical.
+- **Result:** measured operating cost $104.0M (fuel 92%), $0.851/mile, MPG 6.45, 44.6% of
+  deliveries within the window, and only **1.5% of rows with an error-level issue**.
+- **Problems:** `|` broke Markdown tables (now escaped); "66.4% of rows have an issue" was
+  misleading, so error-level rows are now counted separately.
+
+### Sat 10-03 · Thresholds and sources doc ✅
+- **Done:** `docs/02-dq-rule-thresholds` explains every number in the rules and tests: where it's used,
+  why, and its source (data profile, regulation, definition, spec, test design).
+
+### Sat 10-03 · Task 9: Data understanding ✅
+- **Done:** `docs/02-data-understanding` (EN/VI): what the data covers, baselines, a trust table,
+  the real meaning of `on_time_flag`, downstream impact, the success-criteria check, interview
+  talking points.
+- **Also updated:**
+  - `docs/01` §3 and §5: savings target = **≥ $3.1M over 3 years**.
+  - `00-analytical-approach` §5 and §6: location analysis uses `location_city`; the fuel-price-by-
+    location lever is dropped.
+  - `CAPABILITY-MAP`: note on the dropped lever.
+
+### Sat 10-03 · Hiring-age rule removed ✅
+- **Why:** the project owner decided the project focuses on **operational productivity and
+  quality**, not HR compliance (the 18-vs-21 question no longer needs an answer).
+- **Done:** removed `time_order:date_of_birth` from `quality.py`; **69 rules** remain (19 value
+  rules; 43 errors, 26 warnings). Updated the report definitions, tests, `02-dq-rule-thresholds`
+  (including the line numbers in its verification table) and `02-data-understanding`.
+- **Result:** the project owner disconnected DBeaver and ran the build; the re-run after the change
+  takes 8.0 s, 47 tests green. The DQ report changed in exactly the 3 related lines.
+
 ## 6. In progress
 
-**Task 5: value rules** (`range`, `amount_mismatch`, `time_order`, `geo_mismatch`). Each rule is
-one more `Rule(...)` line in `quality.py`, reusing the Task 4 engine.
+**Checkpoint C: module 1 complete.** The warehouse has been rebuilt with all 69 rules; the hiring-age
+question is closed (rule removed). What's left: review using the checklist below, then commit.
+
+### Review checklist (saved 10-03, for you to check on 10-04)
+
+All changes from Task 5 to Task 9 are **staged, not committed**. Check them in this order, then commit.
+
+- [ ] **`docs/02-data-understanding.md`**: read first. Are the trust table (§3), the `on_time_flag`
+      definition (§4) and the 4 interview talking points (§7) convincing?
+- [ ] **`docs/02-dq-rule-thresholds.md`**: each threshold with its reason and source. §6 maps every
+      number to its line of code. Look closely at the rules *without their own test* (§5).
+- [ ] **`docs/02-data-quality-report.md`** (generated): do the §2 baselines look reasonable?
+- [ ] **`docs/01-business-understanding.md`** §3 and §5: target ≥ $3.1M over 3 years.
+- [ ] **`docs/00-analytical-approach.md`** §5–§6: `location_city` used; fuel-price lever dropped.
+- [ ] **Code:** `src/logops/data_platform/quality.py` (19 value rules) and `dq_report.py`.
+- [x] ~~Disconnect DBeaver and build~~ (done 10-03). **Re-run while reviewing:** `python -m uv run logops build` → `python -m uv run pytest`
+      (expect 47 passing) → `git status` (the DQ report should be unchanged).
+- [ ] **Commit + push** (message suggested in the 10-03 conversation, or write your own).
 
 ## 7. Next
 
-**Rest of module 1 (Fri evening):**
-
-| Task | Content | Cut if late? |
-|---|---|---|
-| 5 | Value rules: `range`, `amount_mismatch`, `time_order`, `geo_mismatch` | No |
-| 6 | `agg_drift`: compare monthly metrics with values recomputed from trips | **Yes** |
-| 7 | DQ report EN/VI + baselines (total cost, on-time %, MPG, utilization) | No |
-| 8 | Hardening: drop exact duplicates, `--skip-dq` flag, identical re-runs | **Yes** |
-| 9 | Write `docs/02-data-understanding` for the interview story | No |
+**Module 2 `metrics`** (SQL KPI views): spec → plan → build, applying the adjustments in
+`docs/02-data-understanding` §5.
 
 **Later modules** (details in [roadmap.md](../tasks/roadmap.md)):
 - **Saturday:** `metrics` (SQL KPI views) → `optimize` (4 recommendation engines, each with $ savings).
@@ -253,7 +320,8 @@ Full reasoning for each is in [00-analytical-approach.md](00-analytical-approach
 | `uv` warns "Failed to hardlink" | Harmless: cache on C:, project on D:. Set `UV_LINK_MODE=copy` to hide it |
 | ruff formats code inside Markdown | Added `extend-exclude = ["*.md"]` |
 | DuckDB rejects `?` parameters in `CREATE VIEW` | Inline the path as an escaped SQL string (`sql_path`) |
-| `.duckdb` file locked while open in the UI or PyCharm | Close the connection before `logops build`, or open in `-readonly` mode |
+| `.duckdb` file locked while open in the UI, PyCharm or DBeaver | Disconnect before `logops build` (the command now says why), or open in `-readonly` mode |
+| `\|` broke Markdown table cells | Escaped as `\\|` when rendering the report (`_cell`) |
 | Windows terminal can't print DuckDB's box characters | Set `PYTHONIOENCODING=utf-8` |
 
 ## 10. Running and checking

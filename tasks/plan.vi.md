@@ -52,17 +52,17 @@ T1 khung dự án
 
 ### Giai đoạn 2: Chất lượng dữ liệu
 - [x] T4: Bộ máy kiểm tra + quy tắc khóa (`pk_unique`, `fk_missing`, `fk_orphan`) · M
-- [ ] T5: Quy tắc giá trị (`range`, `amount_mismatch`, `time_order`, `geo_mismatch`) · M
-- [ ] T6: Quy tắc `agg_drift` (số liệu tháng so với số tính lại từ trips) · S
+- [x] T5: Quy tắc giá trị (`range`, `amount_mismatch`, `time_order`, `geo_mismatch`) · M
+- [~] ~~T6: Quy tắc `agg_drift`~~ · đã cắt: kiểm tra một lần thấy chênh lệch 0%
 
 ### Điểm kiểm tra B: Kết quả kiểm tra chính xác
 - [ ] Mỗi quy tắc có test chạy qua trên dữ liệu mẫu; kết quả trên dữ liệu thật hợp lý
 - [ ] Chủ dự án xem lại tỷ lệ báo động nhầm (đặc biệt là `geo_mismatch`)
 
 ### Giai đoạn 3: Báo cáo & hoàn thiện
-- [ ] T7: Bộ tạo báo cáo chất lượng EN + VI, kèm số liệu hiện trạng · M
-- [ ] T8: Ghi lại dòng trùng lặp, `--skip-dq`, chạy lặp lại cho cùng kết quả, hiệu năng < 30 giây · S
-- [ ] T9: Viết tay tài liệu `02-data-understanding` (EN + VI) · S
+- [x] T7: Bộ tạo báo cáo chất lượng EN + VI, kèm số liệu hiện trạng · M
+- [~] ~~T8: Dòng trùng, `--skip-dq`, chạy lặp lại, < 30 giây~~ · đã cắt: 0 dòng trùng, đã ổn định, 5,4 giây
+- [x] T9: Viết tay tài liệu `02-data-understanding` (EN + VI) · S
 
 ### Điểm kiểm tra C: Hoàn thành module
 - [ ] Đạt mọi tiêu chí thành công trong đặc tả · sẵn sàng viết đặc tả `metrics`

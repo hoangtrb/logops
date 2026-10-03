@@ -1,7 +1,7 @@
 # 00 · Nhật ký dự án
 
 > Bản tiếng Anh: [00-project-journal.md](00-project-journal.md) · Cơ sở phân tích: [00-analytical-approach.vi.md](00-analytical-approach.vi.md)
-> **Cập nhật lần cuối:** Thứ 6 02/10/2026, sau Việc 4 (module `data-platform`).
+> **Cập nhật lần cuối:** Thứ 6 02/10/2026, sau Việc 9: module `data-platform` hoàn tất.
 
 **Cách dùng file này**
 - Lần đầu đọc: đọc §1 → §4 để nắm dự án là gì, thư mục có gì, làm theo quy trình nào, đang ở đâu.
@@ -40,20 +40,23 @@ logistics-ops/
 │   ├── 00-analytical-approach.*    Cơ sở lý thuyết và lý do chọn phương pháp
 │   ├── 01-business-understanding.* CRISP-DM pha 1: câu hỏi của giám đốc → KPI → tiêu chí thành công
 │   ├── 02-data-model.*             (tự sinh) sơ đồ quan hệ ER + từ điển dữ liệu, từ schema.py
-│   └── 02-…                        (sẽ có) báo cáo chất lượng dữ liệu + phân tích dữ liệu
+│   ├── 02-data-quality-report.*    (tự sinh) báo cáo chất lượng dữ liệu + số liệu nền
+│   ├── 02-dq-rule-thresholds.*     Các con số trong quy tắc và test: vì sao, nguồn
+│   └── 02-data-understanding.*     CRISP-DM pha 2: phân tích dữ liệu, điểm nói khi phỏng vấn
 ├── tasks/
 │   ├── roadmap.md / .vi.md         Lịch 3 ngày cho cả 6 module
 │   ├── plan.md / .vi.md            Kế hoạch module đang làm (hiện là data-platform)
 │   └── todo.md / .vi.md            Danh sách việc; todo.md (tiếng Anh) là nguồn chuẩn để đánh dấu
 ├── src/logops/
-│   ├── cli.py                      Lệnh `logops` (hiện có `build`)
+│   ├── cli.py                      Lệnh `logops build` và `logops docs`
 │   ├── config.py                   Mọi đường dẫn, tính từ thư mục gốc repo
 │   └── data_platform/
 │       ├── schema.py               Kiểu cột, khóa chính, khóa ngoại của 14 bảng (nguồn chuẩn duy nhất)
 │       ├── ingest.py               CSV → Parquet có kiểu, báo lỗi rõ khi sai kiểu
 │       ├── warehouse.py            Parquet → kho DuckDB
 │       ├── quality.py              Quy tắc chất lượng dữ liệu → cột `dq_issues` + bảng `dq_findings`
-│       └── data_model_doc.py       Sinh `docs/02-data-model` từ schema.py
+│       ├── data_model_doc.py       Sinh `docs/02-data-model` từ schema.py
+│       └── dq_report.py            Sinh `docs/02-data-quality-report` từ kho dữ liệu
 ├── tests/
 │   ├── fixtures/                   CSV nhỏ tự tạo, có lỗi cố ý để test
 │   ├── test_smoke.py               CLI và đường dẫn
@@ -84,7 +87,7 @@ logistics-ops/
 | # | Module | Pha CRISP-DM | Ngày dự kiến | Trạng thái |
 |---|---|---|---|---|
 | — | Hiểu nghiệp vụ (`docs/01`) | 1 | T5 01/10 | ✅ Xong |
-| 1 | `data-platform` | 2, 3 | T6 02/10 | 🔄 Đang làm: Việc 1–4 xong, tiếp theo Việc 5 |
+| 1 | `data-platform` | 2, 3 | T6 02/10 | ✅ Xong (7 việc; Việc 6 và 8 đã cắt). Chờ rà soát Checkpoint C |
 | 2 | `metrics` | 3 | Sáng T7 03/10 | ⏳ Chưa bắt đầu |
 | 3 | `optimize` | 4, 5 | Chiều T7 03/10 | ⏳ |
 | 4 | `insights` | 6 | Sáng CN 04/10 | ⏳ |
@@ -92,7 +95,7 @@ logistics-ops/
 | 6 | `reports` | 6 | Chiều CN 04/10 | ⏳ |
 | — | Demo, đánh giá, đóng băng | 5 | Tối CN 04/10 | ⏳ |
 
-Tiến độ module 1: ████░░░░░ 4/9 việc.
+Tiến độ module 1: █████████ hoàn tất (7 việc xong, 2 việc cắt có lý do).
 
 ## 5. Đã làm (theo thời gian)
 
@@ -203,22 +206,84 @@ Tiến độ module 1: ████░░░░░ 4/9 việc.
 - **Bổ sung tài liệu:** `00-analytical-approach` §3.4 về xử lý dữ liệu thiếu (Rubin: MCAR/MAR/MNAR).
   Kiểm tra cho thấy `driver_id` thiếu là MCAR, nên giữ dòng và xử lý theo từng phép phân tích.
 
+### T7 03/10 · Cắt Việc 6 và Việc 8 ✂️
+- **Lý do:** kiểm tra một lần cho thấy cả hai việc đều chỉ trả về "0 lỗi". Bảng tháng khớp 100% với
+  số tính lại (cả tài xế và xe, kể cả bảo dưỡng); 0 dòng trùng; build đã ổn định và chỉ 5,4 giây.
+- **Thay vào đó:** kết quả hai kiểm tra này được đưa vào báo cáo DQ (mục Kiểm tra chéo), tính lại
+  bằng SQL mỗi lần build.
+
+### T7 03/10 · Việc 5: Quy tắc giá trị ✅
+- **Đã làm:** 20 quy tắc giá trị trong `VALUE_RULES` (`range`, `amount_mismatch`, `time_order`,
+  `geo_mismatch`, `idle_exceeds_duration`); `all_rules()` gộp với quy tắc khóa, tổng cộng 70 quy tắc.
+  `logops build` báo rõ khi file kho đang bị DBeaver giữ.
+- **Kết quả:** 47 test xanh; nạp + kiểm tra mất 2,8 giây. 14/70 quy tắc có vi phạm.
+- **Phát hiện chính:**
+  - `on_time_flag` = đến trong khung **±2 giờ** so với giờ hẹn (khớp 100%). Sớm hơn 2 giờ bị tính
+    là không đúng giờ.
+  - `delivery_events.facility_id` gần như ngẫu nhiên (khớp tuyến 3,4%); `location_city` khớp 100%.
+  - Bang trên phiếu nhiên liệu sai 95% ("Denver, TX"); giá nhiên liệu giữa các thành phố chỉ chênh
+    0,02 USD/gallon.
+  - 7.450 chuyến (8,7%) có thời gian không tải lớn hơn thời gian chuyến.
+- **Quyết định:** mọi ngưỡng được ghi nguồn trong `docs/02-dq-rule-thresholds`. (Quy tắc tuổi tuyển
+  dụng sau đó đã được bỏ, xem mục bên dưới.)
+
+### T7 03/10 · Việc 7: Báo cáo chất lượng dữ liệu ✅
+- **Đã làm:** `dq_report.py` tính mọi con số một lần bằng SQL rồi in ra 2 ngôn ngữ:
+  `docs/02-data-quality-report.md` / `.vi.md`. Gồm tóm tắt, số liệu nền, phát hiện kèm 3 khóa mẫu,
+  định nghĩa quy tắc, kiểm tra chéo, giá trị thiếu. Chạy lại ra file giống hệt từng byte.
+- **Kết quả:** chi phí vận hành đo được 104,0 triệu USD (nhiên liệu 92%), 0,851 USD/dặm, MPG 6,45,
+  giao trong khung 44,6%, chỉ **1,5% dòng có lỗi mức error**.
+- **Vấn đề:** dấu `|` làm vỡ bảng Markdown (đã escape); con số "66,4% dòng có vấn đề" gây hiểu lầm
+  nên tách riêng số dòng có lỗi mức error.
+
+### T7 03/10 · Tài liệu ngưỡng và nguồn ✅
+- **Đã làm:** `docs/02-dq-rule-thresholds` giải thích mọi con số trong quy tắc và test: dùng ở đâu, vì
+  sao, nguồn (hồ sơ dữ liệu, quy định, định nghĩa, spec, thiết kế test).
+
+### T7 03/10 · Việc 9: Hiểu dữ liệu ✅
+- **Đã làm:** `docs/02-data-understanding` (EN/VI): dữ liệu nói gì, số liệu nền, bảng mức tin cậy,
+  định nghĩa thật của `on_time_flag`, ảnh hưởng tới các module sau, đối chiếu tiêu chí thành công,
+  điểm nói khi phỏng vấn.
+- **Cập nhật kèm theo:**
+  - `docs/01` §3 và §5: mục tiêu tiết kiệm = **≥ 3,1 triệu USD trong 3 năm**.
+  - `00-analytical-approach` §5 và §6: phân tích theo địa điểm dùng `location_city`; bỏ đòn bẩy
+    giá nhiên liệu theo địa điểm.
+  - `CAPABILITY-MAP`: ghi chú đòn bẩy đã bỏ.
+
+### T7 03/10 · Bỏ quy tắc tuổi tuyển dụng ✅
+- **Lý do:** chủ dự án quyết định dự án tập trung vào **năng suất và chất lượng vận hành**, không xét
+  tuân thủ nhân sự (câu hỏi 18 hay 21 tuổi không còn cần trả lời).
+- **Đã làm:** bỏ `time_order:date_of_birth` khỏi `quality.py`; còn **69 quy tắc** (19 quy tắc giá trị;
+  43 error, 26 warn). Cập nhật định nghĩa trong báo cáo, test, `02-dq-rule-thresholds` (kể cả số dòng
+  trong bảng kiểm chứng) và `02-data-understanding`.
+- **Kết quả:** chủ dự án đã đóng DBeaver và chạy build; chạy lại sau thay đổi mất 8,0 giây, 47 test
+  xanh. Báo cáo DQ chỉ đổi đúng 3 dòng liên quan.
+
 ## 6. Đang làm
 
-**Việc 5: quy tắc giá trị** (`range`, `amount_mismatch`, `time_order`, `geo_mismatch`). Mỗi quy
-tắc chỉ là thêm một dòng `Rule(...)` vào `quality.py`, dùng lại engine của Việc 4.
+**Checkpoint C: module 1 hoàn tất.** Kho dữ liệu đã được dựng lại với đủ 69 quy tắc; câu hỏi tuổi
+tuyển dụng đã khép lại (đã bỏ quy tắc). Còn lại: rà soát theo danh sách dưới đây rồi commit.
+
+### Danh sách rà soát (lưu 03/10, để bạn kiểm tra ngày 04/10)
+
+Mọi thay đổi từ Việc 5 đến Việc 9 **đã stage, chưa commit**. Kiểm tra theo thứ tự dưới đây, rồi commit.
+
+- [ ] **`docs/02-data-understanding.vi.md`**: đọc trước tiên. Bảng mức tin cậy (§3), định nghĩa
+      `on_time_flag` (§4) và 4 điểm nói khi phỏng vấn (§7) có thuyết phục không?
+- [ ] **`docs/02-dq-rule-thresholds.vi.md`**: mỗi ngưỡng có lý do và nguồn. §6 đối chiếu từng con số
+      với dòng code. Xem kỹ: danh sách quy tắc *chưa có test riêng* (§5).
+- [ ] **`docs/02-data-quality-report.vi.md`** (tự sinh): số liệu nền ở §2 có hợp lý không?
+- [ ] **`docs/01-business-understanding.vi.md`** §3 và §5: mục tiêu ≥ 3,1 triệu USD / 3 năm.
+- [ ] **`docs/00-analytical-approach.vi.md`** §5–§6: dùng `location_city`; đã bỏ đòn bẩy giá nhiên liệu.
+- [ ] **Code:** `src/logops/data_platform/quality.py` (19 quy tắc giá trị) và `dq_report.py`.
+- [x] ~~Đóng DBeaver và build~~ (đã làm 03/10). **Chạy lại khi rà soát:** `python -m uv run logops build` → `python -m uv run pytest`
+      (kỳ vọng 47 test qua) → `git status` (báo cáo DQ không đổi).
+- [ ] **Commit + push** (message gợi ý trong cuộc trò chuyện ngày 03/10, hoặc tự viết).
 
 ## 7. Sẽ làm
 
-**Module 1 còn lại (tối T6):**
-
-| Việc | Nội dung | Cắt nếu trễ? |
-|---|---|---|
-| 5 | Quy tắc giá trị: `range`, `amount_mismatch`, `time_order`, `geo_mismatch` | Không |
-| 6 | `agg_drift`: so bảng chỉ số tháng với số tính lại từ chuyến | **Có** |
-| 7 | Sinh báo cáo DQ EN/VI + baseline (tổng chi phí, % đúng giờ, MPG, mức sử dụng) | Không |
-| 8 | Gia cố: bỏ dòng trùng tuyệt đối, cờ `--skip-dq`, chạy lại ra cùng kết quả | **Có** |
-| 9 | Viết `docs/02-data-understanding` để kể chuyện khi phỏng vấn | Không |
+**Module 2 `metrics`** (view KPI bằng SQL): spec → plan → build, áp dụng các điều chỉnh trong
+`docs/02-data-understanding` §5.
 
 **Các module sau** (chi tiết trong [roadmap.vi.md](../tasks/roadmap.vi.md)):
 - **Thứ 7:** `metrics` (view KPI bằng SQL) → `optimize` (4 engine khuyến nghị, mỗi engine có $ tiết kiệm).
@@ -246,7 +311,8 @@ Mỗi quyết định có lý do đầy đủ trong [00-analytical-approach.vi.m
 | `uv` cảnh báo "Failed to hardlink" | Vô hại: cache nằm ở ổ C:, project ở ổ D:. Có thể đặt `UV_LINK_MODE=copy` để ẩn |
 | ruff định dạng code trong Markdown | Thêm `extend-exclude = ["*.md"]` |
 | DuckDB không nhận tham số `?` trong `CREATE VIEW` | Đưa đường dẫn vào câu SQL dạng chuỗi đã escape (`sql_path`) |
-| File `.duckdb` bị khóa khi đang mở trong UI/PyCharm | Đóng kết nối trước khi `logops build`, hoặc mở ở chế độ `-readonly` |
+| File `.duckdb` bị khóa khi đang mở trong UI/PyCharm/DBeaver | Đóng kết nối trước khi `logops build` (lệnh giờ báo rõ lý do), hoặc mở ở chế độ `-readonly` |
+| Dấu `\|` làm vỡ ô bảng Markdown | Escape thành `\\|` khi sinh báo cáo (`_cell`) |
 | Terminal Windows không in được ký tự khung của DuckDB | Đặt `PYTHONIOENCODING=utf-8` |
 
 ## 10. Chạy và kiểm tra nhanh

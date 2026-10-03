@@ -34,9 +34,10 @@ Thứ tự xây dựng: `data-platform` → `metrics` → `optimize` → `insigh
    mức giá cần điều chỉnh cho từng tuyến.
 2. **Giao hàng đúng giờ & thời gian chờ tại kho.** % đúng giờ, số giờ chờ theo kho/tuyến/khung
    giờ. Mô hình ML dự đoán rủi ro trễ, kèm giải thích các yếu tố chính gây trễ.
-3. **Hiệu quả nhiên liệu.** Xe và tài xế có MPG hoặc thời gian nổ máy chờ bất thường, chênh lệch
-   giá nhiên liệu theo địa điểm. Ước tính số tiền tiết kiệm ($) nếu các trường hợp bất thường đạt
-   mức trung vị của đội xe.
+3. **Hiệu quả nhiên liệu.** Xe và tài xế có MPG hoặc thời gian nổ máy chờ bất thường. Ước tính số
+   tiền tiết kiệm ($) nếu các trường hợp bất thường đạt mức trung vị của đội xe. *(Đã bỏ phần chênh
+   lệch giá nhiên liệu theo địa điểm sau pha 2: giá giữa các thành phố chỉ chênh 0,02 USD/gallon.
+   Xem `docs/02-data-understanding.vi.md` §3.)*
 4. **Hiệu suất sử dụng đội xe & bảo dưỡng.** Xe ít được dùng (xác định quy mô đội xe hợp lý: thực
    sự cần bao nhiêu xe), xe có chi phí cao hoặc nằm chờ sửa nhiều, và cảnh báo xe đến lúc cần
    bảo dưỡng hoặc thay thế.

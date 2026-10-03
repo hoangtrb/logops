@@ -52,3 +52,26 @@ def test_key_rules_run_on_real_data_without_dropping_rows(tmp_path):
         for table in TABLES.values():
             rows = con.execute(f'SELECT count(*) FROM "{table.name}"').fetchone()[0]
             assert rows == csv_record_count(table), table.name
+
+
+def test_dq_report_covers_every_table_and_rule_and_is_reproducible(tmp_path):
+    from logops.data_platform.dq_report import LANGUAGES, report_path, write_report
+    from logops.data_platform.quality import all_rules, run_quality
+
+    for table in TABLES.values():
+        ingest_table(table, config.DATASET_DIR, tmp_path / "parquet")
+    db_path = tmp_path / "warehouse.duckdb"
+    load_warehouse(TABLES.values(), tmp_path / "parquet", db_path)
+    rules = all_rules(TABLES.values())
+    run_quality(db_path, TABLES.values(), rules)
+
+    first = {p: p.read_bytes() for p in write_report(db_path, TABLES.values(), tmp_path)}
+    second = {p: p.read_bytes() for p in write_report(db_path, TABLES.values(), tmp_path)}
+    assert first == second  # byte-identical re-run
+
+    for lang in LANGUAGES:
+        text = report_path(tmp_path, lang).read_text(encoding="utf-8")
+        for table in TABLES:
+            assert f"`{table}" in text, (lang, table)
+        for rule in rules:
+            assert f"`{rule.id}" in text, (lang, rule.label)

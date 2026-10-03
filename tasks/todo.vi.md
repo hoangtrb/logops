@@ -69,15 +69,17 @@ tắc: `pk_unique`, `fk_missing`, `fk_orphan`, sinh tự động từ khai báo 
 **Mô tả:** Thêm `range`, `amount_mismatch`, `time_order` và `geo_mismatch`, mỗi quy tắc một dòng.
 
 **Tiêu chí chấp nhận:**
-- [ ] Mỗi quy tắc có một test trên dữ liệu mẫu: đánh dấu dòng lỗi và bỏ qua dòng sạch
-- [ ] `geo_mismatch` có mức `warn`, danh mục tham chiếu lấy từ facilities + routes
+- [x] Mỗi quy tắc có một test trên dữ liệu mẫu: đánh dấu dòng lỗi và bỏ qua dòng sạch
+- [x] `geo_mismatch` có mức `warn`, danh mục tham chiếu lấy từ facilities + routes
 
 **Kiểm chứng:** `uv run pytest tests/data_platform/test_quality_values.py`
 **Phụ thuộc:** Việc 4
 **File:** `quality.py`, dữ liệu mẫu, file test
 **Quy mô:** M
 
-## Việc 6: Quy tắc `agg_drift`
+## Việc 6: Quy tắc `agg_drift` — ĐÃ CẮT (03/10/2026)
+> Kiểm tra một lần cho thấy chênh lệch 0% trên cả 4.464 tháng-tài xế (số chuyến, dặm, doanh thu). Kết quả được đưa vào V7/V9 thay vì làm thành quy tắc.
+
 **Mô tả:** Tính lại số chuyến, số dặm và doanh thu theo tháng cho từng tài xế và từng xe từ
 `trips` + `loads`, rồi so với `driver_monthly_metrics` / `truck_utilization_metrics`. Đánh dấu
 các dòng lệch hơn 2%.
@@ -101,16 +103,18 @@ trạng (tổng chi phí vận hành, % đúng giờ, MPG của đội xe, hiệ
 `docs/02-data-quality-report.md` và `.vi.md`, dùng một mẫu với hai bộ nhãn.
 
 **Tiêu chí chấp nhận:**
-- [ ] Cả hai file bao phủ đủ 14 bảng và mọi quy tắc, kèm 3 dòng mẫu cho mỗi vi phạm
-- [ ] Số liệu hiện trạng giống hệt nhau ở cả hai ngôn ngữ
-- [ ] Chạy lại tạo ra file giống hệt từng byte (không có dấu thời gian trong nội dung)
+- [x] Cả hai file bao phủ đủ 14 bảng và mọi quy tắc, kèm 3 dòng mẫu cho mỗi vi phạm
+- [x] Số liệu hiện trạng giống hệt nhau ở cả hai ngôn ngữ
+- [x] Chạy lại tạo ra file giống hệt từng byte (không có dấu thời gian trong nội dung)
 
 **Kiểm chứng:** `uv run pytest tests/data_platform/test_dq_report.py` · đọc thủ công cả hai file
 **Phụ thuộc:** Việc 5, Việc 6
 **File:** `dq_report.py`, `cli.py`, file test
 **Quy mô:** M
 
-## Việc 8: Hoàn thiện
+## Việc 8: Hoàn thiện — ĐÃ CẮT (03/10/2026)
+> 0 dòng trùng tuyệt đối ở cả 14 bảng; chạy lại đã cho cùng kết quả và build mất 5,4 giây (mục tiêu < 30 giây). Không cần `--skip-dq` vì bước kiểm tra chỉ mất khoảng 1 giây.
+
 **Mô tả:** Xóa dòng trùng lặp hoàn toàn và ghi lại số lượng; thêm tùy chọn `--skip-dq`; đảm bảo
 chạy lần hai cho cùng kết quả; đo thời gian build.
 
@@ -130,8 +134,8 @@ phủ những gì, các vấn đề chất lượng chính và cách xử lý, s
 thành công ở tài liệu 01 §5 đã được xác nhận hoặc điều chỉnh.
 
 **Tiêu chí chấp nhận:**
-- [ ] `docs/02-data-understanding.md` + `.vi.md` tồn tại và nội dung khớp nhau
-- [ ] Cập nhật mục tiêu ở tài liệu 01 §5 (cả hai ngôn ngữ) nếu số liệu hiện trạng làm thay đổi chúng
+- [x] `docs/02-data-understanding.md` + `.vi.md` tồn tại và nội dung khớp nhau
+- [x] Cập nhật mục tiêu ở tài liệu 01 §5 (cả hai ngôn ngữ) nếu số liệu hiện trạng làm thay đổi chúng
 
 **Kiểm chứng:** chủ dự án đọc lại
 **Phụ thuộc:** Việc 7

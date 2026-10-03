@@ -250,6 +250,12 @@ MPG, say), and this data has no such case.
 - **Descriptive and diagnostic:** on-time % and detention hours by facility, lane, time of day
   and day of week. Detention is converted to money: detention hours × the hourly cost of truck
   and driver.
+  - *Adjusted after phase 2:* "by facility" uses the event's **`location_city`**, not
+    `facility_id`, because `facility_id` matches the lane only 3.4% of the time (essentially
+    random) while `location_city` matches 100%.
+  - *On-time definition:* `on_time_flag` = arrival within **±2 hours** of the appointment
+    (100% match). Reports show both window compliance and the not-late rate. See
+    `02-data-understanding` §4.
 - **Predictive:** a **gradient boosting** classifier (Friedman, 2001) predicts each load's
   delay probability, using only information *known before dispatch*: lane, facility, appointment
   window, load type, weight, driver, truck age.
@@ -309,8 +315,12 @@ reverse the trend inside each group.
   Only trucks or drivers *below* the median are counted.
 - **Idling:** idle hours above the median × fuel burned per idle hour. That burn rate is a
   **documented assumption**, because the data doesn't include it.
-- **Fuel purchase price:** price variance by location. The recommended action is a fueling
-  policy that favors cheaper stations or regions.
+- ~~**Fuel purchase price:** price variance by location.~~ **Dropped after phase 2:** the average
+  price differs by only $0.02/gallon across cities ($3.886–$3.907), and the state on fuel
+  purchases is wrong 95% of the time. There's no signal to support a savings claim, so this lever
+  is left out.
+- **Data filter for idle analysis:** exclude the 7,450 trips (8.7%) whose idle time exceeds the
+  trip duration (rule `idle_exceeds_duration`).
 
 ---
 

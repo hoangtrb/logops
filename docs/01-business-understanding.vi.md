@@ -38,7 +38,9 @@ dòng); bộ công cụ dữ liệu Python; Claude API để viết nhận đị
 **Giả định**
 - `revenue` trong bảng loads là giá tính cho khách hàng (hoặc giá chuyển nội bộ, nếu là đội
   xe nội bộ).
-- `on_time_flag` trong bảng delivery events là thước đo chính thức của mức độ phục vụ.
+- `on_time_flag` trong bảng delivery events là thước đo chính thức của mức độ phục vụ. *Đã xác
+  nhận ở Giai đoạn 2:* cờ này nghĩa là đến trong khung **±2 giờ** so với lịch hẹn (khớp 100% sự
+  kiện), nên đến sớm hơn 2 giờ cũng bị tính là không đạt.
 
 **Rủi ro & cách giảm thiểu**
 
@@ -61,12 +63,15 @@ dòng); bộ công cụ dữ liệu Python; Claude API để viết nhận đị
 
 ## 5. Tiêu chí thành công
 
-*Các mục tiêu dưới đây là tạm thời. Số liệu hiện trạng sẽ được đo ở Giai đoạn 2 (Hiểu dữ
-liệu), và các mục tiêu sẽ được xác nhận hoặc điều chỉnh khi đó.*
+*Số liệu hiện trạng đã được đo ở Giai đoạn 2 ([02-data-quality-report.vi.md](02-data-quality-report.vi.md))
+và các mục tiêu dưới đây đã được xác nhận theo đó ([02-data-understanding.vi.md](02-data-understanding.vi.md) §6).*
 
 **Kinh doanh**
 - Tìm ra các cơ hội tiết kiệm có giá trị **≥ 3% tổng chi phí vận hành**. Mỗi cơ hội có hành
-  động cụ thể, người phụ trách và số tiền ước tính ($).
+  động cụ thể, người phụ trách và số tiền ước tính ($). Chi phí vận hành đo được giai đoạn
+  2022–2024 là **104,0 triệu USD** (nhiên liệu, bảo dưỡng, bồi thường sự cố), nên mục tiêu là
+  **≥ 3,1 triệu USD trong ba năm (khoảng 1,04 triệu USD mỗi năm)**. Dữ liệu không có lương tài xế,
+  nên chi phí thật lớn hơn và mục tiêu này là thận trọng.
 - Mọi khuyến nghị đều truy ngược được về dữ liệu gốc.
 
 **Phân tích**

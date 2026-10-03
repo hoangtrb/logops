@@ -71,15 +71,17 @@ PK/FK declarations in `schema.py`.
 one-line rule entries.
 
 **Acceptance criteria:**
-- [ ] One fixture test per rule: it flags the defective row and passes the clean row
-- [ ] `geo_mismatch` is severity `warn`, and its reference list is built from facilities + routes
+- [x] One fixture test per rule: it flags the defective row and passes the clean row
+- [x] `geo_mismatch` is severity `warn`, and its reference list is built from facilities + routes
 
 **Verification:** `uv run pytest tests/data_platform/test_quality_values.py`
 **Dependencies:** T4
 **Files:** `quality.py`, fixtures, test file
 **Scope:** M
 
-## Task 6: `agg_drift` rule
+## Task 6: `agg_drift` rule — CUT (2026-10-03)
+> A one-off check found 0% drift on all 4,464 driver-months (trips, miles, revenue). The result is reported in T7/T9 instead of a standing rule.
+
 **Description:** Recompute monthly trips, miles and revenue per driver and per truck from
 `trips` + `loads`, and compare with `driver_monthly_metrics` / `truck_utilization_metrics`.
 Flag rows that differ by more than 2%.
@@ -103,16 +105,18 @@ operating cost, on-time %, fleet MPG, average utilization) into
 `docs/02-data-quality-report.md` and `.vi.md`, from one template with two label dictionaries.
 
 **Acceptance criteria:**
-- [ ] Both files cover all 14 tables and every rule, with 3 sample rows per violation
-- [ ] Baseline numbers are identical in both languages
-- [ ] Re-running produces byte-identical files (no timestamps in the body)
+- [x] Both files cover all 14 tables and every rule, with 3 sample rows per violation
+- [x] Baseline numbers are identical in both languages
+- [x] Re-running produces byte-identical files (no timestamps in the body)
 
 **Verification:** `uv run pytest tests/data_platform/test_dq_report.py` · manual read of both files
 **Dependencies:** T5, T6
 **Files:** `dq_report.py`, `cli.py`, test file
 **Scope:** M
 
-## Task 8: Hardening
+## Task 8: Hardening — CUT (2026-10-03)
+> 0 exact duplicate rows in all 14 tables; re-runs are already identical and the build takes 5.4 s (target < 30 s). `--skip-dq` isn't needed: DQ takes ~1 s.
+
 **Description:** Remove exact duplicate rows and log the count; add the `--skip-dq` flag;
 make sure a second run is idempotent; measure the build time.
 
@@ -132,8 +136,8 @@ what the data covers, key quality issues and how they're handled, baselines, and
 confirmed or adjusted success targets from doc 01 §5.
 
 **Acceptance criteria:**
-- [ ] `docs/02-data-understanding.md` + `.vi.md` exist and match each other
-- [ ] Doc 01 §5 targets updated (both languages) if the baselines change them
+- [x] `docs/02-data-understanding.md` + `.vi.md` exist and match each other
+- [x] Doc 01 §5 targets updated (both languages) if the baselines change them
 
 **Verification:** human read-through
 **Dependencies:** T7

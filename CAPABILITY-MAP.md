@@ -31,8 +31,10 @@ Build order: `data-platform` → `metrics` → `optimize` → `insights` → `da
 2. **On-time delivery & detention.** On-time %, detention hours by facility/route/time-of-day.
    An ML model predicts delay risk, with its main drivers explained (the factors that most
    cause delays).
-3. **Fuel efficiency.** Outliers in MPG and idle time by truck and by driver, fuel price
-   variance by location. Estimates savings ($) if outliers improved to the fleet median.
+3. **Fuel efficiency.** Outliers in MPG and idle time by truck and by driver. Estimates savings
+   ($) if outliers improved to the fleet median. *(Fuel price variance by location was dropped
+   after phase 2: prices differ by only $0.02/gallon across cities. See
+   `docs/02-data-understanding.md` §3.)*
 4. **Fleet utilization & maintenance.** Underused trucks (fleet right-sizing: how many trucks
    are really needed), high-cost/high-downtime trucks, and flags for trucks due for
    maintenance or replacement.

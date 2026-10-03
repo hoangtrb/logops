@@ -70,6 +70,8 @@ def test_rebuild_replaces_tables(csv_dir, tmp_path):
 
 
 def test_cli_build_writes_warehouse(csv_dir, tmp_path, monkeypatch):
+    # The DQ report needs all 14 tables; this fixture has only routes.
+    monkeypatch.setattr(cli, "write_report", lambda *_: [])
     monkeypatch.setattr(cli, "TABLES", {"routes": ROUTES})  # fixture dir holds only routes.csv
     monkeypatch.setattr(config, "DATASET_DIR", csv_dir)
     monkeypatch.setattr(config, "PARQUET_DIR", tmp_path / "parquet")
@@ -91,3 +93,19 @@ def test_cli_build_fails_loudly_on_missing_csv(tmp_path, monkeypatch):
 
     assert result.exit_code == 1
     assert "file not found" in result.output
+
+
+def test_cli_build_explains_a_locked_warehouse(csv_dir, tmp_path, monkeypatch):
+    monkeypatch.setattr(cli, "TABLES", {"routes": ROUTES})
+    monkeypatch.setattr(config, "DATASET_DIR", csv_dir)
+    monkeypatch.setattr(config, "PARQUET_DIR", tmp_path / "parquet")
+    monkeypatch.setattr(config, "WAREHOUSE_PATH", tmp_path / "warehouse.duckdb")
+
+    def locked(*_):
+        raise duckdb.IOException("Cannot open file: used by another process")
+
+    monkeypatch.setattr(cli, "load_warehouse", locked)
+    result = CliRunner().invoke(cli.app, ["build"])
+
+    assert result.exit_code == 1
+    assert "another program has it open" in result.output

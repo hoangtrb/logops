@@ -36,6 +36,126 @@ class Rule:
         return f"{self.id}:{self.column}" if self.column else self.id
 
 
+# City/state pairs known to be real: every facility and every route endpoint.
+_GEO_REFERENCE = (
+    "SELECT city, state FROM facilities "
+    "UNION SELECT origin_city, origin_state FROM routes "
+    "UNION SELECT destination_city, destination_state FROM routes"
+)
+_UNKNOWN_PLACE = (
+    f"NOT EXISTS (SELECT 1 FROM ({_GEO_REFERENCE}) g(city, state) "
+    "WHERE g.city = location_city AND g.state = location_state)"
+)
+
+
+def _delivered_before_pickup(column: str) -> str:
+    return (
+        f"event_type = 'Delivery' AND {column} < (SELECT max(p.{column}) FROM delivery_events p "
+        f"WHERE p.trip_id = delivery_events.trip_id AND p.event_type = 'Pickup')"
+    )
+
+
+# Why each threshold, with sources and evidence: docs/02-dq-rule-thresholds.md.
+VALUE_RULES: list[Rule] = [
+    Rule(
+        "trips",
+        "range",
+        "error",
+        "average_mpg NOT BETWEEN 3 AND 12 OR actual_distance_miles <= 0 "
+        "OR actual_duration_hours <= 0 OR fuel_gallons_used <= 0 OR idle_time_hours < 0",
+    ),
+    Rule("trips", "idle_exceeds_duration", "error", "idle_time_hours > actual_duration_hours"),
+    Rule(
+        "loads",
+        "range",
+        "error",
+        "revenue <= 0 OR weight_lbs <= 0 OR pieces <= 0 "
+        "OR fuel_surcharge < 0 OR accessorial_charges < 0",
+    ),
+    Rule("fuel_purchases", "range", "error", "gallons <= 0 OR price_per_gallon <= 0"),
+    Rule(
+        "fuel_purchases",
+        "amount_mismatch",
+        "warn",
+        "abs(total_cost - gallons * price_per_gallon) > 0.01 * total_cost",
+    ),
+    Rule("fuel_purchases", "geo_mismatch", "warn", _UNKNOWN_PLACE, "location_state"),
+    Rule(
+        "maintenance_records",
+        "range",
+        "error",
+        "labor_hours < 0 OR labor_cost < 0 OR parts_cost < 0 OR downtime_hours < 0",
+    ),
+    Rule(
+        "maintenance_records",
+        "amount_mismatch",
+        "warn",
+        "abs(total_cost - (labor_cost + parts_cost)) > 0.01 * total_cost",
+    ),
+    Rule(
+        "safety_incidents",
+        "range",
+        "error",
+        "vehicle_damage_cost < 0 OR cargo_damage_cost < 0 OR claim_amount < 0",
+    ),
+    Rule(
+        "safety_incidents",
+        "amount_mismatch",
+        "warn",
+        "abs(claim_amount - (vehicle_damage_cost + cargo_damage_cost)) > 0.01 * claim_amount",
+    ),
+    Rule("safety_incidents", "geo_mismatch", "warn", _UNKNOWN_PLACE, "location_state"),
+    Rule("delivery_events", "range", "error", "detention_minutes < 0"),
+    Rule(
+        "delivery_events",
+        "time_order",
+        "error",
+        _delivered_before_pickup("actual_datetime"),
+        "actual_datetime",
+    ),
+    Rule(
+        "delivery_events",
+        "time_order",
+        "error",
+        _delivered_before_pickup("scheduled_datetime"),
+        "scheduled_datetime",
+    ),
+    Rule("delivery_events", "geo_mismatch", "warn", _UNKNOWN_PLACE, "location_state"),
+    # The event's own location vs the city of the facility it claims to be at.
+    Rule(
+        "delivery_events",
+        "geo_mismatch",
+        "warn",
+        "location_city <> (SELECT f.city FROM facilities f "
+        "WHERE f.facility_id = delivery_events.facility_id)",
+        "facility_id",
+    ),
+    Rule("drivers", "time_order", "error", "termination_date < hire_date", "termination_date"),
+    Rule(
+        "driver_monthly_metrics",
+        "range",
+        "error",
+        "on_time_delivery_rate NOT BETWEEN 0 AND 1 OR average_mpg NOT BETWEEN 3 AND 12 "
+        "OR trips_completed < 0",
+    ),
+    # Over 100% utilization is a definitional question, not necessarily wrong data.
+    Rule(
+        "truck_utilization_metrics",
+        "range",
+        "warn",
+        "utilization_rate NOT BETWEEN 0 AND 1",
+        "utilization_rate",
+    ),
+]
+
+
+def all_rules(tables: Iterable[TableSchema]) -> list[Rule]:
+    """Key rules generated from the schema plus the value rules for the given tables."""
+    tables = list(tables)
+    names = {t.name for t in tables}
+    return key_rules(tables) + [r for r in VALUE_RULES if r.table in names]
+
+
 def key_rules(tables: Iterable[TableSchema]) -> list[Rule]:
     """pk_unique for every table; fk_missing + fk_orphan for every declared foreign key."""
     by_name = {t.name: t for t in tables}
