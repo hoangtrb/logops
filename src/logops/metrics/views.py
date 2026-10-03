@@ -44,6 +44,7 @@ VIEWS = {
             SELECT
                 t.trip_id, t.load_id, t.dispatch_date, t.month,
                 l.route_id, r.origin_city || ' → ' || r.destination_city AS lane,
+                r.origin_state, r.destination_state,
                 l.customer_id, c.customer_type, l.booking_type, l.load_type,
                 t.driver_id, t.truck_id,
                 t.actual_distance_miles AS miles, r.typical_distance_miles AS typical_miles,
@@ -80,7 +81,8 @@ VIEWS = {
             d.on_time_flag, d.detention_minutes, d.location_city,
             hour(d.scheduled_datetime) AS appointment_hour,
             dayname(d.scheduled_datetime) AS weekday,
-            te.route_id, te.lane, te.customer_id, te.customer_type, te.driver_id, te.truck_id
+            te.route_id, te.lane, te.customer_id, te.customer_type, te.driver_id, te.truck_id,
+            te.load_type, te.origin_state, te.destination_state
         FROM delivery_events d
         JOIN trip_economics te ON te.trip_id = d.trip_id
     """,

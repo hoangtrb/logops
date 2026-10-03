@@ -1,7 +1,7 @@
 # Tổng kết dự án: Logistics Ops Optimizer
 
 > Bản tiếng Anh: [SUMMARY.md](SUMMARY.md) · Cập nhật cuối mỗi module · **Lần cập nhật cuối:**
-> 03/10/2026, sau module 2 · **Nguyên tắc:** chỉ ghi điều đã kiểm chứng; chi tiết và bằng chứng nằm
+> 03/10/2026, sau module 3 `analysis` · **Nguyên tắc:** chỉ ghi điều đã kiểm chứng; chi tiết và bằng chứng nằm
 > trong từng file đánh giá ở `docs/reviews/`.
 
 ## 1. Dự án là gì
@@ -21,9 +21,9 @@ hàng, 58 tuyến.
 | — | Hiểu nghiệp vụ | 1 | ✅ | `docs/01-business-understanding` |
 | 1 | `data-platform` | 2, 3 | ✅ 47 test | [01-data-platform.vi.md](reviews/01-data-platform.vi.md) |
 | 2 | `metrics` | 3 | ✅ 29 test | [02-metrics.vi.md](reviews/02-metrics.vi.md) |
-| 3 | `optimize` | 4, 5 | ⏳ | |
-| 4 | `insights` | 6 | ⏳ | |
-| 5 | `dashboard` | 6 | ⏳ | |
+| 3 | `analysis` | 2, 3 | ✅ 12 test | [03-analysis.vi.md](reviews/03-analysis.vi.md) |
+| 4 | `dashboard` | 6 | ⏳ | |
+| 5 | `optimize` | 4, 5 | ⏸️ Tạm dừng ở nhánh `feature/optimize`, làm lại sau phân tích | |
 | 6 | `reports` | 6 | ⏳ | |
 
 ## 3. Hiện trạng kinh doanh (số liệu nền đã kiểm chứng)
@@ -57,17 +57,20 @@ hàng, 58 tuyến.
 | Kho dữ liệu kiểm tra được, dựng lại bằng một lệnh | `logops build` (khoảng 7 giây) |
 | 69 quy tắc chất lượng dữ liệu, báo cáo EN/VI | `docs/02-data-quality-report` |
 | 3 view nền + 21 KPI theo SCOR | `logops kpi --by …`, `docs/03-kpi-definitions` |
+| Phân tích lợi nhuận, nhiên liệu, đội xe, mạng lưới + nhận xét theo quy tắc | `logops insights`, `docs/03-analysis-insights` |
 | Tài liệu phương pháp, ngưỡng, mô hình dữ liệu | `docs/00-analytical-approach`, `docs/02-*` |
 
-## 6. Đòn bẩy cho module `optimize`
+## 6. Phát hiện chính (module 3 `analysis`)
 
-| Đòn bẩy | Có tín hiệu trong dữ liệu? |
+| Chủ đề | Phát hiện |
 |---|---|
-| Quy mô đội xe (28 xe không chạy) | ✅ 1,40 triệu USD bảo dưỡng; sản lượng gần như không đổi (+1,3%) |
-| Lợi nhuận tuyến | ✅ Biên từ 50,4% đến 72,7% giữa các tuyến |
-| Giao hàng đúng giờ | ✅ 44,6%; sẽ kiểm tra bằng mô hình dự báo trễ |
-| MPG theo xe/tài xế | Chưa kiểm tra |
-| Chạy không tải; giá nhiên liệu theo địa điểm | ❌ Không có tín hiệu: không đưa ra số tiết kiệm |
+| **Lợi nhuận** | Biên tăng 62,7% → 67,2% (2022 → 2024) nhưng doanh thu/dặm đứng yên. **93% mức tăng đóng góp (+4,12 trong +4,42 triệu USD) đến từ giá nhiên liệu giảm**; biên đi ngược giá nhiên liệu (tương quan −0,92) vì phụ phí cố định |
+| | Sản lượng không đổi; các phân khúc khách hàng có biên như nhau; không có rủi ro tập trung khách hàng (HHI 50) |
+| **Mạng lưới** | **33% số lô kết thúc ở nơi không có hàng về**; 16/20 thành phố lệch quá 20%; ổn định qua các năm (0,997). Los Angeles và Indianapolis chỉ nhận hàng. 95,4% số lần xe bắt đầu chuyến mới ở thành phố khác |
+| **Đội xe** | 95% số ngày cần ≤ 73 xe, ngày bận nhất 80; 92 xe đang chạy, 120 xe sở hữu. Không dự báo được thời điểm cao điểm, nên lập kế hoạch theo mức đảm bảo |
+| **Nhiên liệu** | Gallon mua nhiều hơn gallon tiêu thụ ghi nhận 1,28–1,30 lần mỗi năm; chưa đối soát |
+
+Các con số trên do bộ quy tắc tự sinh từ dữ liệu, xem [03-analysis-insights.vi.md](03-analysis-insights.vi.md).
 
 ## 7. Quyết định của chủ dự án
 

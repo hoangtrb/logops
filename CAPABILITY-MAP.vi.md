@@ -20,12 +20,13 @@ chuyện gì?"*
 |---|---|---|
 | `data-platform` | CSV → Parquet đã kiểm tra → kho dữ liệu DuckDB; báo cáo chất lượng dữ liệu | — |
 | `metrics` | Lớp KPI (SQL view): chi phí/dặm, % đúng giờ, thời gian chờ tại kho, MPG, thời gian nổ máy chờ, hiệu suất sử dụng, chi phí bảo dưỡng và an toàn | data-platform |
-| `optimize` | Các bộ máy khuyến nghị cho 4 lĩnh vực trọng tâm bên dưới, mỗi khuyến nghị kèm số tiền tiết kiệm ước tính | metrics |
+| `analysis` | Phân tích lợi nhuận, nhiên liệu, năng lực đội xe, mạng lưới, kèm nhận xét theo quy tắc (thêm ngày 03/10/2026) | metrics |
+| `optimize` | Các bộ máy khuyến nghị cho 4 lĩnh vực trọng tâm bên dưới, mỗi khuyến nghị kèm số tiền tiết kiệm ước tính | metrics, analysis |
 | `insights` | Claude API: viết phần nhận định về KPI và điểm bất thường cho từng báo cáo; đặt câu hỏi bằng ngôn ngữ tự nhiên → SQL | metrics, optimize |
 | `dashboard` | Streamlit + Plotly: mỗi lĩnh vực trọng tâm một trang, kèm nút xuất báo cáo | metrics, optimize, insights |
 | `reports` | Người dùng chọn **loại báo cáo** và khoảng thời gian → ra file PDF hoặc HTML trong một bước (dòng lệnh hoặc nút trên dashboard) | metrics, optimize, insights |
 
-Thứ tự xây dựng: `data-platform` → `metrics` → `optimize` → `insights` → `dashboard` ∥ `reports`
+Thứ tự xây dựng (sửa ngày 03/10/2026): `data-platform` → `metrics` → `analysis` → `dashboard` → `optimize` → `reports`. Phần nhận xét theo quy tắc trong `analysis` đảm nhận vai trò của `insights`; lớp Claude là tùy chọn.
 
 ## Các lĩnh vực trọng tâm (`optimize`), xếp theo mức ưu tiên của Giám đốc
 

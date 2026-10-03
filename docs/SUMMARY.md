@@ -1,7 +1,7 @@
 # Project Summary: Logistics Ops Optimizer
 
 > Vietnamese: [SUMMARY.vi.md](SUMMARY.vi.md) · Updated at the end of each module · **Last updated:**
-> 2026-10-03, after module 2 · **Rule:** verified facts only; details and evidence are in each review
+> 2026-10-03, after module 3 `analysis` · **Rule:** verified facts only; details and evidence are in each review
 > under `docs/reviews/`.
 
 ## 1. What the project is
@@ -21,9 +21,9 @@ customers, 58 lanes.
 | — | Business understanding | 1 | ✅ | `docs/01-business-understanding` |
 | 1 | `data-platform` | 2, 3 | ✅ 47 tests | [01-data-platform.md](reviews/01-data-platform.md) |
 | 2 | `metrics` | 3 | ✅ 29 tests | [02-metrics.md](reviews/02-metrics.md) |
-| 3 | `optimize` | 4, 5 | ⏳ | |
-| 4 | `insights` | 6 | ⏳ | |
-| 5 | `dashboard` | 6 | ⏳ | |
+| 3 | `analysis` | 2, 3 | ✅ 12 tests | [03-analysis.md](reviews/03-analysis.md) |
+| 4 | `dashboard` | 6 | ⏳ | |
+| 5 | `optimize` | 4, 5 | ⏸️ Parked on branch `feature/optimize`, redone after the analysis | |
 | 6 | `reports` | 6 | ⏳ | |
 
 ## 3. Where the business stands (verified baselines)
@@ -57,17 +57,20 @@ customers, 58 lanes.
 | A checked warehouse, rebuilt with one command | `logops build` (about 7 s) |
 | 69 data-quality rules, EN/VI report | `docs/02-data-quality-report` |
 | 3 base views + 21 SCOR KPIs | `logops kpi --by …`, `docs/03-kpi-definitions` |
+| Profit, fuel, fleet and network analyses + rule-based commentary | `logops insights`, `docs/03-analysis-insights` |
 | Method, threshold and data-model documentation | `docs/00-analytical-approach`, `docs/02-*` |
 
-## 6. Levers for the `optimize` module
+## 6. Key findings (module 3 `analysis`)
 
-| Lever | Signal in the data? |
+| Topic | Finding |
 |---|---|
-| Fleet size (28 unused trucks) | ✅ $1.40M maintenance; volume nearly flat (+1.3%) |
-| Lane profitability | ✅ Margins from 50.4% to 72.7% across lanes |
-| On-time delivery | ✅ 44.6%; to be examined with the delay-risk model |
-| MPG by truck/driver | Not yet checked |
-| Idling; fuel price by location | ❌ No signal: no savings claimed |
+| **Profit** | Margin rose 62.7% → 67.2% (2022 → 2024) while revenue per mile stayed flat. **93% of the contribution gain (+$4.12M of +$4.42M) comes from falling fuel prices**; margin moves against fuel prices (correlation −0.92) because the surcharge is fixed |
+| | Volume flat; customer segments earn the same margin; no customer concentration risk (HHI 50) |
+| **Network** | **33% of loads end where there's no return load**; 16 of 20 cities imbalanced by over 20%; stable across years (0.997). Los Angeles and Indianapolis only receive. In 95.4% of transitions trucks start the next trip in another city |
+| **Fleet** | 95% of days need ≤ 73 trucks, busiest day 80; 92 in use, 120 owned. Peak timing can't be forecast, so plan by service level |
+| **Fuel** | Gallons bought exceed gallons recorded as burned by 1.28–1.30× every year; not reconciled |
+
+These figures are generated from the data by the rules; see [03-analysis-insights.md](03-analysis-insights.md).
 
 ## 7. Project owner's decisions
 

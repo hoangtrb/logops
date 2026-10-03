@@ -7,6 +7,8 @@ import duckdb
 import typer
 
 from logops import config
+from logops.analysis.bundle import analysis_bundle
+from logops.analysis.doc import write_analysis_docs
 from logops.data_platform.data_model_doc import write_docs
 from logops.data_platform.dq_report import write_report
 from logops.data_platform.ingest import IngestError, ingest_table
@@ -50,6 +52,7 @@ def build() -> None:
         create_views(con)
     reports = write_report(config.WAREHOUSE_PATH, TABLES.values(), config.DOCS_DIR)
     reports += write_kpi_docs(config.WAREHOUSE_PATH, config.DOCS_DIR)
+    reports += write_analysis_docs(config.WAREHOUSE_PATH, config.DOCS_DIR)
 
     with duckdb.connect(str(config.WAREHOUSE_PATH), read_only=True) as con:
         for name in TABLES:
@@ -111,3 +114,19 @@ def kpi_command(
     for row in shown.iter_rows():
         cells = "".join(f"{'—' if v is None else f'{v:,.2f}':>24}" for v in row[1:])
         typer.echo(f"{str(row[0])[:28]:<28}{cells}")
+
+
+@app.command()
+def insights(
+    date_from: str = typer.Option("2022-01-01", "--from", help="First date (YYYY-MM-DD)"),
+    date_to: str = typer.Option("2024-12-31", "--to", help="Last date (YYYY-MM-DD)"),
+    lang: str = typer.Option("vi", help="Language: vi or en"),
+) -> None:
+    """Print the rule-based commentary for the period."""
+    with duckdb.connect(str(config.WAREHOUSE_PATH), read_only=True) as con:
+        bundle = analysis_bundle(
+            con, dt.date.fromisoformat(date_from), dt.date.fromisoformat(date_to)
+        )
+    for item in bundle["insights"][lang]:
+        typer.echo(f"[{item['level_label']}] {item['text']}")
+        typer.echo("")

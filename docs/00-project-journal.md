@@ -1,7 +1,7 @@
 # 00 · Project Journal
 
 > Vietnamese: [00-project-journal.vi.md](00-project-journal.vi.md) · Analytical approach: [00-analytical-approach.md](00-analytical-approach.md)
-> **Last updated:** Sat 2026-10-03, after module 2 `metrics`. One-page overview: [SUMMARY.md](SUMMARY.md).
+> **Last updated:** Sat 2026-10-03, after module 3 `analysis`. One-page overview: [SUMMARY.md](SUMMARY.md).
 
 **How to use this file**
 - First read: §1–§4 explain what the project is, what's in the folder, which workflow it
@@ -99,11 +99,11 @@ logistics-ops/
 | # | Module | CRISP-DM phase | Planned | Status |
 |---|---|---|---|---|
 | — | Business understanding (`docs/01`) | 1 | Thu 10-01 | ✅ Done |
-| 1 | `data-platform` | 2, 3 | Fri 10-02 | ✅ Done (7 tasks; Tasks 6 and 8 cut). Awaiting Checkpoint C review |
-| 2 | `metrics` | 3 | Sat 10-03 AM | ✅ Done (29 tests). Awaiting your review and commit |
-| 3 | `optimize` | 4, 5 | Sat 10-03 PM | ⏳ |
-| 4 | `insights` | 6 | Sun 10-04 AM | ⏳ |
-| 5 | `dashboard` | 6 | Sun 10-04 AM | ⏳ |
+| 1 | `data-platform` | 2, 3 | Fri 10-02 | ✅ Done (7 tasks; Tasks 6 and 8 cut) |
+| 2 | `metrics` | 3 | Sat 10-03 AM | ✅ Done (29 tests), commit `e99d12a` |
+| 3 | `analysis` | 2, 3 | Sat 10-03 evening | ✅ Done (12 tests). Awaiting your review and commit |
+| 4 | `dashboard` | 6 | Sun 10-04 AM | ⏳ |
+| 5 | `optimize` | 4, 5 | After the analysis | ⏸️ On branch `feature/optimize` |
 | 6 | `reports` | 6 | Sun 10-04 PM | ⏳ |
 | — | Demo, evaluation, freeze | 5 | Sun 10-04 evening | ⏳ |
 
@@ -292,24 +292,37 @@ Module 1 progress: █████████ complete (7 tasks done, 2 cut wit
 - **Reviews:** [reviews/02-metrics.md](reviews/02-metrics.md); module 1:
   [reviews/01-data-platform.md](reviews/01-data-platform.md).
 
+### Sat 10-03 · Reordered: analysis first, optimize later
+- The project owner decided to do the analysis first. The optimize work so far moved to branch
+  `feature/optimize` (pushed), to be redone once the analysis is in.
+
+### Sat 10-03 · Module 3 `analysis` ✅
+- **Spec agreed with the project owner:** profit tracked the way businesses do; no external data (not
+  even coordinates); weekday, seasonality, operating ratio, empty miles and the fuel hypothesis dropped.
+- **Done:** `src/logops/analysis/` with `profit.py` (P&L by period, profit bridge, unit economics,
+  business dimensions, customer concentration), `operations.py` (fuel, fleet capacity, lane matrix,
+  network balance, changed start points), `insights.py` (12 rules), `bundle.py`, `doc.py`; the
+  `logops insights` command; generated `docs/03-analysis-insights`; state and load-type dimensions
+  added to the KPI layer.
+- **Result:** 93 tests pass. 93% of the profit gain comes from fuel prices; 33% of loads end where
+  there's no return load; peak days can't be forecast.
+- **Notebook check:** found the repositioning cost that is always $0, seasonality caused by month
+  length, and the assumed figures.
+- **Fixed along the way:** group shares adding up to over 100% (denominator changed); a hard-coded
+  digit in a comment template (caught by the test).
+- **Review:** [reviews/03-analysis.md](reviews/03-analysis.md).
+
 ## 6. In progress
 
-**Module 2 is done and awaits your review, then a commit.** Read in this order:
-1. [SUMMARY.md](SUMMARY.md): the whole project on one page.
-2. [reviews/02-metrics.md](reviews/02-metrics.md): outputs vs the spec, fleet KPIs, new findings.
-3. [03-kpi-definitions.md](03-kpi-definitions.md): the formulas of the 21 KPIs.
-4. Try: `python -m uv run logops kpi --by route --kpis all`.
+**Module 3 `analysis` is done and awaits your review, then a commit.** Read in this order:
+1. [03-analysis-insights.md](03-analysis-insights.md) §1: the 12 generated comments.
+2. [reviews/03-analysis.md](reviews/03-analysis.md): outputs vs the spec, notebook comparison.
+3. Try: `python -m uv run logops insights --lang en`.
 
 ## 7. Next
 
-**Module 3 `optimize`**: a spec defining the outputs first, then the build. Inputs are the items
-in `reviews/02-metrics` §6: fleet size (28 unused trucks), lane profitability, the delay-risk model,
-MPG.
-
-**Later modules** (details in [roadmap.md](../tasks/roadmap.md)):
-- **Saturday:** `metrics` (SQL KPI views) → `optimize` (4 recommendation engines, each with $ savings).
-- **Sunday:** `insights` (Claude narratives) → `dashboard` (Streamlit) → `reports` (PDF/HTML) →
-  demo script → freeze.
+**Sunday:** `dashboard` (reads `analysis_bundle()`, shows the commentary) → `optimize` (redone from
+branch `feature/optimize`, adding backhaul matching) → `reports` → demo script → freeze.
 
 ## 8. Key decisions
 

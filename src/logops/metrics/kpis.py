@@ -25,6 +25,9 @@ DIMENSIONS = {
     "customer_type": "customer_type",
     "truck": "truck_id",
     "driver": "driver_id",
+    "load_type": "load_type",
+    "origin_state": "origin_state",
+    "destination_state": "destination_state",
     "location_city": "location_city",
 }
 ASSET_DIMENSIONS = {None, "month", "truck"}  # utilization and downtime exist per truck-month

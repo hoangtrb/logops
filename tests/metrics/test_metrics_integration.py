@@ -54,7 +54,9 @@ def test_fleet_totals_match_raw_tables(con):
     assert f["on_time_pct"] == pytest.approx(flag)  # window 120 = on_time_flag
 
 
-@pytest.mark.parametrize("by", ["month", "route", "customer", "truck", "driver"])
+@pytest.mark.parametrize(
+    "by", ["month", "route", "customer", "truck", "driver", "load_type", "origin_state"]
+)
 def test_groups_reconcile_with_fleet(con, by):
     rows = list(kpi(con, *ALL, by=by).iter_rows(named=True))
     total = [r for r in rows if r["group"] == FLEET][0]

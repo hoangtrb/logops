@@ -16,12 +16,13 @@ much does it save?"*, not just *"what happened?"*
 |---|---|---|
 | `data-platform` | CSV → validated Parquet → DuckDB warehouse; data-quality report | — |
 | `metrics` | KPI layer (SQL views): cost/mile, on-time %, detention, MPG, idle, utilization, maintenance & safety cost | data-platform |
-| `optimize` | Recommendation engines for the 4 focus areas below, each with an estimated savings figure | metrics |
+| `analysis` | Profit, fuel, fleet-capacity and network analyses with rule-based commentary (added 2026-10-03) | metrics |
+| `optimize` | Recommendation engines for the 4 focus areas below, each with an estimated savings figure | metrics, analysis |
 | `insights` | Claude API: written summary of KPIs and anomalies per report; questions in plain English → SQL | metrics, optimize |
 | `dashboard` | Streamlit + Plotly: one page per focus area, plus a report-export button | metrics, optimize, insights |
 | `reports` | User picks a **report type** and a date range → PDF or self-contained HTML in one step (CLI or dashboard button) | metrics, optimize, insights |
 
-Build order: `data-platform` → `metrics` → `optimize` → `insights` → `dashboard` ∥ `reports`
+Build order (revised 2026-10-03): `data-platform` → `metrics` → `analysis` → `dashboard` → `optimize` → `reports`. The rule-based commentary in `analysis` covers what `insights` was for; a Claude layer is optional.
 
 ## Focus areas (`optimize`) — ranked by director priority
 

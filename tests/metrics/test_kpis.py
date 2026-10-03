@@ -44,7 +44,20 @@ def test_on_time_window_is_a_parameter(con):
     assert row(kpi(con, *ALL, on_time_window_min=200), FLEET)["on_time_pct"] == pytest.approx(100)
 
 
-@pytest.mark.parametrize("by", ["month", "route", "customer", "customer_type", "truck", "driver"])
+@pytest.mark.parametrize(
+    "by",
+    [
+        "month",
+        "route",
+        "customer",
+        "customer_type",
+        "truck",
+        "driver",
+        "load_type",
+        "origin_state",
+        "destination_state",
+    ],
+)
 def test_groups_plus_unattributed_add_up_to_fleet(con, by):
     table = kpi(con, *ALL, by=by)
     groups = [r for r in table.iter_rows(named=True) if r["group"] != FLEET]

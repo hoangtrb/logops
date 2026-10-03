@@ -1,7 +1,7 @@
 # 00 · Nhật ký dự án
 
 > Bản tiếng Anh: [00-project-journal.md](00-project-journal.md) · Cơ sở phân tích: [00-analytical-approach.vi.md](00-analytical-approach.vi.md)
-> **Cập nhật lần cuối:** Thứ 7 03/10/2026, sau module 2 `metrics`. Tổng kết ngắn gọn: [SUMMARY.vi.md](SUMMARY.vi.md).
+> **Cập nhật lần cuối:** Thứ 7 03/10/2026, sau module 3 `analysis`. Tổng kết ngắn gọn: [SUMMARY.vi.md](SUMMARY.vi.md).
 
 **Cách dùng file này**
 - Lần đầu đọc: đọc §1 → §4 để nắm dự án là gì, thư mục có gì, làm theo quy trình nào, đang ở đâu.
@@ -96,11 +96,11 @@ logistics-ops/
 | # | Module | Pha CRISP-DM | Ngày dự kiến | Trạng thái |
 |---|---|---|---|---|
 | — | Hiểu nghiệp vụ (`docs/01`) | 1 | T5 01/10 | ✅ Xong |
-| 1 | `data-platform` | 2, 3 | T6 02/10 | ✅ Xong (7 việc; Việc 6 và 8 đã cắt). Chờ rà soát Checkpoint C |
-| 2 | `metrics` | 3 | Sáng T7 03/10 | ✅ Xong (29 test). Chờ bạn rà soát và commit |
-| 3 | `optimize` | 4, 5 | Chiều T7 03/10 | ⏳ |
-| 4 | `insights` | 6 | Sáng CN 04/10 | ⏳ |
-| 5 | `dashboard` | 6 | Sáng CN 04/10 | ⏳ |
+| 1 | `data-platform` | 2, 3 | T6 02/10 | ✅ Xong (7 việc; Việc 6 và 8 đã cắt) |
+| 2 | `metrics` | 3 | Sáng T7 03/10 | ✅ Xong (29 test), commit `e99d12a` |
+| 3 | `analysis` | 2, 3 | Tối T7 03/10 | ✅ Xong (12 test). Chờ bạn rà soát và commit |
+| 4 | `dashboard` | 6 | Sáng CN 04/10 | ⏳ |
+| 5 | `optimize` | 4, 5 | Sau phân tích | ⏸️ Ở nhánh `feature/optimize` |
 | 6 | `reports` | 6 | Chiều CN 04/10 | ⏳ |
 | — | Demo, đánh giá, đóng băng | 5 | Tối CN 04/10 | ⏳ |
 
@@ -282,23 +282,36 @@ Tiến độ module 1: █████████ hoàn tất (7 việc xong, 2
 - **Đánh giá:** [reviews/02-metrics.vi.md](reviews/02-metrics.vi.md); module 1:
   [reviews/01-data-platform.vi.md](reviews/01-data-platform.vi.md).
 
+### T7 03/10 · Đổi thứ tự: phân tích trước, optimize sau
+- Chủ dự án quyết định làm phân tích trước. Module optimize đã làm được chuyển sang nhánh
+  `feature/optimize` (đã push), sẽ làm lại sau khi có kết quả phân tích.
+
+### T7 03/10 · Module 3 `analysis` ✅
+- **Spec chốt cùng chủ dự án:** lợi nhuận theo cách doanh nghiệp theo dõi; không dữ liệu ngoài (kể cả
+  tọa độ); bỏ thứ trong tuần, mùa vụ, operating ratio, dặm rỗng và giả thuyết nhiên liệu.
+- **Đã làm:** `src/logops/analysis/` gồm `profit.py` (lãi lỗ theo kỳ, cầu lợi nhuận, đơn vị kinh tế,
+  chiều kinh doanh, tập trung khách hàng), `operations.py` (nhiên liệu, năng lực đội xe, ma trận tuyến,
+  cân bằng mạng lưới, đổi điểm xuất phát), `insights.py` (12 quy tắc), `bundle.py`, `doc.py`; lệnh
+  `logops insights`; `docs/03-analysis-insights` tự sinh; thêm chiều bang và loại hàng vào lớp KPI.
+- **Kết quả:** 93 test qua. 93% mức tăng lợi nhuận đến từ giá nhiên liệu; 33% số lô kết thúc ở nơi
+  không có hàng về; không dự báo được ngày cao điểm.
+- **Đối chiếu notebook:** tìm ra lỗi tính chi phí điều xe luôn bằng $0, mùa vụ do tháng dài ngắn, và
+  các con số giả định.
+- **Vấn đề đã sửa:** tỷ trọng theo nhóm cộng quá 100% (đổi mẫu số); chữ số viết tay trong câu mẫu (test
+  bắt được).
+- **Đánh giá:** [reviews/03-analysis.vi.md](reviews/03-analysis.vi.md).
+
 ## 6. Đang làm
 
-**Module 2 xong, chờ bạn rà soát rồi commit.** Đọc theo thứ tự:
-1. [SUMMARY.vi.md](SUMMARY.vi.md): toàn cảnh dự án trên một trang.
-2. [reviews/02-metrics.vi.md](reviews/02-metrics.vi.md): output so với spec, KPI đội xe, phát hiện mới.
-3. [03-kpi-definitions.vi.md](03-kpi-definitions.vi.md): công thức của 21 KPI.
-4. Thử: `python -m uv run logops kpi --by route --kpis all`.
+**Module 3 `analysis` xong, chờ bạn rà soát rồi commit.** Đọc theo thứ tự:
+1. [03-analysis-insights.vi.md](03-analysis-insights.vi.md) §1: 12 nhận xét tự sinh.
+2. [reviews/03-analysis.vi.md](reviews/03-analysis.vi.md): output so với spec, đối chiếu notebook.
+3. Thử: `python -m uv run logops insights`.
 
 ## 7. Sẽ làm
 
-**Module 3 `optimize`**: spec định nghĩa output trước, rồi build. Đầu vào là các mục ở
-`reviews/02-metrics` §6: quy mô đội xe (28 xe không chạy), lợi nhuận tuyến, mô hình dự báo trễ, MPG.
-
-**Các module sau** (chi tiết trong [roadmap.vi.md](../tasks/roadmap.vi.md)):
-- **Thứ 7:** `metrics` (view KPI bằng SQL) → `optimize` (4 engine khuyến nghị, mỗi engine có $ tiết kiệm).
-- **Chủ nhật:** `insights` (Claude viết nhận xét) → `dashboard` (Streamlit) → `reports`
-  (PDF/HTML) → kịch bản demo → đóng băng.
+**Chủ nhật:** `dashboard` (đọc `analysis_bundle()`, hiển thị nhận xét) → `optimize` (làm lại từ nhánh
+`feature/optimize`, thêm ghép hàng chiều về) → `reports` → kịch bản demo → đóng băng.
 
 ## 8. Các quyết định chính
 
