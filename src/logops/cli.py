@@ -16,6 +16,7 @@ from logops.data_platform.warehouse import load_warehouse
 from logops.metrics.kpi_doc import write_kpi_docs
 from logops.metrics.kpis import CATALOG, DIMENSIONS, kpi
 from logops.metrics.views import create_views
+from logops.optimize.report import collect, recommendations, totals, write_optimize_outputs
 
 app = typer.Typer(help="Logistics Ops Optimizer: fleet data to cost-saving decisions.")
 
@@ -50,6 +51,7 @@ def build() -> None:
         create_views(con)
     reports = write_report(config.WAREHOUSE_PATH, TABLES.values(), config.DOCS_DIR)
     reports += write_kpi_docs(config.WAREHOUSE_PATH, config.DOCS_DIR)
+    reports += write_optimize_outputs(config.WAREHOUSE_PATH, config.DOCS_DIR)
 
     with duckdb.connect(str(config.WAREHOUSE_PATH), read_only=True) as con:
         for name in TABLES:
@@ -111,3 +113,21 @@ def kpi_command(
     for row in shown.iter_rows():
         cells = "".join(f"{'—' if v is None else f'{v:,.2f}':>24}" for v in row[1:])
         typer.echo(f"{str(row[0])[:28]:<28}{cells}")
+
+
+@app.command()
+def optimize(
+    growth: float = typer.Option(0, help="Volume growth scenario in percent, e.g. 10"),
+) -> None:
+    """Print the recommendations and how they compare with the savings target."""
+    with duckdb.connect(str(config.WAREHOUSE_PATH), read_only=True) as con:
+        data = collect(con, growth=growth / 100)
+    t = totals(data)
+    typer.echo(f"Savings target:      ${t['target']:>12,.0f} per year (3% of measured cost)")
+    typer.echo(f"Measured savings:    ${t['measured']:>12,.0f} ({t['measured'] / t['target']:.0%})")
+    typer.echo(f"Upper bound (price): ${t['upper']:>12,.0f} (needs customers to accept)")
+    typer.echo("")
+    for r in recommendations(data).iter_rows(named=True):
+        impact = f"${r['annual_impact_usd']:>11,.0f}" if r["annual_impact_usd"] else " " * 12
+        what = r["item"] if r["impact_type"] == "no signal" else r["action"]
+        typer.echo(f"  [{r['impact_type']:<12}] {impact}  {r['area']:<8} {what}")

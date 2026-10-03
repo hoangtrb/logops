@@ -79,8 +79,7 @@ the targets below are confirmed against them ([02-data-understanding.md](02-data
 - Every recommendation can be traced back to the data behind it.
 
 **Analytical**
-- Delay-risk model beats the naive baseline. Target ROC-AUC ≥ 0.70 on a time-based
-  hold-out set (trained on earlier months, tested on later months).
+- ~~Delay-risk model: ROC-AUC ≥ 0.70 on a time-based hold-out set.~~ **Withdrawn after module 3:** no driver, lane, customer or truck effect on delays persists across years, so a model can't beat the baseline. Replaced by: *every savings claim rests on a signal that persists across years* (`docs/05-evaluation` §4).
 - Data-quality report covers 100% of tables, with every cleaning rule documented.
 
 **Deployment**

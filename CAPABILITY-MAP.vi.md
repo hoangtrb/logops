@@ -45,6 +45,8 @@ Thứ tự xây dựng: `data-platform` → `metrics` → `optimize` → `insigh
 *Mở rộng (nếu còn thời gian):* demo phân công xe/tài xế cho lô hàng bằng quy hoạch tuyến tính
 (OR-Tools).
 
+**Cập nhật sau module 3 (03/10/2026):** chỉ đòn bẩy có tín hiệu lặp lại qua các năm mới được đưa ra số tiền. Đã làm: **quy mô đội xe** (lĩnh vực 4) và **lợi nhuận tuyến + phụ phí nhiên liệu** (lĩnh vực 1). Không làm, có bằng chứng trong `docs/05-evaluation` §4: mô hình dự báo trễ (lĩnh vực 2), MPG và chạy không tải (lĩnh vực 3), phần mở rộng LP (đội xe đã dư công suất). Bổ sung: **lỗ hổng dữ liệu → cải tiến quy trình** (`docs/04-data-process-improvements`).
+
 ## Các loại báo cáo (`reports`)
 
 Tổng quan cho lãnh đạo · Chi phí & Tuyến · Hiệu suất giao hàng · Nhiên liệu · Đội xe & Bảo dưỡng · An toàn & Tài xế

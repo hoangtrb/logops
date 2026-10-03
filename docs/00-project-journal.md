@@ -1,7 +1,7 @@
 # 00 · Project Journal
 
 > Vietnamese: [00-project-journal.vi.md](00-project-journal.vi.md) · Analytical approach: [00-analytical-approach.md](00-analytical-approach.md)
-> **Last updated:** Sat 2026-10-03, after module 2 `metrics`. One-page overview: [SUMMARY.md](SUMMARY.md).
+> **Last updated:** Sat 2026-10-03, after module 3 `optimize`. One-page overview: [SUMMARY.md](SUMMARY.md).
 
 **How to use this file**
 - First read: §1–§4 explain what the project is, what's in the folder, which workflow it
@@ -38,6 +38,7 @@ logistics-ops/
 ├── CAPABILITY-MAP.md / .vi.md      6 modules, 4 focus areas, 6 report types, CRISP-DM mapping
 ├── SPEC-data-platform.md / .vi.md  Spec for module 1
 ├── SPEC-metrics.md / .vi.md        Spec for module 2: outputs defined before coding
+├── SPEC-optimize.md / .vi.md       Spec for module 3: signal check first, real levers only
 ├── pyproject.toml, uv.lock         Dependencies (managed by uv)
 ├── docs/
 │   ├── 00-project-journal.*        ← this file: progress log
@@ -48,6 +49,8 @@ logistics-ops/
 │   ├── 02-dq-rule-thresholds.*     The numbers in the rules and tests: why, and their sources
 │   ├── 02-data-understanding.*     CRISP-DM phase 2: data analysis, interview talking points
 │   ├── 03-kpi-definitions.*        (generated) 21 KPIs: formula, unit, fleet value
+│   ├── 04-data-process-improvements.* (generated) data gaps: cost of doing vs not doing
+│   ├── 05-evaluation.*             (generated) savings vs target, fleet, lanes, rejected levers
 │   ├── reviews/NN-<module>.*       End-of-module review: outputs, real figures, what wasn't done
 │   └── SUMMARY.*                   Project-wide summary, updated at the end of each module
 ├── tasks/
@@ -55,7 +58,7 @@ logistics-ops/
 │   ├── plan.md / .vi.md            Plan for the current module (data-platform)
 │   └── todo.md / .vi.md            Task list; todo.md (English) is the source of truth for checkboxes
 ├── src/logops/
-│   ├── cli.py                      `logops build`, `logops docs`, `logops kpi` commands
+│   ├── cli.py                      `logops build`, `docs`, `kpi`, `optimize` commands
 │   ├── config.py                   All paths, resolved from the repo root
 │   └── data_platform/
 │       ├── schema.py               Column types, primary and foreign keys of the 14 tables (single source of truth)
@@ -68,11 +71,17 @@ logistics-ops/
 │       ├── views.py                3 base views: trip_economics, delivery_performance, truck_economics
 │       ├── kpis.py                 The 21-KPI catalog + kpi()
 │       └── kpi_doc.py              Generates `docs/03-kpi-definitions`
+│   └── optimize/
+│       ├── fleet.py                Fleet size: daily demand, trucks needed, tiered disposal
+│       ├── lanes.py                Lane profitability: 4 groups, surcharge and linehaul scenarios
+│       ├── data_gaps.py            Data gaps: measured cost, cited implementation cost
+│       └── report.py               Recommendations table + docs/04, docs/05
 ├── tests/
 │   ├── fixtures/                   Tiny hand-made CSVs with deliberate defects
 │   ├── test_smoke.py               CLI and paths
 │   ├── data_platform/              Ingest, schema, and integration tests on the real data
-│   └── metrics/                    Hand-computable fixture warehouse + real-data reconciliation tests
+│   ├── metrics/                    Hand-computable fixture warehouse + real-data reconciliation tests
+│   └── optimize/                   Hand-computable fleet and lanes + integration tests
 ├── dataset/          (not committed) 14 raw Kaggle CSVs, read-only
 └── data/             (not committed) Generated: parquet/ and warehouse.duckdb
 ```
@@ -100,8 +109,8 @@ logistics-ops/
 |---|---|---|---|---|
 | — | Business understanding (`docs/01`) | 1 | Thu 10-01 | ✅ Done |
 | 1 | `data-platform` | 2, 3 | Fri 10-02 | ✅ Done (7 tasks; Tasks 6 and 8 cut). Awaiting Checkpoint C review |
-| 2 | `metrics` | 3 | Sat 10-03 AM | ✅ Done (29 tests). Awaiting your review and commit |
-| 3 | `optimize` | 4, 5 | Sat 10-03 PM | ⏳ |
+| 2 | `metrics` | 3 | Sat 10-03 AM | ✅ Done (29 tests), commit `e99d12a` |
+| 3 | `optimize` | 4, 5 | Sat 10-03 PM | ✅ Done (23 tests). Awaiting your review and commit |
 | 4 | `insights` | 6 | Sun 10-04 AM | ⏳ |
 | 5 | `dashboard` | 6 | Sun 10-04 AM | ⏳ |
 | 6 | `reports` | 6 | Sun 10-04 PM | ⏳ |
@@ -292,24 +301,30 @@ Module 1 progress: █████████ complete (7 tasks done, 2 cut wit
 - **Reviews:** [reviews/02-metrics.md](reviews/02-metrics.md); module 1:
   [reviews/01-data-platform.md](reviews/01-data-platform.md).
 
+### Sat 10-03 · Module 3 `optimize` ✅
+- **Signal check before the spec:** only levers whose signal persists across years were kept.
+  Dropped the delay model (AUC criterion withdrawn), MPG and idling; the project owner also dropped
+  bottlenecks, consolidation and detention billing.
+- **Done:** `fleet.py` (P1), `lanes.py` (P2), `data_gaps.py` (P4), `report.py` + the
+  `logops optimize` command + generated `docs/04`, `docs/05` (P5).
+- **Result:** measured saving $0.47M/year (45% of target); upper bound $2.65M/year. 80 trucks needed
+  vs 120; the fuel surcharge is fixed per lane; $7.24M/year of fuel not reconciled.
+- **Fixed along the way:** disposal logic at +20% (4 trucks must come back); accessorials were
+  mixed into the fuel surcharge; uncapped S2 implied a 44% rate increase (added 5/10% caps).
+- **Review:** [reviews/03-optimize.md](reviews/03-optimize.md).
+
 ## 6. In progress
 
-**Module 2 is done and awaits your review, then a commit.** Read in this order:
-1. [SUMMARY.md](SUMMARY.md): the whole project on one page.
-2. [reviews/02-metrics.md](reviews/02-metrics.md): outputs vs the spec, fleet KPIs, new findings.
-3. [03-kpi-definitions.md](03-kpi-definitions.md): the formulas of the 21 KPIs.
-4. Try: `python -m uv run logops kpi --by route --kpis all`.
+**Module 3 is done and awaits your review, then a commit.** Read in this order:
+1. [SUMMARY.md](SUMMARY.md) §6: results vs the target.
+2. [05-evaluation.md](05-evaluation.md): fleet, lanes, scenarios, rejected levers.
+3. [04-data-process-improvements.md](04-data-process-improvements.md): data gaps.
+4. Try: `python -m uv run logops optimize --growth 10`.
 
 ## 7. Next
 
-**Module 3 `optimize`**: a spec defining the outputs first, then the build. Inputs are the items
-in `reviews/02-metrics` §6: fleet size (28 unused trucks), lane profitability, the delay-risk model,
-MPG.
-
-**Later modules** (details in [roadmap.md](../tasks/roadmap.md)):
-- **Saturday:** `metrics` (SQL KPI views) → `optimize` (4 recommendation engines, each with $ savings).
-- **Sunday:** `insights` (Claude narratives) → `dashboard` (Streamlit) → `reports` (PDF/HTML) →
-  demo script → freeze.
+**Sunday:** `insights` (Claude commentary from the `recommendations` table) → `dashboard`
+(Streamlit, growth and linehaul-cap sliders) → `reports` (PDF/HTML) → demo script → freeze.
 
 ## 8. Key decisions
 

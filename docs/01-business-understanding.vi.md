@@ -75,9 +75,7 @@ và các mục tiêu dưới đây đã được xác nhận theo đó ([02-data
 - Mọi khuyến nghị đều truy ngược được về dữ liệu gốc.
 
 **Phân tích**
-- Mô hình dự đoán rủi ro trễ phải tốt hơn cách dự đoán đơn giản nhất. Mục tiêu ROC-AUC ≥ 0,70
-  trên tập kiểm tra chia theo thời gian (huấn luyện trên các tháng trước, kiểm tra trên các
-  tháng sau).
+- ~~Mô hình dự đoán rủi ro trễ: ROC-AUC ≥ 0,70 trên tập kiểm tra chia theo thời gian.~~ **Rút lại sau module 3:** không có tác động nào của tài xế, tuyến, khách hàng hay xe lên việc trễ lặp lại qua các năm, nên mô hình không thể hơn mốc so sánh. Thay bằng: *mọi khoản tiết kiệm đều dựa trên tín hiệu lặp lại qua các năm* (`docs/05-evaluation` §4).
 - Báo cáo chất lượng dữ liệu bao phủ 100% các bảng và ghi lại đầy đủ mọi quy tắc làm sạch.
 
 **Triển khai**

@@ -241,6 +241,8 @@ MPG, say), and this data has no such case.
 
 ## 5. Focus area 2: on-time delivery and detention
 
+> **Result after module 3 (2026-10-03): the delay-risk model was not built.** On-time rates by driver, customer, lane and truck don't persist from 2022–23 to 2024 (correlation 0.01–0.09), and delays don't propagate from pickup to delivery (−0.003). With no persistent signal, a model couldn't beat a coin flip (AUC ≈ 0.5). The method below stays as the plan for when reason codes are captured (`docs/04-data-process-improvements`, row 4).
+
 **Theory**
 - **OTIF** (On-Time In-Full) is the standard retail measure of delivery reliability.
 - **Root-cause analysis:** is the delay caused by the facility (waiting at the dock), the lane
@@ -295,6 +297,8 @@ the spec's "ask first before adding dependencies" rule.
 
 ## 6. Focus area 3: fuel efficiency
 
+> **Result after module 3:** MPG by driver and truck doesn't persist across years (correlation 0.003 and −0.068; range 6.37–6.54), so no MPG savings are claimed. The fuel lever that does have a signal is the **fuel surcharge**: a fixed rate per lane ($0.15–0.34/mile) while fuel cost per mile is the same on every lane. See `docs/05-evaluation` §3.
+
 **Theory**
 - **Internal benchmarking:** compare each truck and driver with the company's own fleet.
 - **Robust statistics:** use the median and **MAD** (median absolute deviation), or the **IQR**
@@ -325,6 +329,8 @@ reverse the trend inside each group.
 ---
 
 ## 7. Focus area 4: fleet utilization and maintenance
+
+> **Implemented in module 3** with the **p99** of daily demand rather than p90: the fleet already has spare capacity, so a high percentile costs little and avoids running short. Result: 80 trucks needed at flat volume vs 120 owned. See `docs/05-evaluation` §2.
 
 **Theory**
 - **Asset utilization:** a parked truck still costs depreciation, insurance and parking.

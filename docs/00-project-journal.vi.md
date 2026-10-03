@@ -1,7 +1,7 @@
 # 00 · Nhật ký dự án
 
 > Bản tiếng Anh: [00-project-journal.md](00-project-journal.md) · Cơ sở phân tích: [00-analytical-approach.vi.md](00-analytical-approach.vi.md)
-> **Cập nhật lần cuối:** Thứ 7 03/10/2026, sau module 2 `metrics`. Tổng kết ngắn gọn: [SUMMARY.vi.md](SUMMARY.vi.md).
+> **Cập nhật lần cuối:** Thứ 7 03/10/2026, sau module 3 `optimize`. Tổng kết ngắn gọn: [SUMMARY.vi.md](SUMMARY.vi.md).
 
 **Cách dùng file này**
 - Lần đầu đọc: đọc §1 → §4 để nắm dự án là gì, thư mục có gì, làm theo quy trình nào, đang ở đâu.
@@ -35,6 +35,7 @@ logistics-ops/
 ├── CAPABILITY-MAP.md / .vi.md      6 module, 4 lĩnh vực tối ưu, 6 loại báo cáo, ánh xạ CRISP-DM
 ├── SPEC-data-platform.md / .vi.md  Đặc tả module 1
 ├── SPEC-metrics.md / .vi.md        Đặc tả module 2: định nghĩa output trước khi code
+├── SPEC-optimize.md / .vi.md       Đặc tả module 3: kiểm tra tín hiệu trước, chỉ làm đòn bẩy có thật
 ├── pyproject.toml, uv.lock         Khai báo thư viện (uv quản lý)
 ├── docs/
 │   ├── 00-project-journal.*        ← file này: nhật ký tiến độ
@@ -45,6 +46,8 @@ logistics-ops/
 │   ├── 02-dq-rule-thresholds.*     Các con số trong quy tắc và test: vì sao, nguồn
 │   ├── 02-data-understanding.*     CRISP-DM pha 2: phân tích dữ liệu, điểm nói khi phỏng vấn
 │   ├── 03-kpi-definitions.*        (tự sinh) 21 KPI: công thức, đơn vị, giá trị đội xe
+│   ├── 04-data-process-improvements.* (tự sinh) lỗ hổng dữ liệu: chi phí làm so với không làm
+│   ├── 05-evaluation.*             (tự sinh) tiết kiệm so với mục tiêu, đội xe, tuyến, đòn bẩy bị loại
 │   ├── reviews/NN-<module>.*       Đánh giá cuối mỗi module: output, số liệu thật, điều chưa làm
 │   └── SUMMARY.*                   Tổng kết toàn dự án, cập nhật cuối mỗi module
 ├── tasks/
@@ -52,7 +55,7 @@ logistics-ops/
 │   ├── plan.md / .vi.md            Kế hoạch module đang làm (hiện là data-platform)
 │   └── todo.md / .vi.md            Danh sách việc; todo.md (tiếng Anh) là nguồn chuẩn để đánh dấu
 ├── src/logops/
-│   ├── cli.py                      Lệnh `logops build`, `logops docs`, `logops kpi`
+│   ├── cli.py                      Lệnh `logops build`, `docs`, `kpi`, `optimize`
 │   ├── config.py                   Mọi đường dẫn, tính từ thư mục gốc repo
 │   └── data_platform/
 │       ├── schema.py               Kiểu cột, khóa chính, khóa ngoại của 14 bảng (nguồn chuẩn duy nhất)
@@ -65,11 +68,17 @@ logistics-ops/
 │       ├── views.py                3 view nền: trip_economics, delivery_performance, truck_economics
 │       ├── kpis.py                 Danh mục 21 KPI + hàm kpi()
 │       └── kpi_doc.py              Sinh `docs/03-kpi-definitions`
+│   └── optimize/
+│       ├── fleet.py                Quy mô đội xe: nhu cầu mỗi ngày, số xe cần, thanh lý theo bậc
+│       ├── lanes.py                Lợi nhuận tuyến: 4 nhóm, kịch bản phụ phí và cước
+│       ├── data_gaps.py            Lỗ hổng dữ liệu: chi phí đo được, chi phí thực hiện có nguồn
+│       └── report.py               Bảng khuyến nghị + docs/04, docs/05
 ├── tests/
 │   ├── fixtures/                   CSV nhỏ tự tạo, có lỗi cố ý để test
 │   ├── test_smoke.py               CLI và đường dẫn
 │   ├── data_platform/              Test nạp dữ liệu, lược đồ, và test tích hợp trên dữ liệu thật
-│   └── metrics/                    Kho mẫu tính tay được + test tích hợp đối chiếu số thật
+│   ├── metrics/                    Kho mẫu tính tay được + test tích hợp đối chiếu số thật
+│   └── optimize/                   Đội xe và tuyến mẫu tính tay được + test tích hợp
 ├── dataset/          (không commit) 14 file CSV gốc từ Kaggle, chỉ đọc
 └── data/             (không commit) Sản phẩm sinh ra: parquet/ và warehouse.duckdb
 ```
@@ -97,8 +106,8 @@ logistics-ops/
 |---|---|---|---|---|
 | — | Hiểu nghiệp vụ (`docs/01`) | 1 | T5 01/10 | ✅ Xong |
 | 1 | `data-platform` | 2, 3 | T6 02/10 | ✅ Xong (7 việc; Việc 6 và 8 đã cắt). Chờ rà soát Checkpoint C |
-| 2 | `metrics` | 3 | Sáng T7 03/10 | ✅ Xong (29 test). Chờ bạn rà soát và commit |
-| 3 | `optimize` | 4, 5 | Chiều T7 03/10 | ⏳ |
+| 2 | `metrics` | 3 | Sáng T7 03/10 | ✅ Xong (29 test), commit `e99d12a` |
+| 3 | `optimize` | 4, 5 | Chiều T7 03/10 | ✅ Xong (23 test). Chờ bạn rà soát và commit |
 | 4 | `insights` | 6 | Sáng CN 04/10 | ⏳ |
 | 5 | `dashboard` | 6 | Sáng CN 04/10 | ⏳ |
 | 6 | `reports` | 6 | Chiều CN 04/10 | ⏳ |
@@ -282,23 +291,31 @@ Tiến độ module 1: █████████ hoàn tất (7 việc xong, 2
 - **Đánh giá:** [reviews/02-metrics.vi.md](reviews/02-metrics.vi.md); module 1:
   [reviews/01-data-platform.vi.md](reviews/01-data-platform.vi.md).
 
+### T7 03/10 · Module 3 `optimize` ✅
+- **Kiểm tra tín hiệu trước khi viết spec:** chỉ giữ đòn bẩy có tín hiệu lặp lại qua các năm. Bỏ mô
+  hình dự báo trễ (tiêu chí AUC rút lại), MPG, chạy không tải; chủ dự án bỏ thêm điểm nghẽn, ghép
+  hàng, phí chờ.
+- **Đã làm:** `fleet.py` (P1), `lanes.py` (P2), `data_gaps.py` (P4), `report.py` + lệnh
+  `logops optimize` + `docs/04`, `docs/05` tự sinh (P5).
+- **Kết quả:** tiết kiệm đo được 0,47 triệu USD/năm (45% mục tiêu); cận trên 2,65 triệu USD/năm.
+  Cần 80 xe so với 120; phụ phí nhiên liệu cố định theo tuyến; 7,24 triệu USD/năm nhiên liệu chưa
+  đối soát.
+- **Vấn đề đã sửa:** logic thanh lý ở +20% (phải đưa 4 xe trở lại); phụ phí khác bị gộp vào phụ phí
+  nhiên liệu; S2 không giới hạn đòi tăng cước 44% (thêm trần 5/10%).
+- **Đánh giá:** [reviews/03-optimize.vi.md](reviews/03-optimize.vi.md).
+
 ## 6. Đang làm
 
-**Module 2 xong, chờ bạn rà soát rồi commit.** Đọc theo thứ tự:
-1. [SUMMARY.vi.md](SUMMARY.vi.md): toàn cảnh dự án trên một trang.
-2. [reviews/02-metrics.vi.md](reviews/02-metrics.vi.md): output so với spec, KPI đội xe, phát hiện mới.
-3. [03-kpi-definitions.vi.md](03-kpi-definitions.vi.md): công thức của 21 KPI.
-4. Thử: `python -m uv run logops kpi --by route --kpis all`.
+**Module 3 xong, chờ bạn rà soát rồi commit.** Đọc theo thứ tự:
+1. [SUMMARY.vi.md](SUMMARY.vi.md) §6: kết quả so với mục tiêu.
+2. [05-evaluation.vi.md](05-evaluation.vi.md): đội xe, tuyến, kịch bản, đòn bẩy bị loại.
+3. [04-data-process-improvements.vi.md](04-data-process-improvements.vi.md): lỗ hổng dữ liệu.
+4. Thử: `python -m uv run logops optimize --growth 10`.
 
 ## 7. Sẽ làm
 
-**Module 3 `optimize`**: spec định nghĩa output trước, rồi build. Đầu vào là các mục ở
-`reviews/02-metrics` §6: quy mô đội xe (28 xe không chạy), lợi nhuận tuyến, mô hình dự báo trễ, MPG.
-
-**Các module sau** (chi tiết trong [roadmap.vi.md](../tasks/roadmap.vi.md)):
-- **Thứ 7:** `metrics` (view KPI bằng SQL) → `optimize` (4 engine khuyến nghị, mỗi engine có $ tiết kiệm).
-- **Chủ nhật:** `insights` (Claude viết nhận xét) → `dashboard` (Streamlit) → `reports`
-  (PDF/HTML) → kịch bản demo → đóng băng.
+**Chủ nhật:** `insights` (Claude viết nhận xét từ bảng `recommendations`) → `dashboard` (Streamlit,
+thanh chọn tăng trưởng và trần tăng cước) → `reports` (PDF/HTML) → kịch bản demo → đóng băng.
 
 ## 8. Các quyết định chính
 

@@ -236,6 +236,8 @@ hao). Vì vậy:
 
 ## 5. Lĩnh vực 2: Giao đúng giờ và thời gian chờ
 
+> **Kết quả sau module 3 (03/10/2026): không xây mô hình dự báo trễ.** Tỷ lệ đúng giờ theo tài xế, khách hàng, tuyến và xe không lặp lại từ 2022–23 sang 2024 (tương quan 0,01–0,09), và trễ không lan từ lúc lấy sang lúc giao (−0,003). Không có tín hiệu lặp lại thì mô hình không hơn tung đồng xu (AUC ≈ 0,5). Phương pháp dưới đây được giữ làm kế hoạch cho khi đã thu thập mã lý do trễ (`docs/04-data-process-improvements`, dòng 4).
+
 **Lý thuyết**
 - **OTIF** (On-Time In-Full) là thước đo chuẩn của bán lẻ cho độ tin cậy giao hàng.
 - **Phân tích nguyên nhân gốc:** trễ do kho (thời gian chờ ở cửa nhận hàng), do tuyến (quãng
@@ -288,6 +290,8 @@ tắc "hỏi trước khi thêm thư viện" trong spec.
 
 ## 6. Lĩnh vực 3: Hiệu quả nhiên liệu
 
+> **Kết quả sau module 3:** MPG theo tài xế và xe không lặp lại qua các năm (tương quan 0,003 và −0,068; chênh 6,37–6,54), nên không đưa ra tiết kiệm từ MPG. Đòn bẩy nhiên liệu có tín hiệu là **phụ phí nhiên liệu**: đơn giá cố định theo tuyến (0,15–0,34 USD/dặm) trong khi chi phí nhiên liệu/dặm như nhau ở mọi tuyến. Xem `docs/05-evaluation` §3.
+
 **Lý thuyết**
 - **Benchmarking nội bộ:** so mỗi xe và tài xế với chính đội xe của mình.
 - **Thống kê bền vững** (robust statistics): dùng trung vị và **MAD** (độ lệch tuyệt đối trung
@@ -316,6 +320,8 @@ cách tránh **nghịch lý Simpson**: xu hướng chung có thể ngược vớ
 ---
 
 ## 7. Lĩnh vực 4: Mức sử dụng đội xe và bảo dưỡng
+
+> **Đã triển khai ở module 3** với **p99** của nhu cầu mỗi ngày thay vì p90: đội xe đã dư công suất nên chọn phân vị cao tốn rất ít mà tránh thiếu xe. Kết quả: cần 80 xe khi sản lượng không đổi, so với 120 xe đang sở hữu. Xem `docs/05-evaluation` §2.
 
 **Lý thuyết**
 - **Mức sử dụng tài sản:** xe đứng yên vẫn tốn khấu hao, bảo hiểm và chỗ đỗ.

@@ -1,7 +1,7 @@
 # Project Summary: Logistics Ops Optimizer
 
 > Vietnamese: [SUMMARY.vi.md](SUMMARY.vi.md) · Updated at the end of each module · **Last updated:**
-> 2026-10-03, after module 2 · **Rule:** verified facts only; details and evidence are in each review
+> 2026-10-03, after module 3 · **Rule:** verified facts only; details and evidence are in each review
 > under `docs/reviews/`.
 
 ## 1. What the project is
@@ -21,7 +21,7 @@ customers, 58 lanes.
 | — | Business understanding | 1 | ✅ | `docs/01-business-understanding` |
 | 1 | `data-platform` | 2, 3 | ✅ 47 tests | [01-data-platform.md](reviews/01-data-platform.md) |
 | 2 | `metrics` | 3 | ✅ 29 tests | [02-metrics.md](reviews/02-metrics.md) |
-| 3 | `optimize` | 4, 5 | ⏳ | |
+| 3 | `optimize` | 4, 5 | ✅ 23 tests | [03-optimize.md](reviews/03-optimize.md) |
 | 4 | `insights` | 6 | ⏳ | |
 | 5 | `dashboard` | 6 | ⏳ | |
 | 6 | `reports` | 6 | ⏳ | |
@@ -54,20 +54,31 @@ customers, 58 lanes.
 
 | Product | Command / file |
 |---|---|
-| A checked warehouse, rebuilt with one command | `logops build` (about 7 s) |
+| A checked warehouse, rebuilt with one command | `logops build` (about 8 s) |
 | 69 data-quality rules, EN/VI report | `docs/02-data-quality-report` |
 | 3 base views + 21 SCOR KPIs | `logops kpi --by …`, `docs/03-kpi-definitions` |
+| Fleet size, lane profitability, recommendations | `logops optimize --growth …`, `docs/05-evaluation` |
+| Data gaps → process improvements | `docs/04-data-process-improvements` |
 | Method, threshold and data-model documentation | `docs/00-analytical-approach`, `docs/02-*` |
 
-## 6. Levers for the `optimize` module
+## 6. Optimization results (module 3)
 
-| Lever | Signal in the data? |
-|---|---|
-| Fleet size (28 unused trucks) | ✅ $1.40M maintenance; volume nearly flat (+1.3%) |
-| Lane profitability | ✅ Margins from 50.4% to 72.7% across lanes |
-| On-time delivery | ✅ 44.6%; to be examined with the delay-risk model |
-| MPG by truck/driver | Not yet checked |
-| Idling; fuel price by location | ❌ No signal: no savings claimed |
+**Against the target of $1.04M per year:**
+
+| Type | Per year | % of target |
+|---|---:|---:|
+| **Measured saving**: dispose of the 28 trucks that never ran (13 `Inactive`, 15 `Maintenance`) | $0.47M | 45% |
+| Upper bound: standardized fuel surcharge (0.96) + linehaul repricing capped at 5% (1.50) + review of the 12 lowest-mileage trucks (0.19) | $2.65M | 255% |
+
+- **Fleet:** 80 trucks needed at flat volume, 96 at +20% growth; 120 owned.
+- **Lanes:** 58 lanes in 4 groups. No lane loses money on measured cost; the weakest loses money if
+  driver cost exceeds $0.857/mile. The fuel surcharge is a fixed rate per lane ($0.15–0.34/mile), not
+  tied to the fuel price.
+- **Data:** $7.24M/year of fuel purchases not reconciled with consumption (unexplained, not proven
+  loss). Telematics for 92 trucks: $25–65K/year, paying for itself if it prevents 0.2% of fuel spend.
+- **Checked and rejected, with evidence:** delay-risk model (AUC criterion withdrawn), MPG by
+  driver/truck, idling, fuel price by location, customer profitability, replacing old trucks. Also
+  dropped by the project owner: bottlenecks, consolidation, detention billing.
 
 ## 7. Project owner's decisions
 

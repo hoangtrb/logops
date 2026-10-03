@@ -41,6 +41,8 @@ Build order: `data-platform` → `metrics` → `optimize` → `insights` → `da
 
 *Stretch (only if time allows):* an LP-based truck/driver-to-load assignment demo (OR-Tools).
 
+**Update after module 3 (2026-10-03):** only levers whose signal persists across years got a dollar figure. Built: **fleet size** (area 4) and **lane profitability + fuel surcharge** (area 1). Not built, with evidence in `docs/05-evaluation` §4: the delay-risk model (area 2), MPG and idling (area 3), and the LP stretch (the fleet already has spare capacity). Added: **data gaps → process improvements** (`docs/04-data-process-improvements`).
+
 ## Report types (`reports`)
 
 Executive Summary · Cost & Lanes · Delivery Performance · Fuel · Fleet & Maintenance · Safety & Drivers
