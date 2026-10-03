@@ -70,8 +70,10 @@ def test_rebuild_replaces_tables(csv_dir, tmp_path):
 
 
 def test_cli_build_writes_warehouse(csv_dir, tmp_path, monkeypatch):
-    # The DQ report needs all 14 tables; this fixture has only routes.
+    # The DQ report, KPI views and KPI docs need all 14 tables; this fixture has only routes.
     monkeypatch.setattr(cli, "write_report", lambda *_: [])
+    monkeypatch.setattr(cli, "create_views", lambda *_: None)
+    monkeypatch.setattr(cli, "write_kpi_docs", lambda *_: [])
     monkeypatch.setattr(cli, "TABLES", {"routes": ROUTES})  # fixture dir holds only routes.csv
     monkeypatch.setattr(config, "DATASET_DIR", csv_dir)
     monkeypatch.setattr(config, "PARQUET_DIR", tmp_path / "parquet")

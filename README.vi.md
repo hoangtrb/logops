@@ -1,7 +1,7 @@
 # Logistics Ops Optimizer
 
 > Bản tiếng Anh: [README.md](README.md) · Các module: [CAPABILITY-MAP.vi.md](CAPABILITY-MAP.vi.md) · Lộ trình: [tasks/roadmap.vi.md](tasks/roadmap.vi.md)
-> Tiến độ: [docs/00-project-journal.vi.md](docs/00-project-journal.vi.md) · Phương pháp: [docs/00-analytical-approach.vi.md](docs/00-analytical-approach.vi.md)
+> **Tổng kết: [docs/SUMMARY.vi.md](docs/SUMMARY.vi.md)** · Tiến độ: [docs/00-project-journal.vi.md](docs/00-project-journal.vi.md) · Phương pháp: [docs/00-analytical-approach.vi.md](docs/00-analytical-approach.vi.md)
 
 Biến dữ liệu đội xe thô thành các quyết định tiết kiệm chi phí cho mạng lưới phân phối: chi phí
 phục vụ, giao hàng đúng giờ, hiệu quả nhiên liệu và mức sử dụng đội xe, trình bày trên dashboard

@@ -1,5 +1,6 @@
 """`logops` command-line entry point."""
 
+import datetime as dt
 import time
 
 import duckdb
@@ -12,6 +13,9 @@ from logops.data_platform.ingest import IngestError, ingest_table
 from logops.data_platform.quality import all_rules, run_quality
 from logops.data_platform.schema import TABLES
 from logops.data_platform.warehouse import load_warehouse
+from logops.metrics.kpi_doc import write_kpi_docs
+from logops.metrics.kpis import CATALOG, DIMENSIONS, kpi
+from logops.metrics.views import create_views
 
 app = typer.Typer(help="Logistics Ops Optimizer: fleet data to cost-saving decisions.")
 
@@ -42,7 +46,10 @@ def build() -> None:
         )
         raise typer.Exit(1) from e
     run_quality(config.WAREHOUSE_PATH, TABLES.values(), all_rules(TABLES.values()))
+    with duckdb.connect(str(config.WAREHOUSE_PATH)) as con:
+        create_views(con)
     reports = write_report(config.WAREHOUSE_PATH, TABLES.values(), config.DOCS_DIR)
+    reports += write_kpi_docs(config.WAREHOUSE_PATH, config.DOCS_DIR)
 
     with duckdb.connect(str(config.WAREHOUSE_PATH), read_only=True) as con:
         for name in TABLES:
@@ -66,3 +73,41 @@ def docs() -> None:
     """Regenerate docs/02-data-model (EN + VI): ER diagram and data dictionary from schema.py."""
     for path in write_docs(TABLES.values(), config.DOCS_DIR):
         typer.echo(f"Wrote {path.relative_to(config.REPO_ROOT)}")
+
+
+DEFAULT_KPIS = "revenue,cost_per_mile,contribution_margin_pct,mpg,on_time_pct,avg_detention_min"
+
+
+@app.command(name="kpi")
+def kpi_command(
+    by: str = typer.Option(None, help=f"Group by: {', '.join(DIMENSIONS)}"),
+    date_from: str = typer.Option("2022-01-01", "--from", help="First dispatch date (YYYY-MM-DD)"),
+    date_to: str = typer.Option("2025-12-31", "--to", help="Last dispatch date (YYYY-MM-DD)"),
+    window: float = typer.Option(120, help="On-time window in minutes (120 = on_time_flag)"),
+    kpis: str = typer.Option(DEFAULT_KPIS, help="Comma-separated KPI names, or 'all'"),
+) -> None:
+    """Print KPIs for the fleet, or per group, from the warehouse built by `logops build`."""
+    names = [k.name for k in CATALOG] if kpis == "all" else kpis.split(",")
+    unknown = set(names) - {k.name for k in CATALOG}
+    if unknown or (by is not None and by not in DIMENSIONS):
+        typer.secho(
+            f"Unknown KPI(s) {sorted(unknown)} or --by {by!r}. "
+            f"KPIs: {', '.join(k.name for k in CATALOG)}. --by: {', '.join(DIMENSIONS)}",
+            fg=typer.colors.RED,
+            err=True,
+        )
+        raise typer.Exit(1)
+    with duckdb.connect(str(config.WAREHOUSE_PATH), read_only=True) as con:
+        table = kpi(
+            con,
+            dt.date.fromisoformat(date_from),
+            dt.date.fromisoformat(date_to),
+            by=by,
+            on_time_window_min=window,
+        )
+    shown = table.select(["group", *names])
+    header = f"{'group':<28}" + "".join(f"{n[:22]:>24}" for n in names)
+    typer.echo(header)
+    for row in shown.iter_rows():
+        cells = "".join(f"{'—' if v is None else f'{v:,.2f}':>24}" for v in row[1:])
+        typer.echo(f"{str(row[0])[:28]:<28}{cells}")

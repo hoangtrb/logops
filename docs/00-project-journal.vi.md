@@ -1,7 +1,7 @@
 # 00 · Nhật ký dự án
 
 > Bản tiếng Anh: [00-project-journal.md](00-project-journal.md) · Cơ sở phân tích: [00-analytical-approach.vi.md](00-analytical-approach.vi.md)
-> **Cập nhật lần cuối:** Thứ 6 02/10/2026, sau Việc 9: module `data-platform` hoàn tất.
+> **Cập nhật lần cuối:** Thứ 7 03/10/2026, sau module 2 `metrics`. Tổng kết ngắn gọn: [SUMMARY.vi.md](SUMMARY.vi.md).
 
 **Cách dùng file này**
 - Lần đầu đọc: đọc §1 → §4 để nắm dự án là gì, thư mục có gì, làm theo quy trình nào, đang ở đâu.
@@ -33,7 +33,8 @@ trên dashboard và báo cáo PDF/HTML xuất bằng một bước.
 logistics-ops/
 ├── README.md / .vi.md              Giới thiệu + 3 bước cài đặt
 ├── CAPABILITY-MAP.md / .vi.md      6 module, 4 lĩnh vực tối ưu, 6 loại báo cáo, ánh xạ CRISP-DM
-├── SPEC-data-platform.md / .vi.md  Đặc tả module 1 (spec của các module sau sẽ nằm cạnh)
+├── SPEC-data-platform.md / .vi.md  Đặc tả module 1
+├── SPEC-metrics.md / .vi.md        Đặc tả module 2: định nghĩa output trước khi code
 ├── pyproject.toml, uv.lock         Khai báo thư viện (uv quản lý)
 ├── docs/
 │   ├── 00-project-journal.*        ← file này: nhật ký tiến độ
@@ -42,13 +43,16 @@ logistics-ops/
 │   ├── 02-data-model.*             (tự sinh) sơ đồ quan hệ ER + từ điển dữ liệu, từ schema.py
 │   ├── 02-data-quality-report.*    (tự sinh) báo cáo chất lượng dữ liệu + số liệu nền
 │   ├── 02-dq-rule-thresholds.*     Các con số trong quy tắc và test: vì sao, nguồn
-│   └── 02-data-understanding.*     CRISP-DM pha 2: phân tích dữ liệu, điểm nói khi phỏng vấn
+│   ├── 02-data-understanding.*     CRISP-DM pha 2: phân tích dữ liệu, điểm nói khi phỏng vấn
+│   ├── 03-kpi-definitions.*        (tự sinh) 21 KPI: công thức, đơn vị, giá trị đội xe
+│   ├── reviews/NN-<module>.*       Đánh giá cuối mỗi module: output, số liệu thật, điều chưa làm
+│   └── SUMMARY.*                   Tổng kết toàn dự án, cập nhật cuối mỗi module
 ├── tasks/
 │   ├── roadmap.md / .vi.md         Lịch 3 ngày cho cả 6 module
 │   ├── plan.md / .vi.md            Kế hoạch module đang làm (hiện là data-platform)
 │   └── todo.md / .vi.md            Danh sách việc; todo.md (tiếng Anh) là nguồn chuẩn để đánh dấu
 ├── src/logops/
-│   ├── cli.py                      Lệnh `logops build` và `logops docs`
+│   ├── cli.py                      Lệnh `logops build`, `logops docs`, `logops kpi`
 │   ├── config.py                   Mọi đường dẫn, tính từ thư mục gốc repo
 │   └── data_platform/
 │       ├── schema.py               Kiểu cột, khóa chính, khóa ngoại của 14 bảng (nguồn chuẩn duy nhất)
@@ -57,10 +61,15 @@ logistics-ops/
 │       ├── quality.py              Quy tắc chất lượng dữ liệu → cột `dq_issues` + bảng `dq_findings`
 │       ├── data_model_doc.py       Sinh `docs/02-data-model` từ schema.py
 │       └── dq_report.py            Sinh `docs/02-data-quality-report` từ kho dữ liệu
+│   └── metrics/
+│       ├── views.py                3 view nền: trip_economics, delivery_performance, truck_economics
+│       ├── kpis.py                 Danh mục 21 KPI + hàm kpi()
+│       └── kpi_doc.py              Sinh `docs/03-kpi-definitions`
 ├── tests/
 │   ├── fixtures/                   CSV nhỏ tự tạo, có lỗi cố ý để test
 │   ├── test_smoke.py               CLI và đường dẫn
-│   └── data_platform/              Test nạp dữ liệu, lược đồ, và test tích hợp trên dữ liệu thật
+│   ├── data_platform/              Test nạp dữ liệu, lược đồ, và test tích hợp trên dữ liệu thật
+│   └── metrics/                    Kho mẫu tính tay được + test tích hợp đối chiếu số thật
 ├── dataset/          (không commit) 14 file CSV gốc từ Kaggle, chỉ đọc
 └── data/             (không commit) Sản phẩm sinh ra: parquet/ và warehouse.duckdb
 ```
@@ -88,7 +97,7 @@ logistics-ops/
 |---|---|---|---|---|
 | — | Hiểu nghiệp vụ (`docs/01`) | 1 | T5 01/10 | ✅ Xong |
 | 1 | `data-platform` | 2, 3 | T6 02/10 | ✅ Xong (7 việc; Việc 6 và 8 đã cắt). Chờ rà soát Checkpoint C |
-| 2 | `metrics` | 3 | Sáng T7 03/10 | ⏳ Chưa bắt đầu |
+| 2 | `metrics` | 3 | Sáng T7 03/10 | ✅ Xong (29 test). Chờ bạn rà soát và commit |
 | 3 | `optimize` | 4, 5 | Chiều T7 03/10 | ⏳ |
 | 4 | `insights` | 6 | Sáng CN 04/10 | ⏳ |
 | 5 | `dashboard` | 6 | Sáng CN 04/10 | ⏳ |
@@ -259,31 +268,32 @@ Tiến độ module 1: █████████ hoàn tất (7 việc xong, 2
 - **Kết quả:** chủ dự án đã đóng DBeaver và chạy build; chạy lại sau thay đổi mất 8,0 giây, 47 test
   xanh. Báo cáo DQ chỉ đổi đúng 3 dòng liên quan.
 
+### T7 03/10 · Module 2 `metrics` ✅
+- **Spec trước:** `SPEC-metrics` định nghĩa output (3 view, 21 KPI, lệnh, tài liệu), danh sách *không
+  làm*, và tiêu chí thành công. Đã được duyệt trước khi code.
+- **Đã làm:** `views.py` (3 view nền, phân bổ chi phí nhiên liệu theo gallon tiêu thụ trong tháng,
+  bảo dưỡng theo dặm xe-tháng); `kpis.py` (21 KPI, nhóm theo 7 chiều, lọc ngày, dòng "Không gán
+  được"); lệnh `logops kpi`; `docs/03-kpi-definitions` tự sinh.
+- **Kết quả:** 6/6 tiêu chí thành công đạt. Tổng khớp bảng gốc; 76 test qua; build 6,6–7,4 giây.
+- **Phát hiện:** 28/120 xe không chạy chuyến nào (1,40 triệu USD bảo dưỡng); gallon mua nhiều hơn
+  tiêu thụ 29% ở mọi xe; sản lượng gần như không đổi (+1,3%); biên tuyến 50,4–72,7%.
+- **Vấn đề:** dấu `|` trong công thức làm vỡ bảng (đã escape); test CLI cũ của module 1 cần tắt các
+  bước cần đủ 14 bảng.
+- **Đánh giá:** [reviews/02-metrics.vi.md](reviews/02-metrics.vi.md); module 1:
+  [reviews/01-data-platform.vi.md](reviews/01-data-platform.vi.md).
+
 ## 6. Đang làm
 
-**Checkpoint C: module 1 hoàn tất.** Kho dữ liệu đã được dựng lại với đủ 69 quy tắc; câu hỏi tuổi
-tuyển dụng đã khép lại (đã bỏ quy tắc). Còn lại: rà soát theo danh sách dưới đây rồi commit.
-
-### Danh sách rà soát (lưu 03/10, để bạn kiểm tra ngày 04/10)
-
-Mọi thay đổi từ Việc 5 đến Việc 9 **đã stage, chưa commit**. Kiểm tra theo thứ tự dưới đây, rồi commit.
-
-- [ ] **`docs/02-data-understanding.vi.md`**: đọc trước tiên. Bảng mức tin cậy (§3), định nghĩa
-      `on_time_flag` (§4) và 4 điểm nói khi phỏng vấn (§7) có thuyết phục không?
-- [ ] **`docs/02-dq-rule-thresholds.vi.md`**: mỗi ngưỡng có lý do và nguồn. §6 đối chiếu từng con số
-      với dòng code. Xem kỹ: danh sách quy tắc *chưa có test riêng* (§5).
-- [ ] **`docs/02-data-quality-report.vi.md`** (tự sinh): số liệu nền ở §2 có hợp lý không?
-- [ ] **`docs/01-business-understanding.vi.md`** §3 và §5: mục tiêu ≥ 3,1 triệu USD / 3 năm.
-- [ ] **`docs/00-analytical-approach.vi.md`** §5–§6: dùng `location_city`; đã bỏ đòn bẩy giá nhiên liệu.
-- [ ] **Code:** `src/logops/data_platform/quality.py` (19 quy tắc giá trị) và `dq_report.py`.
-- [x] ~~Đóng DBeaver và build~~ (đã làm 03/10). **Chạy lại khi rà soát:** `python -m uv run logops build` → `python -m uv run pytest`
-      (kỳ vọng 47 test qua) → `git status` (báo cáo DQ không đổi).
-- [ ] **Commit + push** (message gợi ý trong cuộc trò chuyện ngày 03/10, hoặc tự viết).
+**Module 2 xong, chờ bạn rà soát rồi commit.** Đọc theo thứ tự:
+1. [SUMMARY.vi.md](SUMMARY.vi.md): toàn cảnh dự án trên một trang.
+2. [reviews/02-metrics.vi.md](reviews/02-metrics.vi.md): output so với spec, KPI đội xe, phát hiện mới.
+3. [03-kpi-definitions.vi.md](03-kpi-definitions.vi.md): công thức của 21 KPI.
+4. Thử: `python -m uv run logops kpi --by route --kpis all`.
 
 ## 7. Sẽ làm
 
-**Module 2 `metrics`** (view KPI bằng SQL): spec → plan → build, áp dụng các điều chỉnh trong
-`docs/02-data-understanding` §5.
+**Module 3 `optimize`**: spec định nghĩa output trước, rồi build. Đầu vào là các mục ở
+`reviews/02-metrics` §6: quy mô đội xe (28 xe không chạy), lợi nhuận tuyến, mô hình dự báo trễ, MPG.
 
 **Các module sau** (chi tiết trong [roadmap.vi.md](../tasks/roadmap.vi.md)):
 - **Thứ 7:** `metrics` (view KPI bằng SQL) → `optimize` (4 engine khuyến nghị, mỗi engine có $ tiết kiệm).

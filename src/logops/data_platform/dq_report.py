@@ -340,7 +340,7 @@ def collect(con: duckdb.DuckDBPyConnection, tables: Iterable[TableSchema]) -> di
 
 def render(data: dict, lang: str) -> str:
     t = LABELS[lang]
-    f = _Formatter(lang)
+    f = NumberFormatter(lang)
     total_rows = sum(data["rows"].values())
     with_violations = [x for x in data["findings"] if x[4] > 0]
     period = (
@@ -418,21 +418,21 @@ def _cell(text: str) -> str:
     return text.replace("|", r"\|")
 
 
-class _Formatter:
+class NumberFormatter:
     """EN: 1,234.5 · VI: 1.234,5."""
 
     def __init__(self, lang: str) -> None:
         self.lang = lang
 
-    def _num(self, x: float, decimals: int) -> str:
+    def num(self, x: float, decimals: int) -> str:
         s = f"{x:,.{decimals}f}"
         return s if self.lang == "en" else s.translate(str.maketrans(",.", ".,"))
 
     def int(self, x: float) -> str:
-        return self._num(round(x), 0)
+        return self.num(round(x), 0)
 
     def pct(self, x: float) -> str:
-        return f"{self._num(100 * x, 1)}%"
+        return f"{self.num(100 * x, 1)}%"
 
     def value(self, x, kind: str) -> str:
         if x is None:
@@ -440,12 +440,12 @@ class _Formatter:
         if kind == "date":
             return x.isoformat()
         if kind == "usd_m":
-            m = self._num(x / 1e6, 2)
+            m = self.num(x / 1e6, 2)
             return f"${m}M" if self.lang == "en" else f"{m} triệu USD"
         if kind == "usd":
-            return f"${self._num(x, 3)}" if self.lang == "en" else f"{self._num(x, 3)} USD"
+            return f"${self.num(x, 3)}" if self.lang == "en" else f"{self.num(x, 3)} USD"
         if kind == "num2":
-            return self._num(x, 2)
+            return self.num(x, 2)
         if kind == "pct":
             return self.pct(x)
         return self.int(x)

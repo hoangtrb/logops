@@ -1,7 +1,7 @@
 # 00 · Project Journal
 
 > Vietnamese: [00-project-journal.vi.md](00-project-journal.vi.md) · Analytical approach: [00-analytical-approach.md](00-analytical-approach.md)
-> **Last updated:** Fri 2026-10-02, after Task 9: module `data-platform` complete.
+> **Last updated:** Sat 2026-10-03, after module 2 `metrics`. One-page overview: [SUMMARY.md](SUMMARY.md).
 
 **How to use this file**
 - First read: §1–§4 explain what the project is, what's in the folder, which workflow it
@@ -36,7 +36,8 @@ shown in a dashboard and in PDF/HTML reports exported in one step.
 logistics-ops/
 ├── README.md / .vi.md              Intro + 3 setup steps
 ├── CAPABILITY-MAP.md / .vi.md      6 modules, 4 focus areas, 6 report types, CRISP-DM mapping
-├── SPEC-data-platform.md / .vi.md  Spec for module 1 (later module specs sit alongside)
+├── SPEC-data-platform.md / .vi.md  Spec for module 1
+├── SPEC-metrics.md / .vi.md        Spec for module 2: outputs defined before coding
 ├── pyproject.toml, uv.lock         Dependencies (managed by uv)
 ├── docs/
 │   ├── 00-project-journal.*        ← this file: progress log
@@ -45,13 +46,16 @@ logistics-ops/
 │   ├── 02-data-model.*             (generated) ER diagram + data dictionary, from schema.py
 │   ├── 02-data-quality-report.*    (generated) data-quality report + baselines
 │   ├── 02-dq-rule-thresholds.*     The numbers in the rules and tests: why, and their sources
-│   └── 02-data-understanding.*     CRISP-DM phase 2: data analysis, interview talking points
+│   ├── 02-data-understanding.*     CRISP-DM phase 2: data analysis, interview talking points
+│   ├── 03-kpi-definitions.*        (generated) 21 KPIs: formula, unit, fleet value
+│   ├── reviews/NN-<module>.*       End-of-module review: outputs, real figures, what wasn't done
+│   └── SUMMARY.*                   Project-wide summary, updated at the end of each module
 ├── tasks/
 │   ├── roadmap.md / .vi.md         3-day schedule for all 6 modules
 │   ├── plan.md / .vi.md            Plan for the current module (data-platform)
 │   └── todo.md / .vi.md            Task list; todo.md (English) is the source of truth for checkboxes
 ├── src/logops/
-│   ├── cli.py                      `logops build` and `logops docs` commands
+│   ├── cli.py                      `logops build`, `logops docs`, `logops kpi` commands
 │   ├── config.py                   All paths, resolved from the repo root
 │   └── data_platform/
 │       ├── schema.py               Column types, primary and foreign keys of the 14 tables (single source of truth)
@@ -60,10 +64,15 @@ logistics-ops/
 │       ├── quality.py              Data-quality rules → `dq_issues` column + `dq_findings` table
 │       ├── data_model_doc.py       Generates `docs/02-data-model` from schema.py
 │       └── dq_report.py            Generates `docs/02-data-quality-report` from the warehouse
+│   └── metrics/
+│       ├── views.py                3 base views: trip_economics, delivery_performance, truck_economics
+│       ├── kpis.py                 The 21-KPI catalog + kpi()
+│       └── kpi_doc.py              Generates `docs/03-kpi-definitions`
 ├── tests/
 │   ├── fixtures/                   Tiny hand-made CSVs with deliberate defects
 │   ├── test_smoke.py               CLI and paths
-│   └── data_platform/              Ingest, schema, and integration tests on the real data
+│   ├── data_platform/              Ingest, schema, and integration tests on the real data
+│   └── metrics/                    Hand-computable fixture warehouse + real-data reconciliation tests
 ├── dataset/          (not committed) 14 raw Kaggle CSVs, read-only
 └── data/             (not committed) Generated: parquet/ and warehouse.duckdb
 ```
@@ -91,7 +100,7 @@ logistics-ops/
 |---|---|---|---|---|
 | — | Business understanding (`docs/01`) | 1 | Thu 10-01 | ✅ Done |
 | 1 | `data-platform` | 2, 3 | Fri 10-02 | ✅ Done (7 tasks; Tasks 6 and 8 cut). Awaiting Checkpoint C review |
-| 2 | `metrics` | 3 | Sat 10-03 AM | ⏳ Not started |
+| 2 | `metrics` | 3 | Sat 10-03 AM | ✅ Done (29 tests). Awaiting your review and commit |
 | 3 | `optimize` | 4, 5 | Sat 10-03 PM | ⏳ |
 | 4 | `insights` | 6 | Sun 10-04 AM | ⏳ |
 | 5 | `dashboard` | 6 | Sun 10-04 AM | ⏳ |
@@ -268,31 +277,34 @@ Module 1 progress: █████████ complete (7 tasks done, 2 cut wit
 - **Result:** the project owner disconnected DBeaver and ran the build; the re-run after the change
   takes 8.0 s, 47 tests green. The DQ report changed in exactly the 3 related lines.
 
+### Sat 10-03 · Module 2 `metrics` ✅
+- **Spec first:** `SPEC-metrics` defines the outputs (3 views, 21 KPIs, a command, docs), an
+  out-of-scope list and success criteria. Approved before coding.
+- **Done:** `views.py` (3 base views; fuel allocated by gallons burned within the month,
+  maintenance by truck-month miles); `kpis.py` (21 KPIs, 7 groupings, date filter, "Unattributed"
+  line); the `logops kpi` command; the generated `docs/03-kpi-definitions`.
+- **Result:** all 6 success criteria met. Totals match the source tables; 76 tests pass; build
+  6.6–7.4 s.
+- **Findings:** 28 of 120 trucks ran no trip ($1.40M maintenance); 29% more gallons bought than
+  burned, on every truck; volume nearly flat (+1.3%); lane margins 50.4–72.7%.
+- **Problems:** `|` in a formula broke a table (now escaped); module 1's old CLI test had to stub
+  the steps that need all 14 tables.
+- **Reviews:** [reviews/02-metrics.md](reviews/02-metrics.md); module 1:
+  [reviews/01-data-platform.md](reviews/01-data-platform.md).
+
 ## 6. In progress
 
-**Checkpoint C: module 1 complete.** The warehouse has been rebuilt with all 69 rules; the hiring-age
-question is closed (rule removed). What's left: review using the checklist below, then commit.
-
-### Review checklist (saved 10-03, for you to check on 10-04)
-
-All changes from Task 5 to Task 9 are **staged, not committed**. Check them in this order, then commit.
-
-- [ ] **`docs/02-data-understanding.md`**: read first. Are the trust table (§3), the `on_time_flag`
-      definition (§4) and the 4 interview talking points (§7) convincing?
-- [ ] **`docs/02-dq-rule-thresholds.md`**: each threshold with its reason and source. §6 maps every
-      number to its line of code. Look closely at the rules *without their own test* (§5).
-- [ ] **`docs/02-data-quality-report.md`** (generated): do the §2 baselines look reasonable?
-- [ ] **`docs/01-business-understanding.md`** §3 and §5: target ≥ $3.1M over 3 years.
-- [ ] **`docs/00-analytical-approach.md`** §5–§6: `location_city` used; fuel-price lever dropped.
-- [ ] **Code:** `src/logops/data_platform/quality.py` (19 value rules) and `dq_report.py`.
-- [x] ~~Disconnect DBeaver and build~~ (done 10-03). **Re-run while reviewing:** `python -m uv run logops build` → `python -m uv run pytest`
-      (expect 47 passing) → `git status` (the DQ report should be unchanged).
-- [ ] **Commit + push** (message suggested in the 10-03 conversation, or write your own).
+**Module 2 is done and awaits your review, then a commit.** Read in this order:
+1. [SUMMARY.md](SUMMARY.md): the whole project on one page.
+2. [reviews/02-metrics.md](reviews/02-metrics.md): outputs vs the spec, fleet KPIs, new findings.
+3. [03-kpi-definitions.md](03-kpi-definitions.md): the formulas of the 21 KPIs.
+4. Try: `python -m uv run logops kpi --by route --kpis all`.
 
 ## 7. Next
 
-**Module 2 `metrics`** (SQL KPI views): spec → plan → build, applying the adjustments in
-`docs/02-data-understanding` §5.
+**Module 3 `optimize`**: a spec defining the outputs first, then the build. Inputs are the items
+in `reviews/02-metrics` §6: fleet size (28 unused trucks), lane profitability, the delay-risk model,
+MPG.
 
 **Later modules** (details in [roadmap.md](../tasks/roadmap.md)):
 - **Saturday:** `metrics` (SQL KPI views) → `optimize` (4 recommendation engines, each with $ savings).
