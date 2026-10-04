@@ -17,10 +17,10 @@ much does it save?"*, not just *"what happened?"*
 | `data-platform` | CSV → validated Parquet → DuckDB warehouse; data-quality report | — |
 | `metrics` | KPI layer (SQL views): cost/mile, on-time %, detention, MPG, idle, utilization, maintenance & safety cost | data-platform |
 | `analysis` | Profit, fuel, fleet-capacity and network analyses with rule-based commentary (added 2026-10-03) | metrics |
-| `optimize` | Recommendation engines for the 4 focus areas below, each with an estimated savings figure | metrics, analysis |
+| `optimize` | Fleet size, lane pricing, late-delivery check, data-process improvements; recommendations table and dashboard page, measured vs upper bound (built 2026-10-04) | metrics, analysis |
 | `insights` | Claude API: written summary of KPIs and anomalies per report; questions in plain English → SQL | metrics, optimize |
 | `dashboard` | Streamlit + Plotly: 8 pages with commentary next to each chart, VI/EN toggle, responsive (built 2026-10-03); recommendations page and report-export button come with `optimize` and `reports` | metrics, analysis |
-| `reports` | User picks a **report type** and a date range → PDF or self-contained HTML in one step (CLI or dashboard button) | metrics, optimize, insights |
+| `reports` | One report with every dashboard page as a tab × date range × VI/EN → self-contained responsive HTML or paged PDF with footer, from the CLI or the dashboard (built 2026-10-04) | analysis, optimize, dashboard |
 
 Build order (revised 2026-10-03): `data-platform` → `metrics` → `analysis` → `dashboard` → `optimize` → `reports`. The rule-based commentary in `analysis` covers what `insights` was for; a Claude layer is optional.
 
@@ -44,8 +44,9 @@ Build order (revised 2026-10-03): `data-platform` → `metrics` → `analysis` �
 
 ## Report types (`reports`)
 
-Executive Summary · Cost & Lanes · Delivery Performance · Fuel · Fleet & Maintenance · Safety & Drivers
-Each one: date-range filter, KPIs + charts + recommendations + Claude narrative → PDF or HTML.
+Built (2026-10-04): one "Transport management report" with every dashboard page as a tab
+(overview first), for a date range and a language → responsive HTML or PDF (one sheet per page,
+footer with name, export date, page number). Safety & drivers dropped (out of scope).
 
 ## CRISP-DM framing
 

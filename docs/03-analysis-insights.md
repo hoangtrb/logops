@@ -189,8 +189,8 @@ Over the whole period: 95% of days ≤ 73 trucks, 99% ≤ 75, busiest day 80. 92
 
 | City | Loads out | Loads in | Net | Imbalance |
 |---|---:|---:|---:|---:|
-| Los Angeles | 0 | 8,948 | -8,948 | 200.0% |
 | Indianapolis | 0 | 5,810 | -5,810 | 200.0% |
+| Los Angeles | 0 | 8,948 | -8,948 | 200.0% |
 | Phoenix | 4,456 | 0 | 4,456 | 200.0% |
 | Chicago | 5,894 | 1,456 | 4,438 | 120.8% |
 | Las Vegas | 5,865 | 1,479 | 4,386 | 119.4% |

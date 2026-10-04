@@ -21,10 +21,10 @@ chuyện gì?"*
 | `data-platform` | CSV → Parquet đã kiểm tra → kho dữ liệu DuckDB; báo cáo chất lượng dữ liệu | — |
 | `metrics` | Lớp KPI (SQL view): chi phí/dặm, % đúng giờ, thời gian chờ tại kho, MPG, thời gian nổ máy chờ, hiệu suất sử dụng, chi phí bảo dưỡng và an toàn | data-platform |
 | `analysis` | Phân tích lợi nhuận, nhiên liệu, năng lực đội xe, mạng lưới, kèm nhận xét theo quy tắc (thêm ngày 03/10/2026) | metrics |
-| `optimize` | Các bộ máy khuyến nghị cho 4 lĩnh vực trọng tâm bên dưới, mỗi khuyến nghị kèm số tiền tiết kiệm ước tính | metrics, analysis |
+| `optimize` | Quy mô đội xe, giá cước tuyến, kiểm tra giao trễ, cải tiến quy trình dữ liệu; bảng khuyến nghị và trang dashboard, tách tiết kiệm đo được với mức trần (xong 04/10/2026) | metrics, analysis |
 | `insights` | Claude API: viết phần nhận định về KPI và điểm bất thường cho từng báo cáo; đặt câu hỏi bằng ngôn ngữ tự nhiên → SQL | metrics, optimize |
 | `dashboard` | Streamlit + Plotly: 8 trang, nhận xét cạnh từng biểu đồ, nút chuyển VI/EN, responsive (xong 03/10/2026); trang khuyến nghị và nút xuất báo cáo thêm khi có `optimize` và `reports` | metrics, analysis |
-| `reports` | Người dùng chọn **loại báo cáo** và khoảng thời gian → ra file PDF hoặc HTML trong một bước (dòng lệnh hoặc nút trên dashboard) | metrics, optimize, insights |
+| `reports` | Một báo cáo gồm mọi trang dashboard dạng tab × khoảng thời gian × VI/EN → HTML tự chứa, responsive hoặc PDF chia trang có chân trang, từ CLI hoặc dashboard (xong 04/10/2026) | analysis, optimize, dashboard |
 
 Thứ tự xây dựng (sửa ngày 03/10/2026): `data-platform` → `metrics` → `analysis` → `dashboard` → `optimize` → `reports`. Phần nhận xét theo quy tắc trong `analysis` đảm nhận vai trò của `insights`; lớp Claude là tùy chọn.
 
@@ -48,8 +48,9 @@ Thứ tự xây dựng (sửa ngày 03/10/2026): `data-platform` → `metrics` �
 
 ## Các loại báo cáo (`reports`)
 
-Tổng quan cho lãnh đạo · Chi phí & Tuyến · Hiệu suất giao hàng · Nhiên liệu · Đội xe & Bảo dưỡng · An toàn & Tài xế
-Mỗi báo cáo: lọc theo khoảng thời gian, gồm KPI + biểu đồ + khuyến nghị + nhận định do Claude viết → PDF hoặc HTML.
+Đã làm (04/10/2026): một "Báo cáo quản lý vận tải" gồm mọi trang dashboard dạng tab (Tổng quan
+mở đầu), theo khoảng thời gian và ngôn ngữ → HTML responsive hoặc PDF (mỗi trang một tờ, chân trang
+có tên, ngày xuất, số trang). Bỏ An toàn & tài xế (ngoài phạm vi).
 
 ## Khung CRISP-DM
 

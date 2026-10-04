@@ -1,6 +1,7 @@
 """Cached access to the analysis layer. The only module that opens the warehouse."""
 
 import datetime as dt
+from concurrent.futures import Future, ThreadPoolExecutor
 
 import duckdb
 import streamlit as st
@@ -12,6 +13,7 @@ from logops.analysis.profit import bridge
 from logops.data_platform.dq_report import collect as dq_collect
 from logops.data_platform.schema import TABLES
 from logops.metrics.kpis import CATALOG, FLEET, kpi
+from logops.optimize.report import collect
 
 
 class WarehouseUnavailable(Exception):
@@ -35,6 +37,11 @@ def _run(fn, *args):
 @st.cache_data(show_spinner=False)
 def bounds() -> tuple[dt.date, dt.date]:
     return _run(service.data_bounds)
+
+
+@st.cache_data(show_spinner=False)
+def dataset_profile() -> dict:
+    return _run(service.dataset_profile)
 
 
 @st.cache_data(show_spinner=False)
@@ -100,6 +107,42 @@ def fleet_productivity(start: dt.date, end: dt.date) -> dict:
 @st.cache_data(show_spinner=False)
 def customer_names() -> dict:
     return _run(service.customer_names)
+
+
+@st.cache_data(show_spinner=False)
+def optimization(growth: float) -> dict:
+    """Recommendations and scenarios over the whole data period (not the sidebar range)."""
+    return _run(collect, growth)
+
+
+PDF_SHARE = 0.85  # of the progress bar spent drawing pages when the PDF print follows
+
+
+def report_file(start: dt.date, end: dt.date, lang: str, fmt: str, progress: list) -> bytes:
+    """The report as bytes; `progress[0]` goes from 0 to 1 while it is made.
+
+    Raises reports.NoBrowserError for PDF without Edge or Chrome.
+    """
+    from logops.reports import build_html, to_pdf  # the report draws with this module's loaders
+
+    share = PDF_SHARE if fmt == "pdf" else 1.0
+
+    def step(x: float) -> None:
+        progress[0] = share * x
+
+    html = build_html(start, end, lang, progress=step, for_print=fmt == "pdf")
+    if fmt == "pdf":
+        html = to_pdf(html)
+    progress[0] = 1.0
+    return html if isinstance(html, bytes) else html.encode("utf-8")
+
+
+_REPORTS = ThreadPoolExecutor(max_workers=2, thread_name_prefix="report")
+
+
+def start_report(start: dt.date, end: dt.date, lang: str, fmt: str, progress: list) -> Future:
+    """Build the report on a worker thread, so the dashboard stays usable while it runs."""
+    return _REPORTS.submit(report_file, start, end, lang, fmt, progress)
 
 
 @st.cache_data(show_spinner=False)

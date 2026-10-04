@@ -379,6 +379,84 @@ Tiến độ module 1: █████████ hoàn tất (7 việc xong, 2
 ### CN 04/10 · Sửa bố cục dashboard ✅
 - Không còn tràn chữ ở 1440/1280/1024/768/390 px (lưới theo vùng nội dung, bảng ngắt dòng, nhãn cột chỉ ghi số); tab giữ lựa chọn; Điểm chính đóng/mở được, có chú thích màu viền; "tr USD"; sửa thứ tự cột bảng KPI. 120 test pass.
 
+### CN 04/10 · Module 5 `optimize` (làm lại) ✅
+- **Phạm vi đã thống nhất:** O1 đội xe, O2 giá cước tuyến, O4 giao trễ, O5 quy trình dữ liệu, O6
+  khuyến nghị và trang dashboard; O3 ghép chuyến tùy chọn (chưa làm). Được phép vượt mục tiêu.
+- **Đã làm:** chuyển `optimize/` từ `feature/optimize`; nhu cầu xe và nhóm tuyến đồng bộ với lớp phân
+  tích và dashboard; thêm `lateness.py` (không có nguyên nhân lặp lại); thêm lỗ hổng "chuyến điều xe
+  không được ghi"; khuyến nghị hai ngôn ngữ với bằng chứng tính từ dữ liệu; trang "Khuyến nghị tối
+  ưu"; lệnh `logops optimize`; sinh `docs/04`, `docs/05`.
+- **Kết quả:** đo được 0,47 tr USD/năm (45% mục tiêu), mức trần 2,42 tr USD, tổng tiềm năng 2,89 tr
+  USD (278%); 7,24 tr USD nhiên liệu chưa giải thích được không cộng. 148 test pass.
+- **Đánh giá:** [reviews/05-optimize.vi.md](reviews/05-optimize.vi.md).
+
+### CN 04/10 · Module 6 `reports` ✅
+- **Đã làm:** `src/logops/reports/` (`build.py` năm loại báo cáo dùng biểu đồ và component của
+  dashboard, `pdf.py` in headless bằng Edge/Chrome); lệnh `logops report`; thanh bên "Xuất báo cáo".
+- **Kết quả:** HTML tự chứa (~4,7 MB), PDF khoảng 2 giây sau 10–15 giây tạo báo cáo; 157 test pass.
+- **Đánh giá:** [reviews/06-reports.vi.md](reviews/06-reports.vi.md).
+
+### CN 04/10 · Chỉnh dashboard và báo cáo ✅
+- **Đã làm:** chi tiết tối ưu chuyển về trang cùng chủ đề (quy mô đội xe → đội xe, giá cước →
+  tuyến, kiểm tra giao trễ → giao hàng, phụ phí theo giá → nhiên liệu, cải tiến quy trình dữ liệu
+  → dữ liệu); trang Khuyến nghị tối ưu giữ phần tổng hợp, thêm cột "Xem chi tiết ở trang". Đổi tên
+  kịch bản sản lượng ("Như hiện tại", "Tăng 5%"…). Nút ngôn ngữ "Vi"/"En". Xuất báo cáo chạy nền:
+  vẫn dùng dashboard bình thường, xong thì có thông báo và nút Tải về màu xanh lá. Điểm chính trong
+  báo cáo hiển thị dạng tab (khi in: đủ các mức).
+- **Còn mở:** đề xuất nội dung báo cáo v2 trong [SPEC-reports.vi.md](../SPEC-reports.vi.md), chờ duyệt.
+
+### CN 04/10 · Trang tối ưu và báo cáo duy nhất ✅
+- **Đã làm:** gộp tối ưu lại một trang, đặt trước trang dữ liệu. Làm lại xuất báo cáo theo yêu cầu
+  của chủ dự án: một báo cáo gồm mọi trang dashboard dạng tab (đầu trang có tiêu đề, ngày xuất,
+  khoảng thời gian), do code của các trang vẽ qua bộ dựng HTML; HTML responsive; PDF mỗi trang một
+  tờ, chân trang có tên, ngày xuất, trang x / y. Thanh bên có dòng trạng thái và nút Tải về đổ màu
+  xanh theo tiến độ. Tổng quan thêm ô Chi phí vận hành.
+- **Kết quả:** 155 test pass; PDF giai đoạn 2022–2024 dài 48 trang.
+
+### CN 04/10 · Đề tài, giải thích tiết kiệm, bố cục in ✅
+- **Đã làm:** thẻ đề tài và nguồn dữ liệu (Tổng quan, bìa báo cáo); bỏ icon; tab báo cáo hai hàng;
+  mức tin cậy dữ liệu bằng chữ màu; đổi "mức trần" thành "tiềm năng tối đa", 4 ô tiết kiệm có giải
+  thích cách tính khi rê chuột (in kèm trong PDF), gồm điều kiện đạt mục tiêu (cần thêm 0,57 tr
+  USD, tức 23,7% tiềm năng); làm lại bố cục in PDF (bìa, mục lục, đánh số mục, hình, bảng; bảng
+  rộng in trang ngang; không cắt dữ liệu).
+- **Kết quả:** 156 test pass; PDF giai đoạn 2022–2024 dài 43 trang.
+
+### CN 04/10 · PDF dạng văn bản báo cáo ✅
+- **Đã làm:** PDF trình bày như văn bản: Times New Roman, chữ đen, tiêu đề xanh đậm, thân bài
+  11 pt, lề 20 mm; điểm chính thành đoạn văn đánh số, ô KPI thành bảng (kèm cách tính), bảng kẻ
+  ngang mảnh, bỏ khung; biểu đồ dùng cùng phông. Bản HTML và dashboard giữ dạng thẻ.
+- **Kết quả:** 156 test pass; PDF giai đoạn 2022–2024 dài 49 trang.
+
+### CN 04/10 · Phần đầu báo cáo PDF ✅
+- **Đã làm:** bìa có ảnh (reports/assets/cover.jpg, không bắt buộc) và khối thông tin đề tài nổi
+  bật; mục lục, danh mục hình, danh mục bảng có số trang và liên kết (in hai lượt: lượt đầu cho
+  biết trang của từng đích liên kết); trang tóm tắt điều hành (kết quả, cần hành động ngay, cần
+  theo dõi, tiết kiệm); điểm chính có tiêu đề mức độ tô màu, gạch đầu dòng và dòng đề xuất nổi bật.
+- **Kết quả:** 157 test pass; PDF giai đoạn 2022–2024 dài 55 trang (31 hình, 11 bảng).
+
+### CN 04/10 · O3 ghép chuyến ✅
+- **Đã làm:** `optimize/chaining.py` mô phỏng lại mọi lô theo giờ thực tế với hai cách điều phối
+  (như hiện tại: xe rảnh lâu nhất; ghép chuyến: ưu tiên xe đang ở thành phố lấy hàng), cho 12/24/48
+  giờ để chạy sang thành phố khác; khuyến nghị loại "ước tính"; phần trên dashboard có ô nhập chi
+  phí mỗi lần điều xe; mục trong tài liệu đánh giá. Ảnh bìa báo cáo chuyển xuống dưới thông tin đề tài.
+- **Kết quả:** cách như hiện tại cho 95,3% chuyến phải điều xe (thực tế 95,4%); ghép chuyến còn
+  35,4%, bớt 17.018 lần điều xe mỗi năm, số xe cần −14,6%; 4,63 tr USD mỗi năm theo 272 USD mỗi
+  lần (giả thuyết, không cộng vào tổng). 159 test pass.
+
+### CN 04/10 · Chuẩn bị phỏng vấn ✅
+- **Đã làm:** README (tóm tắt, cách dùng, các module) và `docs/demo-script` (kịch bản 7 phút, danh
+  sách chuẩn bị, câu hỏi có thể gặp) EN/VI; báo cáo dự phòng (VI/EN, PDF/HTML) trong `reports/output/`.
+- **Kết quả:** 159 test pass, `ruff` sạch.
+
+### CN 04/10 · Làm lại O3: xe gần nhất, quãng đường và nhiên liệu ✅
+- **Thay đổi (chủ dự án):** bỏ giả thuyết 272 USD mỗi lần điều xe. Mỗi lô lấy xe rảnh gần nhất;
+  quãng đường theo mạng tuyến (đường ngắn nhất), mỗi dặm chạy rỗng 0,605 USD (giá nhiên liệu ÷ số dặm
+  mỗi gallon, từ dữ liệu). Không đặt giới hạn cứng cho quãng chạy rỗng (mọi giới hạn đến 24 giờ đều
+  cần thêm hàng nghìn xe); báo tỷ lệ lần điều xe trong một ngày lái 11 giờ (33%).
+- **Kết quả:** chuyến phải điều xe 89,5% → 41,1%, dặm chạy rỗng −59,5%, số xe 211 → 195 trong mô
+  phỏng; mô hình tính 12,56 tr USD, vượt lượng nhiên liệu mua ngoài chuyến, nên áp tỷ lệ giảm lên phần
+  đó: tối đa 4,27 tr USD mỗi năm (ước tính, không cộng vào tổng). 160 test pass.
+
 ## 6. Đang làm
 
 **Module 4 `dashboard` xong, chờ bạn rà soát rồi commit.**

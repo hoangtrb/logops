@@ -40,6 +40,7 @@ header[data-testid="stHeader"] {background: transparent;}
 .lo-kpi .l {font-size: 0.84rem; font-weight: 600; color: #4a4945; line-height: 1.3;}
 .lo-kpi .v {font-size: 1.6rem; font-weight: 700; color: #141413; line-height: 1.25;
   margin-top: 6px; font-variant-numeric: tabular-nums; overflow-wrap: anywhere;}
+.lo-grid.c5 .lo-kpi .v {font-size: 1.35rem;}
 .lo-kpi .d {font-size: 0.8rem; font-weight: 600; margin-top: 4px; min-height: 1.1em;}
 .lo-kpi .d.good {color: #0e7a50;}
 .lo-kpi .d.bad {color: #c0392b;}
@@ -47,6 +48,36 @@ header[data-testid="stHeader"] {background: transparent;}
 .lo-kpi .n {font-size: 0.76rem; color: #8a8882; line-height: 1.35; margin-top: auto;
   padding-top: 8px;}
 [class*="st-key-card-"] {background: #fff;}
+/* KPI with a "how it is computed" note: dotted label, note opens on hover, focus or tap */
+.lo-kpi.has-tip {position: relative; cursor: help; outline: none;}
+.lo-kpi.has-tip .l {text-decoration: underline dotted #8a8882; text-underline-offset: 3px;}
+.lo-kpi .tip {display: none; position: absolute; left: 0; top: calc(100% + 6px); z-index: 50;
+  width: max(100%, 340px); max-width: 92vw; box-sizing: border-box; background: #1f2e2d;
+  color: #f4f3ee; border-radius: 10px; padding: 10px 12px; font-size: 0.8rem; line-height: 1.45;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.18);}
+.lo-kpi .tip p {margin: 0 0 4px; font-size: inherit; line-height: inherit; color: inherit;}
+.lo-kpi .tip p:last-child {margin-bottom: 0;}
+.lo-kpi.has-tip:hover .tip, .lo-kpi.has-tip:focus .tip, .lo-kpi.has-tip:focus-within .tip {
+  display: block;}
+.lo-grid > .lo-kpi.has-tip:last-child .tip {left: auto; right: 0;}
+.lo-proj {display: grid; grid-template-columns: max-content 1fr; gap: 6px 18px;
+  background: #fff; border: 1px solid #e3e1da; border-radius: 12px; padding: 14px 18px;
+  margin: 4px 0 14px; font-size: 0.88rem; line-height: 1.45;}
+.lo-proj .k {color: #6b6a65; font-weight: 600;}
+.lo-proj .x {color: #1f1e1c; min-width: 0; overflow-wrap: anywhere;}
+.lo-proj a {color: #0f5257;}
+@media (max-width: 560px) {.lo-proj {grid-template-columns: 1fr; gap: 2px;}
+  .lo-proj .x {margin-bottom: 6px;}}
+.lo-level {font-weight: 700;}
+.lo-level.ok {color: #0e7a50;}
+.lo-level.warn {color: #a86400;}
+.lo-level.no {color: #c0392b;}
+/* finished report: green Download button with a short pulse to draw the eye */
+.st-key-r_download button {background: #1e8e4e; border-color: #1e8e4e; color: #fff;
+  animation: lo-pulse 1.2s ease-out 3;}
+.st-key-r_download button:hover {background: #18753f; border-color: #18753f; color: #fff;}
+@keyframes lo-pulse {0% {box-shadow: 0 0 0 0 rgba(30, 142, 78, 0.55);}
+  100% {box-shadow: 0 0 0 10px rgba(30, 142, 78, 0);}}
 .lo-fgrid {display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px;
   margin: 6px 0 4px;}
 .lo-fgrid.one {grid-template-columns: 1fr;}
@@ -109,6 +140,7 @@ class Kpi:
     delta: str | None = None
     tone: str = "flat"  # good | bad | flat
     note: str | None = None
+    tip: list[str] | None = None  # how the value is computed, shown on hover or tap
 
 
 def kpi_grid(items: list[Kpi], cols: int = 4) -> str:
@@ -122,11 +154,31 @@ def kpi_grid(items: list[Kpi], cols: int = 4) -> str:
             else ""
         )
         note = f'<div class="n">{escape(k.note)}</div>' if k.note else ""
+        tip, attrs = "", ""
+        if k.tip:
+            lines = "".join(f"<p>{escape(line)}</p>" for line in k.tip)
+            tip, attrs = f'<div class="tip" role="tooltip">{lines}</div>', ' tabindex="0"'
         cards.append(
-            f'<div class="lo-kpi"><div class="l">{escape(k.label)}</div>'
-            f'<div class="v">{escape(k.value)}</div>{delta}{note}</div>'
+            f'<div class="lo-kpi{" has-tip" if k.tip else ""}"{attrs}>'
+            f'<div class="l">{escape(k.label)}</div>'
+            f'<div class="v">{escape(k.value)}</div>{delta}{note}{tip}</div>'
         )
     return f'<div class="lo-wrap"><div class="lo-grid c{cols}">{"".join(cards)}</div></div>'
+
+
+def project_card(rows: list[tuple[str, str, str | None]]) -> str:
+    """What the project is about and where the data comes from: (label, text, link or None)."""
+    cells = "".join(
+        f'<div class="k">{escape(k)}</div><div class="x">'
+        + (
+            f'<a href="{escape(url)}" target="_blank" rel="noopener">{escape(text)}</a>'
+            if url
+            else escape(text)
+        )
+        + "</div>"
+        for k, text, url in rows
+    )
+    return f'<div class="lo-proj">{cells}</div>'
 
 
 def group_label(text: str) -> str:
@@ -163,6 +215,54 @@ def findings_html(items: list[dict], parts: dict[str, str]) -> str:
     )
 
 
+def findings_text(
+    heading: str, groups: list[tuple[str, str, list[dict]]], parts: dict[str, str]
+) -> str:
+    """Findings as text for print: a coloured heading per level (priority red, watch amber,
+    reference grey) with its count; each finding a numbered title with its tone, the facts as
+    bullets and the recommended action set off by a rule."""
+    out = [f'<h3 class="p-h3">{escape(heading)}</h3>']
+    for level, level_name, items in groups:
+        out.append(
+            f'<h4 class="p-level {escape(level)}">{escape(level_name)} ({len(items)})</h4>'
+            '<ol class="p-findings">'
+        )
+        for i in items:
+            impact = parts["meaning"] if i["level"] == "info" else parts["impact"]
+            bullets = "".join(
+                f"<li><b>{escape(k)}:</b> {escape(v)}</li>"
+                for k, v in ((parts["what"], i["what"]), (impact, i["impact"]))
+            )
+            action = (
+                f'<p class="p-action"><b>{escape(parts["action"])}:</b> {escape(i["action"])}</p>'
+                if i.get("action")
+                else ""
+            )
+            out.append(
+                f'<li><p class="p-ftitle"><b>{escape(i["title"])}</b></p>'
+                f'<p class="p-tags"><span class="p-tone {escape(i["tone"])}">'
+                f"{escape(i['tone_label'])}</span> · {escape(i['topic_label'])}</p>"
+                f'<ul class="p-parts">{bullets}</ul>{action}</li>'
+            )
+        out.append("</ol>")
+    return "".join(out)
+
+
+def kpi_text(items: list[Kpi]) -> str:
+    """KPI cards as a table for print: indicator, value (with its change), and how to read it."""
+    rows = []
+    for k in items:
+        change = f'<div class="p-delta">{escape(k.delta)}</div>' if k.delta else ""
+        notes = [k.note] if k.note else []
+        notes += k.tip or []
+        note = "".join(f"<p>{escape(n)}</p>" for n in notes)
+        rows.append(
+            f'<tr><td>{escape(k.label)}</td><td class="num">{escape(k.value)}{change}</td>'
+            f"<td>{note}</td></tr>"
+        )
+    return f'<table class="p-kpis"><tbody>{"".join(rows)}</tbody></table>'
+
+
 def page_header(title: str, description: str, scope: str) -> str:
     return (
         f'<div class="lo-banner"><div class="t">{escape(title)}</div>'
@@ -189,28 +289,36 @@ def tone_legend(labels: dict[str, str], prefix: str) -> str:
     return f'<div class="lo-legend">{escape(prefix)}{items}</div>'
 
 
+class Html(str):
+    """A table cell that is already HTML (not escaped)."""
+
+
+def level_text(text: str, level: str) -> Html:
+    """A rating written as coloured text: ok (green), warn (amber), no (red)."""
+    return Html(f'<span class="lo-level {escape(level)}">{escape(text)}</span>')
+
+
 def html_table(
     columns: list[str],
     rows: list[list],
     numeric: set[int] = frozenset(),
     nowrap: set[int] = frozenset(),
+    numbered: bool = True,
 ) -> str:
     """A numbered table whose long text wraps inside the cell (st.dataframe truncates it)."""
-    head = "".join(f"<th>{escape(c)}</th>" for c in columns)
+    head = ("<th></th>" if numbered else "") + "".join(f"<th>{escape(c)}</th>" for c in columns)
     body = "".join(
-        f'<tr><td class="n">{n}</td>'
+        "<tr>"
+        + (f'<td class="n">{n}</td>' if numbered else "")
         + "".join(
             f'<td class="{"num" if i in numeric else "nw" if i in nowrap else ""}">'
-            f"{escape(str(v))}</td>"
+            f"{v if isinstance(v, Html) else escape(str(v))}</td>"
             for i, v in enumerate(row)
         )
         + "</tr>"
         for n, row in enumerate(rows, start=1)
     )
-    return (
-        f'<table class="lo-table"><thead><tr><th></th>{head}</tr></thead>'
-        f"<tbody>{body}</tbody></table>"
-    )
+    return f'<table class="lo-table"><thead><tr>{head}</tr></thead><tbody>{body}</tbody></table>'
 
 
 def note(text: str) -> str:

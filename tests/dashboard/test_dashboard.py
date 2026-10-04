@@ -11,7 +11,17 @@ from logops import config
 
 DASHBOARD = Path(__file__).parents[2] / "src" / "logops" / "dashboard"
 WARM_LOAD_SECONDS = 3  # docs/01 §5: each page under 3 s once cached
-PAGES = ("overview", "profit", "regions", "network", "service", "fleet", "fuel", "data_page")
+PAGES = (
+    "overview",
+    "optimize",
+    "profit",
+    "regions",
+    "network",
+    "service",
+    "fleet",
+    "fuel",
+    "data_page",
+)
 SCRIPT = """
 from logops.dashboard import data, pages
 from logops.dashboard.charts import fmt
@@ -137,3 +147,61 @@ def test_html_table_keeps_headers_and_cells_aligned():
     out = ui.html_table(["A", "B"], [["x <y>", 1.5]], numeric={1}, nowrap={0})
     assert out.index(">A<") < out.index(">B<")
     assert '<td class="nw">x &lt;y&gt;</td><td class="num">1.5</td>' in out
+
+
+@pytest.mark.slow
+@pytest.mark.skipif(not config.WAREHOUSE_PATH.is_file(), reason="run `logops build` first")
+def test_sidebar_exports_an_html_report_in_the_background():
+    at = AppTest.from_file(str(DASHBOARD / "app.py"), default_timeout=300)
+    at.run()
+    next(b for b in at.sidebar.button if b.key == "r_make").click()
+    at.run()  # returns while the report is still being built
+    assert not at.exception, [e.value for e in at.exception]
+    job = at.session_state["r_job"]
+    assert next(b for b in at.sidebar.button if b.key == "r_make").disabled
+    job["future"].result(timeout=300)
+    at.run()  # the status fragment picks up the finished file
+    assert not at.exception, [e.value for e in at.exception]
+    assert "r_job" not in at.session_state
+    content, name, fmt = at.session_state["r_file"]
+    assert fmt == "html" and name.startswith("bao-cao-van-tai-")
+    assert content.startswith(b"<!doctype")
+    assert job["progress"][0] == 1.0
+
+
+def test_report_drawing_never_reaches_streamlit_in_other_threads():
+    import threading
+
+    import streamlit
+
+    from logops.dashboard.output import drawing_to, st
+    from logops.reports.static import HtmlOut
+
+    seen = []
+    with drawing_to(HtmlOut("vi", {})):
+        other = threading.Thread(target=lambda: seen.append(st.html))
+        other.start()
+        other.join()
+        st.caption("x")  # goes to the HTML builder, not the app
+    assert seen == [streamlit.html]
+
+
+@pytest.mark.slow
+@pytest.mark.skipif(not config.WAREHOUSE_PATH.is_file(), reason="run `logops build` first")
+def test_savings_tips_add_up_to_the_cards_and_say_what_reaches_the_target():
+    from logops.dashboard import data, pages
+    from logops.dashboard.charts import fmt
+    from logops.dashboard.i18n import T
+    from logops.optimize import report
+
+    ctx = {"lang": "en", "t": T["en"], "f": fmt("en")}
+    d = data.optimization(0.0)
+    rec = report.recommendations(d, "en")
+    tot = report.totals(d)
+    tips = pages.savings_tips(ctx, d, rec, tot)
+    musd = pages._musd(ctx)
+    assert musd(tot["target"]) in tips["target"][-1]
+    measured_items = [x for x in tips["measured"] if x.startswith("• ")]
+    assert len(measured_items) == rec.filter(rec["impact_type"] == "measured").height
+    assert musd(tot["measured"] + tot["upper"]) in tips["total"][0]
+    assert musd(tot["target"] - tot["measured"]) in tips["total"][1]  # the gap still to find

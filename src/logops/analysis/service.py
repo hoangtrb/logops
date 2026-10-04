@@ -104,6 +104,7 @@ def scorecard(
     return {
         "revenue": money["revenue"],
         "contribution": money["contribution"],
+        "op_cost": money["revenue"] - money["contribution"],  # fuel + maintenance + claims
         "margin_pct": money["margin_pct"],
         "cost_per_mile": money["measured_cost"] / money["miles"] if money["miles"] else None,
         "trips": money["trips"],
@@ -198,6 +199,26 @@ def fleet_productivity(con: duckdb.DuckDBPyConnection, start: dt.date, end: dt.d
 
 def customer_names(con: duckdb.DuckDBPyConnection) -> dict[str, str]:
     return dict(con.execute("SELECT customer_id, customer_name FROM customers").fetchall())
+
+
+DATASET_TABLES = (
+    "drivers", "trucks", "trailers", "customers", "facilities", "routes", "loads", "trips",
+    "fuel_purchases", "maintenance_records", "delivery_events", "safety_incidents",
+    "driver_monthly_metrics", "truck_utilization_metrics",
+)  # fmt: skip
+
+
+def dataset_profile(con: duckdb.DuckDBPyConnection) -> dict:
+    """Size of the dataset and of the company it describes, for the project card."""
+    count = {t: con.execute(f"SELECT count(*) FROM {t}").fetchone()[0] for t in DATASET_TABLES}
+    first, last = data_bounds(con)
+    return {
+        "tables": len(count),
+        "rows": sum(count.values()),
+        "first": first,
+        "last": last,
+        **{t: count[t] for t in ("trucks", "drivers", "customers", "routes", "trips")},
+    }
 
 
 def data_bounds(con: duckdb.DuckDBPyConnection) -> tuple[dt.date, dt.date]:

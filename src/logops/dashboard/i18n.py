@@ -172,6 +172,8 @@ T = {
         # overview
         "k_revenue": "Doanh thu",
         "k_contribution": "Lợi nhuận đóng góp",
+        "k_op_cost": "Chi phí vận hành",
+        "n_op_cost": "Nhiên liệu + bảo dưỡng + bồi thường sự cố",
         "k_margin": "Biên đóng góp",
         "k_cost_mile": "Chi phí vận hành mỗi dặm",
         "k_otd": "Giao hàng đúng hẹn (OTD)",
@@ -449,6 +451,255 @@ T = {
         "spend": "Chi phí nhiên liệu",
         "spend_note": "Chi phí nhiên liệu = lượng mua × giá. Đối chiếu với biểu đồ giá và biểu đồ "
         "lượng mua để thấy chi phí thay đổi do giá hay do lượng.",
+        # optimization
+        "p_optimize": "Khuyến nghị tối ưu",
+        "d_optimize": "Các hành động giúp giảm chi phí hoặc tăng lợi nhuận, kèm số tiền mỗi năm và "
+        "mức độ chắc chắn.",
+        "o_scope": "Tính trên toàn bộ dữ liệu từ {a} đến {b}; không đổi theo khoảng thời gian ở "
+        "thanh bên.",
+        "proj_heading": "Đề tài và nguồn dữ liệu",
+        "proj": {
+            "title": "Đề tài",
+            "goal": "Bài toán",
+            "data": "Bộ dữ liệu",
+            "company": "Doanh nghiệp",
+            "source": "Nguồn dữ liệu",
+        },
+        "proj_title": "Phân tích và tối ưu hiệu quả vận hành vận tải hàng hóa đường bộ",
+        "proj_goal": "Tìm cách giảm ít nhất 3% chi phí vận hành mỗi năm và nâng chất lượng giao "
+        "hàng, từ dữ liệu vận hành của doanh nghiệp",
+        "proj_data": "Logistics Operations Database: {tables} bảng, {rows} dòng, chuyến xe từ {a} "
+        "đến {b}",
+        "proj_company": "Doanh nghiệp vận tải hàng hóa đường bộ tại Mỹ; dữ liệu mô phỏng nên không "
+        "nêu tên: {trucks} xe tải, {drivers} tài xế, {customers} khách hàng, {routes} tuyến, "
+        "{trips} chuyến",
+        "proj_source": "Kaggle, tác giả yogape: "
+        "kaggle.com/datasets/yogape/logistics-operations-database",
+        "o_tip_hint": "Rê chuột hoặc chạm vào từng ô để xem cách tính ra con số.",
+        "o_tip_target": [
+            "Mục tiêu = 3% chi phí vận hành đo được bình quân mỗi năm.",
+            "Chi phí vận hành đo được: {base} mỗi năm (nhiên liệu, bảo dưỡng, bồi thường sự cố "
+            "2022–2024, gồm cả bảo dưỡng của các xe không chạy chuyến).",
+            "3% × {base} = {target} mỗi năm.",
+        ],
+        "o_tip_measured": "Chi phí bảo dưỡng mỗi năm của các xe chưa từng chạy chuyến; thanh lý "
+        "thì khoản này mất hẳn:",
+        "o_tip_measured_end": "Điều kiện: thanh lý hoặc dừng bảo dưỡng đủ {n} xe. Không ảnh hưởng "
+        "vận hành vì các xe này chưa từng chạy chuyến nào.",
+        "o_tip_upper": "Giá trị tối đa của các hành động cần quyết định nội bộ hoặc khách hàng "
+        "chấp nhận:",
+        "o_tip_upper_end": "Gọi là tối đa vì giả định khách chấp nhận đủ mức tăng mà không giảm "
+        "sản lượng, và các xe còn lại gánh hết chuyến của xe được rút. Thực tế thường thấp hơn.",
+        "o_tip_sum": "Tổng: {total} = {pct} mục tiêu.",
+        "o_tip_total": "Tiết kiệm đo được {m} + tiềm năng tối đa {u} = {total} ({pct} mục tiêu).",
+        "o_tip_gap": "Để đạt mục tiêu {target}: làm đủ phần đo được ({m}) và thu thêm ít nhất "
+        "{gap} từ các hành động tiềm năng, tức {share} tiềm năng tối đa.",
+        "o_tip_example": "Ví dụ: riêng việc nâng phụ phí nhiên liệu ({fsc}) đã đủ nếu khách chấp "
+        "nhận ít nhất {fsc_share} mức nâng đề xuất.",
+        "o_tip_done": "Riêng phần đo được đã đạt mục tiêu {target}.",
+        "o_target": "Mục tiêu tiết kiệm",
+        "n_target": "3% chi phí vận hành đo được, mỗi năm",
+        "o_measured": "Tiết kiệm đo được",
+        "n_measured": "{pct} mục tiêu · chi phí có sẵn trong dữ liệu, chắc chắn dừng khi thực hiện",
+        "o_upper": "Tiềm năng tối đa",
+        "n_upper": "Nếu khách hàng hoặc nội bộ chấp nhận thay đổi; thực tế thường thấp hơn",
+        "o_total": "Tổng tiềm năng",
+        "n_total": "{pct} mục tiêu nếu thực hiện tất cả",
+        "o_unexplained": "Ngoài ra, {amount} mỗi năm tiền nhiên liệu chưa giải thích được (mua "
+        "nhiều hơn lượng ghi nhận tiêu thụ). Khoản này không cộng vào tổng vì chưa chứng minh là "
+        "thất thoát; cần đối soát trước.",
+        "o_chart": "Giá trị mỗi năm của từng khuyến nghị",
+        "o_chart_note": "Xanh lá là tiết kiệm đo được, xanh dương là tiềm năng tối đa. Mục tiêu là "
+        "{target} mỗi năm.",
+        "o_table": "Danh sách khuyến nghị",
+        "o_cols": [
+            "Lĩnh vực",
+            "Hành động",
+            "Phạm vi",
+            "Giá trị mỗi năm",
+            "Loại",
+            "Căn cứ",
+        ],
+        "o_areas": {
+            "Fleet": "Đội xe",
+            "Lanes": "Giá cước tuyến",
+            "Data": "Dữ liệu",
+            "Network": "Mạng lưới",
+            "Checked": "Đã kiểm tra",
+        },
+        "o_types": {
+            "measured": "Tiết kiệm đo được",
+            "upper bound": "Tiềm năng tối đa",
+            "risk sharing": "Chia sẻ rủi ro",
+            "unexplained": "Chưa giải thích được",
+            "estimate": "Ước tính (giả thuyết)",
+            "no signal": "Không có tín hiệu",
+        },
+        "o_checked": "Đã kiểm tra và không đề xuất",
+        "o_checked_note": "Chỉ đề xuất khi tín hiệu lặp lại qua các năm. Các đòn bẩy dưới đây đã "
+        "được kiểm tra trên dữ liệu và không đạt, hoặc đã được chủ dự án loại.",
+        "o_checked_cols": ["Đòn bẩy", "Bằng chứng"],
+        "o_fleet": "Quy mô đội xe",
+        "o_growth": "Sản lượng chuyến giả định",
+        "o_growth_now": "Như hiện tại",
+        "o_growth_up": "Tăng {g}%",
+        "o_growth_help": "Số xe cần nếu số chuyến mỗi ngày giữ nguyên như 2022–2024 hoặc tăng thêm "
+        "5%, 10%, 20%. Các ô tổng tiết kiệm ở đầu trang dùng mức Như hiện tại.",
+        "o_needed": "Số xe cần",
+        "n_needed": "Đủ cho 99% số ngày, đã tính xe dừng bảo dưỡng và chuyến thiếu mã xe",
+        "o_owned": "Xe sở hữu",
+        "o_in_use": "Xe từng chạy chuyến",
+        "o_surplus": "Xe dư so với nhu cầu",
+        "o_needed_chart": "Số xe cần theo sản lượng chuyến",
+        "o_needed_note": "So với {owned} xe sở hữu và {in_use} xe từng chạy chuyến. Ngày bận nhất "
+        "cần {busiest} xe; {above} trên {days} ngày cần nhiều hơn mức đề xuất khi sản lượng như "
+        "hiện tại, có thể thuê xe ngắn hạn cho những ngày này.",
+        "o_tiers": "Lộ trình thanh lý theo bậc",
+        "o_tier_cols": [
+            "Bậc",
+            "Nhóm xe",
+            "Số xe",
+            "Đưa lại vận hành",
+            "Chi phí bảo dưỡng mỗi năm",
+            "Loại",
+        ],
+        "o_tier_status": {
+            "Inactive": "Ngừng hoạt động, chưa từng chạy",
+            "Maintenance": "Đang bảo dưỡng, chưa từng chạy",
+            "Active (lowest mileage)": "Đang chạy, ít dặm nhất",
+        },
+        "o_tiers_note": "Bậc 1–2 là xe chưa từng chạy chuyến nào: bỏ đi không ảnh hưởng vận hành "
+        "nên tiết kiệm là chắc chắn. Bậc 3 là tiềm năng tối đa vì các xe còn lại phải gánh chuyến "
+        "của xe bị bỏ. Giá bán lại xe không có trong dữ liệu nên chưa tính vào.",
+        "o_lanes": "Giá cước tuyến",
+        "o_cap": "Mức tăng cước tối đa mỗi tuyến",
+        "o_cap_none": "Không giới hạn (lý thuyết)",
+        "o_s1": "S1 · Chuẩn hóa phụ phí nhiên liệu",
+        "n_s1": "Nâng phụ phí các tuyến thấp lên mức trung vị",
+        "o_s2": "S2 · Tăng cước tuyến biên thấp",
+        "n_s2": "Về gần biên trung vị, trong mức tăng tối đa đã chọn",
+        "o_s12": "Tổng S1 + S2 mỗi năm",
+        "n_s12": "{pct} mục tiêu",
+        "o_loss": "Sụt sản lượng hòa vốn",
+        "n_loss": "Trung vị: tuyến tăng giá có thể mất chừng này sản lượng mà lợi nhuận không thấp "
+        "hơn hiện nay",
+        "o_lane_table": "Kết quả theo tuyến",
+        "o_lane_note": "Chi phí tài xế hòa vốn: tuyến chỉ lỗ nếu chi phí tài xế mỗi dặm vượt mức "
+        "này (thay cho lương tài xế không có trong dữ liệu). Tuyến không cần điều chỉnh có S1, S2 "
+        "bằng 0.",
+        "o_lane_cols": {
+            "lane": "Tuyến",
+            "group": "Hướng xử lý",
+            "margin": "Biên đóng góp (%)",
+            "fsc_rate": "Phụ phí hiện tại (USD/dặm)",
+            "s1": "S1 (USD/năm)",
+            "s2": "S2 (USD/năm)",
+            "increase": "Tăng cước (%)",
+            "loss": "Sụt sản lượng hòa vốn (%)",
+            "break_even": "Chi phí tài xế hòa vốn (USD/dặm)",
+        },
+        "o_s3": "S3 · Phụ phí theo giá nhiên liệu (mô phỏng)",
+        "o_s3_group": "Phụ phí nhiên liệu theo giá",
+        "o_chain": "Ghép chuyến: điều xe rảnh gần nhất (mô phỏng)",
+        "o_chain_moved": "Chuyến phải điều xe",
+        "n_chain_moved": "Như hiện tại {today} (thực tế {seen})",
+        "o_chain_miles": "Dặm chạy rỗng",
+        "n_chain_miles": "{near} so với {today} triệu dặm mỗi năm trong mô phỏng",
+        "o_chain_move": "Quãng điều xe bình quân",
+        "n_chain_move": "Khoảng {h} giờ lái; {day} số lần trong một ngày lái ({limit} giờ)",
+        "o_chain_value": "Tiết kiệm nhiên liệu tối đa mỗi năm",
+        "n_chain_value": "−{cut} × {fuel} nhiên liệu mua ngoài chuyến; ước tính, không cộng vào "
+        "tổng",
+        "o_chain_tip": [
+            "Từ dữ liệu: tốc độ {speed} dặm/giờ, {mpg} dặm/gallon, giá {price}/gallon → "
+            "mỗi dặm chạy rỗng {per_mile}.",
+            "Mô hình: dặm chạy rỗng giảm {cut}, tức {model} nhiên liệu mỗi năm.",
+            "Nhưng nhiên liệu mua ngoài chuyến chỉ có {off_trip} mỗi năm (khoảng {off_miles} triệu "
+            "dặm), ít hơn số dặm rỗng của mô hình.",
+            "Vì vậy chỉ áp tỷ lệ giảm: {cut} × {off_trip} = {saving} mỗi năm, là mức tối đa.",
+        ],
+        "o_chain_table": "Như hiện tại và điều xe gần nhất",
+        "o_chain_note": "Mô phỏng lại {loads} lô với giờ lấy và giao thực tế. Mỗi lô được giao cho "
+        "xe rảnh gần thành phố lấy hàng nhất, kịp chạy rỗng tới (xe đang ở đó được ưu tiên). Quãng "
+        "đường lấy theo mạng tuyến của dữ liệu, đi vòng khi hai thành phố không có tuyến trực "
+        "tiếp, nên dài hơn đường thực tế. Không đặt giới hạn cứng cho quãng chạy rỗng: xe dồn ở "
+        "các thành phố ít hàng đi phải chạy xa, và mọi giới hạn đến 24 giờ đều cần thêm hàng nghìn "
+        "xe. Quãng điều xe nên giữ trong một ngày lái ({h} giờ); xa hơn thì nên tìm hàng chiều về "
+        "tại chỗ thay vì chạy rỗng.",
+        "o_chain_cols": ["Chỉ số", "Như hiện tại", "Điều xe gần nhất"],
+        "o_chain_rows": [
+            "Chuyến phải điều xe",
+            "Lần điều xe mỗi năm",
+            "Dặm chạy rỗng mỗi năm",
+            "Dặm mỗi lần điều xe",
+            "Lần điều xe trong một ngày lái ({h} giờ)",
+            "Số xe cần (mô phỏng)",
+        ],
+        "o_s3_note": "Phụ phí tính theo giá nhiên liệu hằng tháng, với giá cơ sở {base} mỗi gallon "
+        "để tổng doanh thu 3 năm không đổi. Năm giá cao thu nhiều hơn, năm giá thấp thu ít hơn: "
+        "lợi nhuận bớt phụ thuộc giá nhiên liệu. Không tính là tiết kiệm.",
+        "o_s3_actual": "Phụ phí thực tế",
+        "o_s3_indexed": "Phụ phí theo giá nhiên liệu",
+        "o_gaps": "Cải tiến quy trình dữ liệu",
+        "o_gaps_note": "Bậc 1 là thay đổi quy trình hoặc cấu hình trên hệ thống sẵn có, gần như "
+        "không tốn tiền. Bậc 2 cần thiết bị telematics; giá là số tham khảo công khai, cần thay "
+        "bằng báo giá thực tế.",
+        "o_gap_cols": [
+            "Lỗ hổng",
+            "Bằng chứng",
+            "Chi phí khi không làm",
+            "Biện pháp bậc 1 (quy trình)",
+            "Biện pháp bậc 2 (thiết bị)",
+        ],
+        "o_tele_cost": "Chi phí telematics mỗi năm",
+        "n_tele_cost": "{trucks} xe đang chạy · thuê bao và thiết bị chia đều 3 năm",
+        "o_tele_break": "Mức hòa vốn của telematics",
+        "n_tele_break": "Phần chi phí nhiên liệu cần tiết kiệm để thiết bị tự hoàn vốn",
+        "o_sources": "Nguồn giá tham khảo",
+        # reports
+        "r_export": "Xuất báo cáo",
+        "r_title": "Báo cáo quản lý vận tải",
+        "r_period": "Khoảng thời gian: {a} – {b}",
+        "r_generated": "Ngày xuất: {d}",
+        "r_page": "Trang",
+        "r_toc": "Mục lục",
+        "r_figs": "Danh mục hình",
+        "r_tabs": "Danh mục bảng",
+        "r_summary": "Tóm tắt điều hành",
+        "r_sum_results": "Kết quả chính trong kỳ",
+        "r_sum_act": "Cần hành động ngay",
+        "r_sum_watch": "Cần theo dõi",
+        "r_sum_savings": "Cơ hội tiết kiệm",
+        "r_fig": "Hình",
+        "r_tab": "Bảng",
+        "r_running": "Đang tạo báo cáo… {pct}",
+        "r_done": "Đã tạo xong · {name}",
+        "r_format": "Định dạng",
+        "r_make": "Tạo báo cáo",
+        "r_download": "Tải về",
+        "r_no_browser": "Không tìm thấy Microsoft Edge hoặc Google Chrome để tạo PDF. Hãy chọn "
+        "định dạng HTML.",
+        "r_note": "Số liệu do lớp phân tích tính từ dữ liệu. Lợi nhuận là lợi nhuận đóng góp, chưa "
+        "trừ lương tài xế và chi phí chung vì dữ liệu không có.",
+        "r_late": "Kiểm tra nguyên nhân giao trễ",
+        "r_late_note": "{share} lần giao trễ quá 2 giờ. Một nguyên nhân chỉ đáng xử lý khi tỷ lệ "
+        "trễ của nhóm lặp lại giữa 2022–2023 và năm cuối (tương quan từ 0,7).",
+        "r_late_cols": [
+            "Phân tích theo",
+            "Số nhóm",
+            "Chênh lệch tỷ lệ trễ (điểm %)",
+            "Tương quan giữa hai giai đoạn",
+            "Có tín hiệu",
+        ],
+        "r_dims": {
+            "city": "Thành phố nhận",
+            "customer": "Khách hàng",
+            "appointment_hour": "Giờ hẹn",
+            "lane": "Tuyến",
+            "driver": "Tài xế",
+        },
+        "r_yes": "Có",
+        "r_no": "Không",
         # data
         "d_tables": "Số bảng dữ liệu",
         "d_rows": "Số dòng dữ liệu",
@@ -460,20 +711,20 @@ T = {
         "severity": {"error": "Lỗi nghiêm trọng", "warn": "Cảnh báo"},
         "trust": "Dữ liệu tin được đến đâu",
         "trust_rows": [
-            ("✅", "Quan hệ giữa các bảng, các khoản tiền, bảng tổng hợp tháng", "Tin cậy"),
+            ("Quan hệ giữa các bảng, các khoản tiền, bảng tổng hợp tháng", "Tin cậy", "ok"),
             (
-                "⚠️",
                 "Mã tài xế/xe thiếu khoảng 2%; một số lần giao ghi trước khi lấy hàng; hệ số sử "
                 "dụng xe trên 100%",
                 "Dùng có điều kiện",
+                "warn",
             ),
             (
-                "❌",
                 "Bang trên giao dịch nhiên liệu, mã kho trên sự kiện giao nhận, giờ chạy không tải",
                 "Không sử dụng",
+                "no",
             ),
         ],
-        "trust_cols": ["Đánh giá", "Dữ liệu", "Mức sử dụng"],
+        "trust_cols": ["Dữ liệu", "Mức tin cậy"],
         "glossary": "Định nghĩa KPI",
         "glossary_note": "Cột giá trị là kết quả của từng KPI cho toàn đội xe trong khoảng thời "
         "gian đang chọn, để đối chiếu định nghĩa với con số trên các trang.",
@@ -555,6 +806,8 @@ T = {
         "u_miles": "miles",
         "k_revenue": "Revenue",
         "k_contribution": "Contribution profit",
+        "k_op_cost": "Operating cost",
+        "n_op_cost": "Fuel + maintenance + claims",
         "k_margin": "Contribution margin",
         "k_cost_mile": "Operating cost per mile",
         "k_otd": "On-time delivery (OTD)",
@@ -827,6 +1080,256 @@ T = {
         "spend": "Fuel cost",
         "spend_note": "Fuel cost = gallons bought × price. Compare with the price and volume "
         "charts to see whether a change comes from price or from volume.",
+        "p_optimize": "Optimization recommendations",
+        "d_optimize": "Actions that cut cost or raise profit, with their yearly value and how "
+        "certain each is.",
+        "o_scope": "Computed over all the data from {a} to {b}; the sidebar date range doesn't "
+        "change it.",
+        "proj_heading": "Project and data source",
+        "proj": {
+            "title": "Project",
+            "goal": "Problem",
+            "data": "Dataset",
+            "company": "Company",
+            "source": "Data source",
+        },
+        "proj_title": "Analysing and optimizing the operations of a road freight carrier",
+        "proj_goal": "Find ways to cut operating cost by at least 3% a year and improve delivery "
+        "performance, from the company's operating data",
+        "proj_data": "Logistics Operations Database: {tables} tables, {rows} rows, trips from {a} "
+        "to {b}",
+        "proj_company": "A US road freight carrier; the data is synthetic, so the company is not "
+        "named: {trucks} trucks, {drivers} drivers, {customers} customers, {routes} lanes, {trips} "
+        "trips",
+        "proj_source": "Kaggle, by yogape: "
+        "kaggle.com/datasets/yogape/logistics-operations-database",
+        "o_tip_hint": "Hover over or tap each card to see how its figure is computed.",
+        "o_tip_target": [
+            "Target = 3% of the average measured operating cost per year.",
+            "Measured operating cost: {base} a year (fuel, maintenance and claims in 2022–2024, "
+            "including maintenance of trucks that never ran).",
+            "3% × {base} = {target} a year.",
+        ],
+        "o_tip_measured": "Yearly maintenance of trucks that never ran a trip; it stops for good "
+        "once they are disposed of:",
+        "o_tip_measured_end": "Condition: dispose of, or stop maintaining, all {n} trucks. "
+        "Operations are not affected since these trucks never ran a trip.",
+        "o_tip_upper": "Maximum value of the actions that need an internal decision or customers "
+        "to accept a change:",
+        "o_tip_upper_end": "It is a maximum because it assumes customers accept the full increase "
+        "without cutting volume, and the remaining trucks take over every trip of those withdrawn. "
+        "In practice it is usually lower.",
+        "o_tip_sum": "Total: {total} = {pct} of the target.",
+        "o_tip_total": "Measured savings {m} + maximum potential {u} = {total} ({pct} of the "
+        "target).",
+        "o_tip_gap": "To reach the {target} target: do all of the measured part ({m}) and get at "
+        "least {gap} more from the potential actions, i.e. {share} of the maximum potential.",
+        "o_tip_example": "For example, raising the fuel surcharge ({fsc}) is enough on its own if "
+        "customers accept at least {fsc_share} of the proposed increase.",
+        "o_tip_done": "The measured part alone reaches the {target} target.",
+        "o_target": "Savings target",
+        "n_target": "3% of measured operating cost, per year",
+        "o_measured": "Measured savings",
+        "n_measured": "{pct} of target · costs in the data that stop for certain",
+        "o_upper": "Maximum potential",
+        "n_upper": "If customers or management accept the change; usually lower in practice",
+        "o_total": "Total potential",
+        "n_total": "{pct} of target if everything is done",
+        "o_unexplained": "Besides, {amount} a year of fuel spend is unexplained (more bought than "
+        "recorded as burned). It is not added to the total because it isn't proven loss; it needs "
+        "reconciling first.",
+        "o_chart": "Yearly value of each recommendation",
+        "o_chart_note": "Green is a measured saving, blue a maximum potential. The target is "
+        "{target} a year.",
+        "o_table": "Recommendations",
+        "o_cols": [
+            "Area",
+            "Action",
+            "Scope",
+            "Value per year",
+            "Type",
+            "Evidence",
+        ],
+        "o_areas": {
+            "Fleet": "Fleet",
+            "Network": "Network",
+            "Lanes": "Lane pricing",
+            "Data": "Data",
+            "Checked": "Checked",
+        },
+        "o_types": {
+            "measured": "Measured saving",
+            "upper bound": "Maximum potential",
+            "risk sharing": "Risk sharing",
+            "unexplained": "Unexplained",
+            "estimate": "Estimate (hypothesis)",
+            "no signal": "No signal",
+        },
+        "o_checked": "Checked and not recommended",
+        "o_checked_note": "A lever is recommended only if its signal repeats across years. These "
+        "were checked on the data and failed, or were dropped by the project owner.",
+        "o_checked_cols": ["Lever", "Evidence"],
+        "o_fleet": "Fleet size",
+        "o_growth": "Assumed trip volume",
+        "o_growth_now": "Current volume",
+        "o_growth_up": "+{g}%",
+        "o_growth_help": "Trucks needed if trips per day stay at the 2022–2024 level or grow by "
+        "5%, 10% or 20%. The savings totals at the top of the page use the current volume.",
+        "o_needed": "Trucks needed",
+        "n_needed": "Enough on 99% of days, after maintenance downtime and trips without a truck "
+        "ID",
+        "o_owned": "Trucks owned",
+        "o_in_use": "Trucks that have run trips",
+        "o_surplus": "Trucks above the need",
+        "o_needed_chart": "Trucks needed by trip volume",
+        "o_needed_note": "Against {owned} trucks owned and {in_use} that have run trips. The "
+        "busiest day needed {busiest}; {above} of {days} days needed more than the recommendation "
+        "at the current volume, which short-term rental can cover.",
+        "o_tiers": "Disposal in tiers",
+        "o_tier_cols": [
+            "Tier",
+            "Trucks",
+            "Count",
+            "Back to service",
+            "Maintenance per year",
+            "Type",
+        ],
+        "o_tier_status": {
+            "Inactive": "Inactive, never ran",
+            "Maintenance": "In maintenance, never ran",
+            "Active (lowest mileage)": "In use, lowest mileage",
+        },
+        "o_tiers_note": "Tiers 1–2 never ran a trip: giving them up doesn't touch operations, so "
+        "the saving is certain. Tier 3 is a maximum potential because the remaining trucks must "
+        "take over its trips. Resale value isn't in the data and isn't counted.",
+        "o_lanes": "Lane pricing",
+        "o_cap": "Largest rate increase per lane",
+        "o_cap_none": "No cap (theoretical)",
+        "o_s1": "S1 · Standardize the fuel surcharge",
+        "n_s1": "Raise low surcharges to the median",
+        "o_s2": "S2 · Raise rates on low-margin lanes",
+        "n_s2": "Toward the median margin, within the chosen cap",
+        "o_s12": "S1 + S2 per year",
+        "n_s12": "{pct} of target",
+        "o_loss": "Break-even volume loss",
+        "n_loss": "Median: a repriced lane can lose this much volume and still earn no less than "
+        "today",
+        "o_lane_table": "Results by lane",
+        "o_lane_note": "Break-even driver cost: the lane loses money only if driver cost per mile "
+        "exceeds it (instead of the driver pay the data lacks). Lanes that need no change show 0 "
+        "for S1 and S2.",
+        "o_lane_cols": {
+            "lane": "Lane",
+            "group": "Action",
+            "margin": "Contribution margin (%)",
+            "fsc_rate": "Current surcharge (USD/mile)",
+            "s1": "S1 (USD/year)",
+            "s2": "S2 (USD/year)",
+            "increase": "Rate increase (%)",
+            "loss": "Break-even volume loss (%)",
+            "break_even": "Break-even driver cost (USD/mile)",
+        },
+        "o_s3": "S3 · Surcharge indexed to the fuel price (simulation)",
+        "o_s3_group": "Fuel surcharge that follows the price",
+        "o_chain": "Trip chaining: nearest free truck (simulation)",
+        "o_chain_moved": "Trips needing a move",
+        "n_chain_moved": "As today {today} (observed {seen})",
+        "o_chain_miles": "Empty miles",
+        "n_chain_miles": "{near} against {today} million miles a year in the replay",
+        "o_chain_move": "Average empty move",
+        "n_chain_move": "About {h} h of driving; {day} of moves within one driving day ({limit} h)",
+        "o_chain_value": "Maximum fuel saving per year",
+        "n_chain_value": "−{cut} × {fuel} of fuel bought off trips; an estimate, not in the total",
+        "o_chain_tip": [
+            "From the data: {speed} mph, {mpg} miles a gallon, {price} a gallon → an empty "
+            "mile costs {per_mile}.",
+            "Model: empty miles fall by {cut}, i.e. {model} of fuel a year.",
+            "But the fuel bought off trips is only {off_trip} a year (about {off_miles} "
+            "million miles), less than the model's empty miles.",
+            "So only the cut is applied: {cut} × {off_trip} = {saving} a year, a maximum.",
+        ],
+        "o_chain_table": "Today's dispatching and the nearest truck",
+        "o_chain_note": "Replays the {loads} loads at their actual pickup and delivery times. Each "
+        "load goes to the free truck closest to its pickup city that can drive there in time (a "
+        "truck already there first). Distances follow the data's lanes, detouring where two cities "
+        "have no lane, so they are longer than real roads. No fixed limit on the empty drive: "
+        "trucks piling up in cities that send little back must drive far, and any limit up to 24 h "
+        "needs thousands of extra trucks. Keep moves within one driving day ({h} h); beyond that, "
+        "look for a return load on the spot rather than driving empty.",
+        "o_chain_cols": ["Measure", "As today", "Nearest truck"],
+        "o_chain_rows": [
+            "Trips needing a move",
+            "Moves a year",
+            "Empty miles a year",
+            "Miles per move",
+            "Moves within one driving day ({h} h)",
+            "Trucks needed (replay)",
+        ],
+        "o_s3_note": "The surcharge follows the monthly fuel price, with a base of {base} per "
+        "gallon so that 3-year revenue is unchanged. High-price years earn more, low-price years "
+        "less: profit depends less on fuel prices. Not counted as a saving.",
+        "o_s3_actual": "Actual surcharge",
+        "o_s3_indexed": "Fuel-indexed surcharge",
+        "o_gaps": "Data-process improvements",
+        "o_gaps_note": "Tier 1 is a process or configuration change in existing systems, close to "
+        "free. Tier 2 needs telematics devices; prices are indicative public figures, to be "
+        "replaced by vendor quotes.",
+        "o_gap_cols": [
+            "Gap",
+            "Evidence",
+            "Cost of not doing",
+            "Tier-1 measure (process)",
+            "Tier-2 measure (device)",
+        ],
+        "o_tele_cost": "Telematics cost per year",
+        "n_tele_cost": "{trucks} trucks in use · subscription and devices spread over 3 years",
+        "o_tele_break": "Telematics break-even",
+        "n_tele_break": "Share of fuel spend it must save to pay for itself",
+        "o_sources": "Indicative price sources",
+        "r_export": "Export report",
+        "r_title": "Transport management report",
+        "r_period": "Period: {a} – {b}",
+        "r_generated": "Exported: {d}",
+        "r_page": "Page",
+        "r_toc": "Contents",
+        "r_figs": "List of figures",
+        "r_tabs": "List of tables",
+        "r_summary": "Executive summary",
+        "r_sum_results": "Key results for the period",
+        "r_sum_act": "Act now",
+        "r_sum_watch": "Keep watching",
+        "r_sum_savings": "Savings opportunity",
+        "r_fig": "Figure",
+        "r_tab": "Table",
+        "r_running": "Creating the report… {pct}",
+        "r_done": "Done · {name}",
+        "r_format": "Format",
+        "r_make": "Create report",
+        "r_download": "Download",
+        "r_no_browser": "Microsoft Edge or Google Chrome was not found, so no PDF can be made. "
+        "Choose HTML.",
+        "r_note": "Figures computed from the data by the analysis layer. Profit is contribution "
+        "profit, before driver pay and overhead, which the data doesn't have.",
+        "r_late": "Is there a cause behind late deliveries?",
+        "r_late_note": "{share} of deliveries are more than 2 hours late. A cause is worth acting "
+        "on only if a group's late rate repeats between 2022–2023 and the last year (correlation "
+        "0.7 or more).",
+        "r_late_cols": [
+            "By",
+            "Groups",
+            "Spread of late rates (pts)",
+            "Correlation between periods",
+            "Signal",
+        ],
+        "r_dims": {
+            "city": "Delivery city",
+            "customer": "Customer",
+            "appointment_hour": "Appointment hour",
+            "lane": "Lane",
+            "driver": "Driver",
+        },
+        "r_yes": "Yes",
+        "r_no": "No",
         "d_tables": "Data tables",
         "d_rows": "Data rows",
         "d_rules": "Quality rules",
@@ -837,20 +1340,20 @@ T = {
         "severity": {"error": "Serious error", "warn": "Warning"},
         "trust": "How far the data can be trusted",
         "trust_rows": [
-            ("✅", "Table relationships, money amounts, monthly aggregate tables", "Trusted"),
+            ("Table relationships, money amounts, monthly aggregate tables", "Trusted", "ok"),
             (
-                "⚠️",
                 "About 2% of driver/truck codes missing; some deliveries recorded before pickup; "
                 "utilization above 100%",
                 "Use with care",
+                "warn",
             ),
             (
-                "❌",
                 "State on fuel purchases, facility code on delivery events, idle hours",
                 "Not used",
+                "no",
             ),
         ],
-        "trust_cols": ["Rating", "Data", "Use"],
+        "trust_cols": ["Data", "Trust level"],
         "glossary": "KPI definitions",
         "glossary_note": "The value column is each KPI for the whole fleet over the selected "
         "range, so each definition can be checked against the numbers on the other pages.",

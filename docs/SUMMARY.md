@@ -1,7 +1,7 @@
 # Project Summary: Logistics Ops Optimizer
 
 > Vietnamese: [SUMMARY.vi.md](SUMMARY.vi.md) · Updated at the end of each module · **Last updated:**
-> 2026-10-03, after module 4 `dashboard` · **Rule:** verified facts only; details and evidence are in each review
+> 2026-10-04, after module 6 `reports` · **Rule:** verified facts only; details and evidence are in each review
 > under `docs/reviews/`.
 
 ## 1. What the project is
@@ -20,11 +20,11 @@ customers, 58 lanes.
 |---|---|---|---|---|
 | — | Business understanding | 1 | ✅ | `docs/01-business-understanding` |
 | 1 | `data-platform` | 2, 3 | ✅ 47 tests | [01-data-platform.md](reviews/01-data-platform.md) |
-| 2 | `metrics` | 3 | ✅ 29 tests | [02-metrics.md](reviews/02-metrics.md) |
+| 2 | `metrics` | 3 | ✅ 28 tests | [02-metrics.md](reviews/02-metrics.md) |
 | 3 | `analysis` | 2, 3 | ✅ 12 tests | [03-analysis.md](reviews/03-analysis.md) |
 | 4 | `dashboard` | 6 | ✅ 26 tests | [04-dashboard.md](reviews/04-dashboard.md) |
-| 5 | `optimize` | 4, 5 | ⏸️ Parked on branch `feature/optimize`, redone after the analysis | |
-| 6 | `reports` | 6 | ⏳ | |
+| 5 | `optimize` | 4, 5 | ✅ 28 tests | [05-optimize.md](reviews/05-optimize.md) |
+| 6 | `reports` | 6 | ✅ 7 tests | [06-reports.md](reviews/06-reports.md) |
 
 ## 3. Where the business stands (verified baselines)
 
@@ -59,10 +59,26 @@ customers, 58 lanes.
 | 69 data-quality rules, EN/VI report | `docs/02-data-quality-report` |
 | 3 base views + 21 SCOR KPIs | `logops kpi --by …`, `docs/03-kpi-definitions` |
 | Profit, fuel, fleet and network analyses + rule-based commentary | `logops insights`, `docs/03-analysis-insights` |
-| 8-page dashboard, VI/EN toggle, responsive (27 charts, commentary next to each chart) | `logops dashboard` → http://localhost:8501 |
+| Dashboard, VI/EN toggle, responsive, commentary next to each chart | `logops dashboard` → http://localhost:8501 |
+| Recommendations vs the savings target, dashboard page, `docs/04`, `docs/05` | `logops optimize` |
+| One report with every dashboard page as a tab, self-contained HTML or paged PDF, from the CLI or the dashboard | `logops report` |
 | Method, threshold and data-model documentation | `docs/00-analytical-approach`, `docs/02-*` |
 
-## 6. Key findings (module 3 `analysis`)
+## 6. Savings vs target (module 5 `optimize`, per year)
+
+| Type | Amount | vs target ($1.04M) |
+|---|---:|---:|
+| Measured: dispose of the 28 trucks that never ran | $0.47M | 45% |
+| Upper bound: 13 lowest-mileage trucks, fuel surcharge to the median, +5% rates on low-margin lanes | $2.42M | 233% |
+| Total potential | $2.89M | 278% |
+| Unexplained, not counted: fuel bought but not recorded as burned | $7.24M | — |
+| Estimate (maximum), not counted: trip chaining, empty miles −59.5% × $7.18M of fuel bought off trips | $4.27M | — |
+
+Trip chaining (sending the nearest free truck to each load) cuts trips needing a move from 89.5% to 41.1% and empty miles by 59.5% in a replay of every load at actual times; distances come from the lanes and fuel per mile from the data.
+
+Late deliveries (44.4% more than 2 h late) have no repeatable cause in the data, so no recommendation is made for them. Details: [05-evaluation.md](05-evaluation.md).
+
+## 7. Key findings (module 3 `analysis`)
 
 | Topic | Finding |
 |---|---|
@@ -74,7 +90,7 @@ customers, 58 lanes.
 
 These figures are generated from the data by the rules; see [03-analysis-insights.md](03-analysis-insights.md).
 
-## 7. Project owner's decisions
+## 8. Project owner's decisions
 
 - Focus on **operational productivity and quality**; no HR-compliance criteria.
 - Don't build anything the data can't support (e.g. driver pay).

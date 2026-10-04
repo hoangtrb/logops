@@ -21,6 +21,7 @@ from logops.data_platform.warehouse import load_warehouse
 from logops.metrics.kpi_doc import write_kpi_docs
 from logops.metrics.kpis import CATALOG, DIMENSIONS, kpi
 from logops.metrics.views import create_views
+from logops.optimize.report import collect, recommendations, totals, write_optimize_outputs
 
 app = typer.Typer(help="Logistics Ops Optimizer: fleet data to cost-saving decisions.")
 
@@ -56,6 +57,7 @@ def build() -> None:
     reports = write_report(config.WAREHOUSE_PATH, TABLES.values(), config.DOCS_DIR)
     reports += write_kpi_docs(config.WAREHOUSE_PATH, config.DOCS_DIR)
     reports += write_analysis_docs(config.WAREHOUSE_PATH, config.DOCS_DIR)
+    reports += write_optimize_outputs(config.WAREHOUSE_PATH, config.DOCS_DIR)
 
     with duckdb.connect(str(config.WAREHOUSE_PATH), read_only=True) as con:
         for name in TABLES:
@@ -133,6 +135,54 @@ def insights(
     for item in bundle["insights"][lang]:
         typer.echo(f"[{item['level_label']} · {item['tone_label']}] {item['text']}")
         typer.echo("")
+
+
+@app.command()
+def optimize(
+    growth: float = typer.Option(0, help="Volume growth scenario in percent, e.g. 10"),
+) -> None:
+    """Print the recommendations and how they compare with the savings target."""
+    with duckdb.connect(str(config.WAREHOUSE_PATH), read_only=True) as con:
+        data = collect(con, growth=growth / 100)
+    t = totals(data)
+    typer.echo(f"Savings target:      ${t['target']:>12,.0f} per year (3% of measured cost)")
+    typer.echo(f"Measured savings:    ${t['measured']:>12,.0f} ({t['measured'] / t['target']:.0%})")
+    typer.echo(f"Upper bound (price): ${t['upper']:>12,.0f} (needs customers to accept)")
+    typer.echo("")
+    for r in recommendations(data).iter_rows(named=True):
+        impact = f"${r['annual_impact_usd']:>11,.0f}" if r["annual_impact_usd"] else " " * 12
+        what = r["item"] if r["impact_type"] == "no signal" else r["action"]
+        typer.echo(f"  [{r['impact_type']:<12}] {impact}  {r['area']:<8} {what}")
+
+
+@app.command()
+def report(
+    date_from: str = typer.Option("2022-01-01", "--from", help="First date (YYYY-MM-DD)"),
+    date_to: str = typer.Option("2024-12-31", "--to", help="Last date (YYYY-MM-DD)"),
+    lang: str = typer.Option("vi", help="Language: vi or en"),
+    fmt: str = typer.Option("html", "--format", help="html or pdf"),
+) -> None:
+    """Write the report (every dashboard page) to reports/output/: HTML, or PDF via Edge/Chrome."""
+    import logging
+
+    from logops.reports import NoBrowserError, build_html, file_name, to_pdf  # loads Streamlit
+
+    for name in list(logging.root.manager.loggerDict):  # cached loaders run outside the app
+        if name.startswith("streamlit"):
+            logging.getLogger(name).setLevel(logging.ERROR)
+    start, end = dt.date.fromisoformat(date_from), dt.date.fromisoformat(date_to)
+    html = build_html(start, end, lang, for_print=fmt == "pdf")
+    out_dir = config.REPO_ROOT / "reports" / "output"
+    out_dir.mkdir(parents=True, exist_ok=True)
+    path = out_dir / file_name(lang, start, end, fmt)
+    if fmt == "pdf":
+        try:
+            path.write_bytes(to_pdf(html))
+        except NoBrowserError as e:
+            raise typer.Exit(f"{e}; use --format html") from e
+    else:
+        path.write_text(html, encoding="utf-8")
+    typer.echo(f"Wrote {path}")
 
 
 @app.command()

@@ -1,7 +1,7 @@
 # Tổng kết dự án: Logistics Ops Optimizer
 
 > Bản tiếng Anh: [SUMMARY.md](SUMMARY.md) · Cập nhật cuối mỗi module · **Lần cập nhật cuối:**
-> 03/10/2026, sau module 4 `dashboard` · **Nguyên tắc:** chỉ ghi điều đã kiểm chứng; chi tiết và bằng chứng nằm
+> 04/10/2026, sau module 6 `reports` · **Nguyên tắc:** chỉ ghi điều đã kiểm chứng; chi tiết và bằng chứng nằm
 > trong từng file đánh giá ở `docs/reviews/`.
 
 ## 1. Dự án là gì
@@ -20,11 +20,11 @@ hàng, 58 tuyến.
 |---|---|---|---|---|
 | — | Hiểu nghiệp vụ | 1 | ✅ | `docs/01-business-understanding` |
 | 1 | `data-platform` | 2, 3 | ✅ 47 test | [01-data-platform.vi.md](reviews/01-data-platform.vi.md) |
-| 2 | `metrics` | 3 | ✅ 29 test | [02-metrics.vi.md](reviews/02-metrics.vi.md) |
+| 2 | `metrics` | 3 | ✅ 28 test | [02-metrics.vi.md](reviews/02-metrics.vi.md) |
 | 3 | `analysis` | 2, 3 | ✅ 12 test | [03-analysis.vi.md](reviews/03-analysis.vi.md) |
 | 4 | `dashboard` | 6 | ✅ 26 test | [04-dashboard.vi.md](reviews/04-dashboard.vi.md) |
-| 5 | `optimize` | 4, 5 | ⏸️ Tạm dừng ở nhánh `feature/optimize`, làm lại sau phân tích | |
-| 6 | `reports` | 6 | ⏳ | |
+| 5 | `optimize` | 4, 5 | ✅ 28 test | [05-optimize.vi.md](reviews/05-optimize.vi.md) |
+| 6 | `reports` | 6 | ✅ 7 test | [06-reports.vi.md](reviews/06-reports.vi.md) |
 
 ## 3. Hiện trạng kinh doanh (số liệu nền đã kiểm chứng)
 
@@ -59,10 +59,26 @@ hàng, 58 tuyến.
 | 69 quy tắc chất lượng dữ liệu, báo cáo EN/VI | `docs/02-data-quality-report` |
 | 3 view nền + 21 KPI theo SCOR | `logops kpi --by …`, `docs/03-kpi-definitions` |
 | Phân tích lợi nhuận, nhiên liệu, đội xe, mạng lưới + nhận xét theo quy tắc | `logops insights`, `docs/03-analysis-insights` |
-| Dashboard 8 trang, nút chuyển VI/EN, responsive (27 biểu đồ, nhận xét cạnh từng biểu đồ) | `logops dashboard` → http://localhost:8501 |
+| Dashboard, nút chuyển VI/EN, responsive, nhận xét cạnh từng biểu đồ | `logops dashboard` → http://localhost:8501 |
+| Khuyến nghị so với mục tiêu tiết kiệm, trang dashboard, `docs/04`, `docs/05` | `logops optimize` |
+| Một báo cáo gồm mọi trang dashboard dạng tab, HTML tự chứa hoặc PDF chia trang, từ CLI hoặc dashboard | `logops report` |
 | Tài liệu phương pháp, ngưỡng, mô hình dữ liệu | `docs/00-analytical-approach`, `docs/02-*` |
 
-## 6. Phát hiện chính (module 3 `analysis`)
+## 6. Tiết kiệm so với mục tiêu (module 5 `optimize`, mỗi năm)
+
+| Loại | Số tiền | So với mục tiêu (1,04 tr USD) |
+|---|---:|---:|
+| Đo được: thanh lý 28 xe chưa từng chạy | 0,47 tr USD | 45% |
+| Mức trần: 13 xe ít dặm nhất, phụ phí nhiên liệu về trung vị, tăng cước +5% tuyến biên thấp | 2,42 tr USD | 233% |
+| Tổng tiềm năng | 2,89 tr USD | 278% |
+| Chưa giải thích được, không cộng: nhiên liệu mua nhưng không ghi nhận tiêu thụ | 7,24 tr USD | — |
+| Ước tính (tối đa), không cộng: ghép chuyến, dặm chạy rỗng −59,5% × 7,18 tr USD nhiên liệu mua ngoài chuyến | 4,27 tr USD | — |
+
+Ghép chuyến (điều xe rảnh gần nhất cho mỗi lô) làm tỷ lệ chuyến phải điều xe giảm từ 89,5% xuống 41,1% và dặm chạy rỗng giảm 59,5% khi mô phỏng lại mọi lô theo giờ thực tế; quãng đường lấy từ mạng tuyến, nhiên liệu mỗi dặm từ dữ liệu.
+
+Giao trễ (44,4% lần giao trễ quá 2 giờ) không có nguyên nhân lặp lại trong dữ liệu nên không có đề xuất. Chi tiết: [05-evaluation.vi.md](05-evaluation.vi.md).
+
+## 7. Phát hiện chính (module 3 `analysis`)
 
 | Chủ đề | Phát hiện |
 |---|---|
@@ -74,7 +90,7 @@ hàng, 58 tuyến.
 
 Các con số trên do bộ quy tắc tự sinh từ dữ liệu, xem [03-analysis-insights.vi.md](03-analysis-insights.vi.md).
 
-## 7. Quyết định của chủ dự án
+## 8. Quyết định của chủ dự án
 
 - Tập trung vào **năng suất và chất lượng vận hành**; không xét tiêu chí tuân thủ nhân sự.
 - Không làm những gì dữ liệu không có (ví dụ lương tài xế).

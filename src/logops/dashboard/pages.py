@@ -10,15 +10,16 @@ import datetime as dt
 import re
 
 import polars as pl
-import streamlit as st
 
 from logops.analysis import insights
 from logops.analysis.operations import ACTION_PRIORITY
 from logops.dashboard import charts as ch
 from logops.dashboard import data, ui
 from logops.dashboard.i18n import DQ_COLUMNS, DQ_RULES, DQ_TABLES, STATES
+from logops.dashboard.output import st  # Streamlit, or HTML while a report is built
 from logops.dashboard.ui import Kpi
 from logops.metrics.kpis import AREAS, TITLES, UNITS
+from logops.optimize import report as optimize_report
 
 # ------------------------------------------------------------------ shared pieces
 
@@ -39,8 +40,13 @@ def show(ctx, fig, title: str, unit: str | None = None, note: str | None = None)
             st.html(ui.callout(t["explain"], note))
 
 
+def on_paper() -> bool:
+    """True while a report for print is drawn: findings and KPIs then come as text and tables."""
+    return bool(getattr(st, "paper", False))
+
+
 def cards(items: list[Kpi], cols: int = 4) -> None:
-    st.html(ui.kpi_grid(items, cols))
+    st.html(ui.kpi_text(items) if on_paper() else ui.kpi_grid(items, cols))
 
 
 def findings(ctx, topics: tuple[str, ...] | None = None, levels=None, note=None) -> None:
@@ -61,6 +67,10 @@ def findings(ctx, topics: tuple[str, ...] | None = None, levels=None, note=None)
     counts = " · ".join(
         f"{len(g)} {insights.LEVELS[lang][lvl].lower()}" for lvl, g in by_level.items()
     )
+    if on_paper():
+        groups = [(lvl, insights.LEVELS[lang][lvl], g) for lvl, g in by_level.items()]
+        st.html(ui.findings_text(t["key_points"], groups, insights.PARTS[lang]))
+        return
     page = "-".join(topics or ("all",)) + "-" + "-".join(levels or ("all",))
     with st.expander(f"**{t['key_points']}** · {counts}", expanded=True, key=f"card-kp-{page}"):
         if note:
@@ -89,7 +99,7 @@ def table(
     """
     t = ctx["t"]
     shown = df
-    if filters:
+    if filters and not ctx.get("static"):
         for col, name in zip(st.columns(len(filters)), filters, strict=True):
             options = sorted(df[name].drop_nulls().unique().to_list())
             chosen = col.multiselect(
@@ -169,8 +179,39 @@ def _year_span(ctx, year: int) -> tuple[dt.date, dt.date, bool]:
     return lo, hi, (lo, hi) == (a, z)
 
 
+def project_rows(ctx) -> list[tuple[str, str, str | None]]:
+    """What the project is about and where its data comes from, for the overview and the report."""
+    t, f = ctx["t"], ctx["f"]
+    p = data.dataset_profile()
+    names = t["proj"]
+    return [
+        (names["title"], t["proj_title"], None),
+        (names["goal"], t["proj_goal"], None),
+        (
+            names["data"],
+            t["proj_data"].format(
+                tables=p["tables"],
+                rows=f.int(p["rows"]),
+                a=day(ctx, p["first"]),
+                b=day(ctx, p["last"]),
+            ),
+            None,
+        ),
+        (
+            names["company"],
+            t["proj_company"].format(
+                **{k: f.int(p[k]) for k in ("trucks", "drivers", "customers", "routes", "trips")}
+            ),
+            None,
+        ),
+        (names["source"], t["proj_source"], optimize_report.DATASET_URL),
+    ]
+
+
 def overview(ctx) -> None:
     t, b, f = ctx["t"], ctx["bundle"], ctx["f"]
+    if not ctx.get("static"):  # the report shows it on its cover
+        st.html(ui.project_card(project_rows(ctx)))
     years = list(range(ctx["start"].year, ctx["end"].year + 1))
     choice = st.segmented_control(
         t["view_period"],
@@ -205,10 +246,12 @@ def overview(ctx) -> None:
     cards(
         [
             kpi("revenue", money(ctx, now["revenue"]), "revenue"),
+            kpi("op_cost", money(ctx, now["op_cost"]), "op_cost", higher=False),
             kpi("contribution", money(ctx, now["contribution"]), "contribution"),
             kpi("margin", pct(ctx, now["margin_pct"]), "margin_pct", "points"),
             kpi("cost_mile", f.value(now["cost_per_mile"], "usd"), "cost_per_mile", higher=False),
-        ]
+        ],
+        cols=5,
     )
     st.html(ui.group_label(t["g_operations"]))
     cards(
@@ -351,22 +394,26 @@ def regions(ctx) -> None:
     )
     states = b["dimensions"][side].filter(~pl.col("is_total"))
     side_name = t["origin" if side == "origin_state" else "destination"]
-    c1, c2 = st.columns([3, 2])
-    with c1:
-        show(
-            ctx,
-            ch.us_map(
-                states["group"].to_list(),
-                states["contribution"].to_list(),
-                lang,
-                lambda v: money(ctx, v),
-                names=[state(s) for s in states["group"]],
-                unit=t["u_musd"],
-            ),
-            f"{t['state_map']} · {side_name}",
-            t["u_musd"],
-            t["state_map_note"],
-        )
+    # a report has no map: its outline would be fetched from the internet
+    if ctx.get("static"):
+        (c2,) = st.columns(1)
+    else:
+        c1, c2 = st.columns([3, 2])
+        with c1:
+            show(
+                ctx,
+                ch.us_map(
+                    states["group"].to_list(),
+                    states["contribution"].to_list(),
+                    lang,
+                    lambda v: money(ctx, v),
+                    names=[state(s) for s in states["group"]],
+                    unit=t["u_musd"],
+                ),
+                f"{t['state_map']} · {side_name}",
+                t["u_musd"],
+                t["state_map_note"],
+            )
     with c2:
         ranked = states.sort("contribution_margin_pct")
         lo, hi = ranked.row(0, named=True), ranked.row(-1, named=True)
@@ -968,7 +1015,13 @@ def data_page(ctx) -> None:
 
     with card(t["trust"]):
         st.html(ui.chart_header(t["trust"]))
-        st.html(ui.html_table(t["trust_cols"], [list(r) for r in t["trust_rows"]]))
+        st.html(
+            ui.html_table(
+                t["trust_cols"],
+                [[what, ui.level_text(level, cls)] for what, level, cls in t["trust_rows"]],
+                nowrap={1},
+            )
+        )
 
     cols = t["g_cols"]
     rows = [
@@ -984,12 +1037,14 @@ def data_page(ctx) -> None:
     with card(t["glossary"]):
         st.html(ui.chart_header(t["glossary"]))
         st.html(ui.callout(t["explain"], t["glossary_note"]))
-        areas = sorted({r[cols["area"]] for r in rows})
-        chosen = st.multiselect(
-            cols["area"], areas, key=f"glossary-{lang}", placeholder=t["filter_all"]
-        )
-        shown = [r for r in rows if not chosen or r[cols["area"]] in chosen]
-        st.caption(t["rows_shown"].format(n=len(shown), total=len(rows)))
+        shown = rows
+        if not ctx.get("static"):  # a report has no filter
+            areas = sorted({r[cols["area"]] for r in rows})
+            chosen = st.multiselect(
+                cols["area"], areas, key=f"glossary-{lang}", placeholder=t["filter_all"]
+            )
+            shown = [r for r in rows if not chosen or r[cols["area"]] in chosen]
+            st.caption(t["rows_shown"].format(n=len(shown), total=len(rows)))
         header = list(rows[0])  # same order as the row values
         st.html(
             ui.html_table(
@@ -999,3 +1054,467 @@ def data_page(ctx) -> None:
                 nowrap={header.index(cols["unit"])},
             )
         )
+
+
+# ------------------------------------------------------------------ 9. optimization
+# One page: the savings summary first, then each lever in its own group (fleet, lane pricing,
+# fuel surcharge, late deliveries, data process) and the levers checked and not recommended.
+
+
+def growth_label(t: dict, g: float) -> str:
+    return t["o_growth_now"] if g == 0 else t["o_growth_up"].format(g=f"{g:g}")
+
+
+def opt_group(ctx, title: str) -> None:
+    st.html(ui.group_label(title))
+
+
+def _musd(ctx):
+    return lambda x: ctx["f"].value(x, "usd_m")
+
+
+def savings_tips(ctx, d: dict, rec: pl.DataFrame, tot: dict) -> dict[str, list[str]]:
+    """For each savings card, the figures it is made of and what it takes to reach the target."""
+    t, f = ctx["t"], ctx["f"]
+    musd = _musd(ctx)
+    target, m, u = tot["target"], tot["measured"], tot["upper"]
+
+    def items(kind: str) -> list[str]:
+        rows = rec.filter(pl.col("impact_type") == kind).iter_rows(named=True)
+        return [f"• {r['action']}: {musd(r['annual_impact_usd'])}" for r in rows]
+
+    measured_trucks = int(d["tiers"].filter(pl.col("saving_type") == "measured")["trucks"].sum())
+    gap = target - m
+    fsc = d["by_cap"][optimize_report.DEFAULT_CAP_PCT][0]
+    if gap > 0:
+        reach = [
+            t["o_tip_gap"].format(
+                target=musd(target), m=musd(m), gap=musd(gap), share=f.pct(gap / u)
+            ),
+            t["o_tip_example"].format(fsc=musd(fsc), fsc_share=f.pct(gap / fsc)),
+        ]
+    else:
+        reach = [t["o_tip_done"].format(target=musd(target))]
+    base = target / optimize_report.TARGET_SHARE
+    return {
+        "target": [line.format(base=musd(base), target=musd(target)) for line in t["o_tip_target"]],
+        "measured": [
+            t["o_tip_measured"],
+            *items("measured"),
+            t["o_tip_sum"].format(total=musd(m), pct=f.pct(m / target)),
+            t["o_tip_measured_end"].format(n=measured_trucks),
+        ],
+        "upper": [
+            t["o_tip_upper"],
+            *items("upper bound"),
+            t["o_tip_sum"].format(total=musd(u), pct=f.pct(u / target)),
+            t["o_tip_upper_end"],
+        ],
+        "total": [
+            t["o_tip_total"].format(
+                m=musd(m), u=musd(u), total=musd(m + u), pct=f.pct((m + u) / target)
+            ),
+            *reach,
+        ],
+    }
+
+
+def optimize(ctx) -> None:
+    t, f, lang = ctx["t"], ctx["f"], ctx["lang"]
+    musd = _musd(ctx)
+    d = data.optimization(0.0)
+    first, last = data.bounds()
+    st.caption(t["o_scope"].format(a=day(ctx, first), b=day(ctx, last)))
+    rec = optimize_report.recommendations(d, lang)
+    tot = optimize_report.totals(d)
+    target = tot["target"]
+    total = tot["measured"] + tot["upper"]
+    tips = savings_tips(ctx, d, rec, tot)
+    if not on_paper():  # printed, the computation sits under each figure
+        st.caption(t["o_tip_hint"])
+    cards(
+        [
+            Kpi(t["o_target"], musd(target), note=t["n_target"], tip=tips["target"]),
+            Kpi(
+                t["o_measured"],
+                musd(tot["measured"]),
+                note=t["n_measured"].format(pct=f.pct(tot["measured"] / target)),
+                tip=tips["measured"],
+            ),
+            Kpi(t["o_upper"], musd(tot["upper"]), note=t["n_upper"], tip=tips["upper"]),
+            Kpi(
+                t["o_total"],
+                musd(total),
+                note=t["n_total"].format(pct=f.pct(total / target)),
+                tip=tips["total"],
+            ),
+        ]
+    )
+    unexplained = rec.filter(pl.col("impact_type") == "unexplained")["annual_impact_usd"].sum()
+    st.html(ui.callout(t["explain"], t["o_unexplained"].format(amount=musd(unexplained))))
+
+    valued = rec.filter(pl.col("impact_type").is_in(["measured", "upper bound"]))
+    show(
+        ctx,
+        ch.hbar(
+            valued["action"].to_list(),
+            valued["annual_impact_usd"].to_list(),
+            lang,
+            lambda v: f.num(v / 1e6, 2),
+            color=[
+                ch.AQUA if k == "measured" else ch.BLUE for k in valued["impact_type"].to_list()
+            ],
+        ),
+        t["o_chart"],
+        t["u_musd"],
+        t["o_chart_note"].format(target=musd(target)),
+    )
+
+    acted = rec.filter(pl.col("impact_type") != "no signal")
+    with card(t["o_table"]):
+        st.html(ui.chart_header(t["o_table"]))
+        st.html(
+            ui.html_table(
+                t["o_cols"],
+                [
+                    [
+                        t["o_areas"][r["area"]],
+                        r["action"],
+                        r["item"],
+                        musd(r["annual_impact_usd"]) if r["annual_impact_usd"] else "—",
+                        t["o_types"][r["impact_type"]],
+                        r["evidence"],
+                    ]
+                    for r in acted.iter_rows(named=True)
+                ],
+                numeric={3},
+            )
+        )
+
+    fleet_plan(ctx)
+    lane_pricing(ctx)
+    fuel_surcharge(ctx)
+    trip_chaining(ctx)
+    lateness_check(ctx)
+    data_gaps(ctx)
+
+    opt_group(ctx, t["o_checked"])
+    checked = rec.filter(pl.col("impact_type") == "no signal")
+    with card(t["o_checked"]):
+        st.html(ui.chart_header(t["o_checked"]))
+        st.html(ui.callout(t["explain"], t["o_checked_note"]))
+        st.html(
+            ui.html_table(
+                t["o_checked_cols"],
+                [[r["item"], r["evidence"]] for r in checked.iter_rows(named=True)],
+            )
+        )
+
+
+def fleet_plan(ctx) -> None:
+    """Fleet page: trucks needed per volume scenario and the disposal tiers."""
+    t, lang = ctx["t"], ctx["lang"]
+    musd = _musd(ctx)
+    opt_group(ctx, t["o_fleet"])
+    growth = (
+        st.segmented_control(
+            t["o_growth"],
+            [0, 5, 10, 20],
+            default=0,
+            format_func=lambda g: growth_label(t, g),
+            key="opt_growth",
+        )
+        or 0
+    )
+    st.caption(t["o_growth_help"])
+    d = data.optimization(growth / 100)
+    plan = d["plan"]
+    now = plan.filter(pl.col("growth_pct") == float(growth)).row(0, named=True)
+    trucks = t["u_trucks"]
+    cards(
+        [
+            Kpi(t["o_needed"], f"{now['trucks_needed']} {trucks}", note=t["n_needed"]),
+            Kpi(t["o_owned"], f"{now['fleet_size']} {trucks}"),
+            Kpi(t["o_in_use"], f"{now['trucks_in_use']} {trucks}"),
+            Kpi(t["o_surplus"], f"{now['surplus']} {trucks}"),
+        ]
+    )
+    cc = d["cross_check"]
+    c1, c2 = st.columns([2, 3])
+    with c1:
+        show(
+            ctx,
+            ch.vbars(
+                [growth_label(t, g) for g in plan["growth_pct"]],
+                plan["trucks_needed"].to_list(),
+                lang,
+                str,
+                color=[ch.BLUE if g == growth else ch.NEUTRAL for g in plan["growth_pct"]],
+                height=300,
+                category_title=t["o_growth"],
+            ),
+            t["o_needed_chart"],
+            trucks,
+            t["o_needed_note"].format(
+                owned=now["fleet_size"],
+                in_use=now["trucks_in_use"],
+                busiest=cc["busiest_day_trucks"],
+                above=cc["days_above_need"],
+                days=cc["days"],
+            ),
+        )
+    with c2, card(t["o_tiers"]):
+        st.html(ui.chart_header(t["o_tiers"]))
+        st.html(
+            ui.html_table(
+                t["o_tier_cols"],
+                [
+                    [
+                        r["tier"],
+                        t["o_tier_status"][r["status"]],
+                        r["trucks"],
+                        r["return_to_service"],
+                        musd(r["maintenance_per_year"]),
+                        t["o_types"][r["saving_type"]],
+                    ]
+                    for r in d["tiers"].iter_rows(named=True)
+                ],
+                numeric={2, 3, 4},
+                numbered=False,
+            )
+        )
+        st.html(ui.callout(t["explain"], t["o_tiers_note"]))
+
+
+def lane_pricing(ctx) -> None:
+    """Lanes page: fuel-surcharge (S1) and rate (S2) scenarios, per lane."""
+    t, f = ctx["t"], ctx["f"]
+    musd = _musd(ctx)
+    opt_group(ctx, t["o_lanes"])
+    d = data.optimization(0.0)
+    target = optimize_report.totals(d)["target"]
+    cap = st.segmented_control(
+        t["o_cap"],
+        ["5", "10", "none"],
+        default="5",
+        format_func=lambda c: t["o_cap_none"] if c == "none" else f"+{c}%",
+        key="opt_cap",
+    )
+    cap_value = None if cap == "none" else float(cap or 5)
+    s1, s2, loss = d["by_cap"][cap_value]
+    cards(
+        [
+            Kpi(t["o_s1"], musd(s1), note=t["n_s1"]),
+            Kpi(t["o_s2"], musd(s2), note=t["n_s2"]),
+            Kpi(
+                t["o_s12"],
+                musd(s1 + s2),
+                note=t["n_s12"].format(pct=f.pct((s1 + s2) / target)),
+            ),
+            Kpi(t["o_loss"], pct(ctx, loss), note=t["n_loss"]),
+        ]
+    )
+    cols = t["o_lane_cols"]
+    lanes = d["lane_scenarios"][cap_value]
+    view = lanes.sort(["s2_uplift", "s1_uplift"], descending=True).select(
+        pl.col("lane").alias(cols["lane"]),
+        pl.col("group").replace_strict(t["actions"]).alias(cols["group"]),
+        (100 * pl.col("margin")).round(1).alias(cols["margin"]),
+        pl.col("fsc_rate").round(3).alias(cols["fsc_rate"]),
+        pl.col("s1_uplift").round(0).alias(cols["s1"]),
+        pl.col("s2_uplift").round(0).alias(cols["s2"]),
+        pl.col("s2_linehaul_increase_pct").round(1).alias(cols["increase"]),
+        pl.col("max_volume_loss_pct").round(1).alias(cols["loss"]),
+        pl.col("break_even_driver_cost_per_mile").round(3).alias(cols["break_even"]),
+    )
+    with card(t["o_lane_table"]):
+        st.html(ui.chart_header(t["o_lane_table"]))
+        st.html(ui.callout(t["explain"], t["o_lane_note"]))
+        table(ctx, view, "opt-lanes", filters=(cols["group"],), height=380)
+
+
+def fuel_surcharge(ctx) -> None:
+    """Fuel page: a surcharge that follows the fuel price (S3), simulated."""
+    t, f, lang = ctx["t"], ctx["f"], ctx["lang"]
+    opt_group(ctx, t["o_s3_group"])
+    d = data.optimization(0.0)
+    ix = d["indexed_by_year"]
+    show(
+        ctx,
+        ch.grouped_bars(
+            [str(y) for y in ix["year"]],
+            {
+                t["o_s3_actual"]: [v / 1e6 for v in ix["actual"]],
+                t["o_s3_indexed"]: [v / 1e6 for v in ix["indexed"]],
+            },
+            lang,
+            lambda v: f.num(v, 2),
+            value_title=t["u_musd"],
+            category_title=t["year"],
+        ),
+        t["o_s3"],
+        t["u_musd"],
+        t["o_s3_note"].format(base=f.value(d["indexed_base"], "usd")),
+    )
+
+
+def trip_chaining(ctx) -> None:
+    """Nearest-truck dispatching against today's: moves, empty miles, trucks, fuel (O3)."""
+    t, f = ctx["t"], ctx["f"]
+    opt_group(ctx, t["o_chain"])
+    c = data.optimization(0.0)["chaining"]
+    k, today, near = c["costs"], c["today"], c["nearest"]
+    hours = lambda miles: f.num(miles / k["speed_mph"], 0)  # noqa: E731
+    cards(
+        [
+            Kpi(
+                t["o_chain_moved"],
+                pct(ctx, near["moved_pct"]),
+                note=t["n_chain_moved"].format(
+                    today=pct(ctx, today["moved_pct"]), seen=pct(ctx, c["observed_moved_pct"])
+                ),
+            ),
+            Kpi(
+                t["o_chain_miles"],
+                f"−{f.pct(c['empty_miles_cut'])}",
+                note=t["n_chain_miles"].format(
+                    near=f.num(near["empty_miles_per_year"] / 1e6, 1),
+                    today=f.num(today["empty_miles_per_year"] / 1e6, 1),
+                ),
+            ),
+            Kpi(
+                t["o_chain_move"],
+                f"{f.int(near['miles_per_move'])} {t['u_miles']}",
+                note=t["n_chain_move"].format(
+                    h=hours(near["miles_per_move"]),
+                    day=pct(ctx, near["within_a_day_pct"]),
+                    limit=optimize_report.DRIVING_DAY_HOURS,
+                ),
+            ),
+            Kpi(
+                t["o_chain_value"],
+                f.value(c["saving_per_year"], "usd_m"),
+                note=t["n_chain_value"].format(
+                    cut=f.pct(c["empty_miles_cut"]),
+                    fuel=f.value(k["off_trip_fuel_per_year"], "usd_m"),
+                ),
+                tip=[
+                    line.format(
+                        speed=f.num(k["speed_mph"], 1),
+                        mpg=f.num(k["mpg"], 2),
+                        price=f.value(k["fuel_price"], "usd"),
+                        per_mile=f.value(k["cost_per_mile"], "usd"),
+                        model=f.value(c["model_fuel_saving"], "usd_m"),
+                        cut=f.pct(c["empty_miles_cut"]),
+                        off_trip=f.value(k["off_trip_fuel_per_year"], "usd_m"),
+                        off_miles=f.num(k["off_trip_miles_per_year"] / 1e6, 1),
+                        saving=f.value(c["saving_per_year"], "usd_m"),
+                    )
+                    for line in t["o_chain_tip"]
+                ],
+            ),
+        ]
+    )
+    rows = [
+        (t["o_chain_rows"][0], lambda x: pct(ctx, x["moved_pct"])),
+        (t["o_chain_rows"][1], lambda x: f.int(x["moves_per_year"])),
+        (t["o_chain_rows"][2], lambda x: f.int(x["empty_miles_per_year"])),
+        (t["o_chain_rows"][3], lambda x: f.int(x["miles_per_move"])),
+        (
+            t["o_chain_rows"][4].format(h=optimize_report.DRIVING_DAY_HOURS),
+            lambda x: pct(ctx, x["within_a_day_pct"]),
+        ),
+        (t["o_chain_rows"][5], lambda x: f.int(x["trucks"])),
+    ]
+    with card(t["o_chain_table"]):
+        st.html(ui.chart_header(t["o_chain_table"]))
+        st.html(
+            ui.callout(
+                t["explain"],
+                t["o_chain_note"].format(
+                    loads=f.int(c["loads"]), h=optimize_report.DRIVING_DAY_HOURS
+                ),
+            )
+        )
+        st.html(
+            ui.html_table(
+                t["o_chain_cols"],
+                [[name, cell(today), cell(near)] for name, cell in rows],
+                numeric={1, 2},
+                numbered=False,
+            )
+        )
+
+
+def lateness_check(ctx) -> None:
+    """Delivery page: does lateness repeat by city, customer, hour, lane or driver?"""
+    t, f = ctx["t"], ctx["f"]
+    opt_group(ctx, t["r_late"])
+    d = data.optimization(0.0)
+    with card(t["r_late"]):
+        st.html(ui.chart_header(t["r_late"]))
+        st.html(ui.callout(t["explain"], t["r_late_note"].format(share=pct(ctx, d["late_share"]))))
+        st.html(
+            ui.html_table(
+                t["r_late_cols"],
+                [
+                    [
+                        t["r_dims"][r["dimension"]],
+                        r["groups"],
+                        "—" if r["spread_pts"] is None else f.num(r["spread_pts"], 1),
+                        "—" if r["persistence"] is None else f.num(r["persistence"], 2),
+                        t["r_yes"] if r["signal"] else t["r_no"],
+                    ]
+                    for r in d["lateness"].iter_rows(named=True)
+                ],
+                numeric={1, 2, 3},
+            )
+        )
+
+
+def data_gaps(ctx) -> None:
+    """Data page: process and equipment changes that would close the data gaps."""
+    t, f, lang = ctx["t"], ctx["f"], ctx["lang"]
+    opt_group(ctx, t["o_gaps"])
+    d = data.optimization(0.0)
+    g = d["gaps"]
+    low, high = g.telematics_cost_per_year
+    cards(
+        [
+            Kpi(
+                t["o_tele_cost"],
+                f"{money(ctx, low)} – {money(ctx, high)}",
+                note=t["n_tele_cost"].format(trucks=g.trucks_in_use),
+            ),
+            Kpi(t["o_tele_break"], f.pct(g.telematics_break_even_share), note=t["n_tele_break"]),
+        ],
+        cols=2,
+    )
+    with card(t["o_gaps"]):
+        st.html(ui.chart_header(t["o_gaps"]))
+        st.html(ui.callout(t["explain"], t["o_gaps_note"]))
+        st.html(
+            ui.html_table(
+                t["o_gap_cols"],
+                [
+                    [r["gap"], r["evidence"], r["not_doing"], r["tier1"], r["tier2"]]
+                    for r in optimize_report.gap_rows(d, lang)
+                ],
+            )
+        )
+        sources = " · ".join(text for text, _url in optimize_report.SOURCES.values())
+        st.caption(f"{t['o_sources']}: {sources}")
+
+
+# page key and render function: the dashboard's navigation and the report's tabs, in order
+ORDER = [
+    ("p_overview", overview),
+    ("p_profit", profit),
+    ("p_regions", regions),
+    ("p_network", network),
+    ("p_service", service),
+    ("p_fleet", fleet),
+    ("p_fuel", fuel),
+    ("p_optimize", optimize),
+    ("p_data", data_page),
+]

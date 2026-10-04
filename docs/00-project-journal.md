@@ -390,6 +390,85 @@ Module 1 progress: █████████ complete (7 tasks done, 2 cut wit
 ### Sun 10-04 · Dashboard layout fixes ✅
 - No overflow at 1440/1280/1024/768/390 px (container-query grids, wrapping tables, unit-free bar labels); tabs keep their selection; findings collapsible with a tone legend; "tr USD"; KPI table column order fixed. 120 tests pass.
 
+### Sun 10-04 · Module 5 `optimize` (redone) ✅
+- **Scope agreed:** O1 fleet, O2 lane pricing, O4 late deliveries, O5 data process, O6
+  recommendations and dashboard page; O3 trip chaining optional (not done). Target may be exceeded.
+- **Done:** ported `optimize/` from `feature/optimize`; daily demand and lane groups aligned with
+  the analysis layer and dashboard; new `lateness.py` (no persistent cause); new gap "moves between
+  trips not recorded"; bilingual recommendations with evidence computed from the data; dashboard
+  page "Optimization recommendations"; `logops optimize`; generated `docs/04`, `docs/05`.
+- **Result:** measured $0.47M/year (45% of target), upper bound $2.42M, total potential $2.89M
+  (278%); unexplained fuel $7.24M not counted. 148 tests pass.
+- **Review:** [reviews/05-optimize.md](reviews/05-optimize.md).
+
+### Sun 10-04 · Module 6 `reports` ✅
+- **Done:** `src/logops/reports/` (`build.py` five report types from the dashboard's charts and
+  components, `pdf.py` headless Edge/Chrome print); `logops report`; sidebar "Export report".
+- **Result:** HTML self-contained (~4.7 MB), PDF in about 2 s after a 10–15 s build; 157 tests pass.
+- **Review:** [reviews/06-reports.md](reviews/06-reports.md).
+
+### Sun 10-04 · Dashboard and report follow-ups ✅
+- **Done:** optimization details moved next to their topic (fleet plan → fleet, lane pricing →
+  lanes, lateness check → delivery, indexed surcharge → fuel, data-process gaps → data); the
+  optimization page keeps the summary with a "details on page" column. Volume scenario renamed
+  ("Current volume", "+5%"…). Language buttons "Vi"/"En". Report export runs on a worker thread:
+  the dashboard stays usable, a toast and a green Download button appear when done. Report
+  findings show as tabs (printed: all levels).
+- **Open:** report content proposal v2 in [SPEC-reports.md](../SPEC-reports.md), awaiting review.
+
+### Sun 10-04 · Optimization page and the single report ✅
+- **Done:** optimization back on one page, placed before the data page. Report export reworked as
+  the owner asked: one report with every dashboard page as a tab (header with title, export date
+  and period), drawn by the page code through an HTML builder; responsive HTML; PDF with one sheet
+  per page and a footer (name, export date, page x / y). Sidebar export shows a status line and a
+  Download button that fills with green while the report is made. Overview adds operating cost.
+- **Result:** 155 tests pass; PDF for 2022–2024 is 48 pages.
+
+### Sun 10-04 · Project card, savings explained, print layout ✅
+- **Done:** project and data-source card (overview, report cover); icons removed; report tabs in
+  two rows; trust levels as coloured text; "upper bound" renamed "maximum potential" and the four
+  savings cards explain their figures on hover (printed in the PDF), including what it takes to
+  reach the target ($0.57M more, 23.7% of the potential); PDF print layout rebuilt (cover,
+  contents, numbered sections, figures and tables, landscape sheets for wide tables, no cut).
+- **Result:** 156 tests pass; PDF for 2022–2024 is 43 pages.
+
+### Sun 10-04 · PDF as a written report ✅
+- **Done:** the PDF is typeset as a document: Times New Roman, black text, dark blue headings,
+  11 pt body, 20 mm margins; findings as numbered paragraphs, KPI cards as a table (with how each
+  figure is computed), tables with thin horizontal rules, no boxes; charts use the same typeface.
+  The HTML report and the dashboard keep their cards.
+- **Result:** 156 tests pass; PDF for 2022–2024 is 49 pages.
+
+### Sun 10-04 · PDF front matter ✅
+- **Done:** cover with a photo (reports/assets/cover.jpg, optional) and the project facts set off;
+  contents, list of figures and list of tables with page numbers and links (two prints: the first
+  one's named destinations give the pages); executive summary page (results, act now, keep
+  watching, savings); findings with coloured level headings, bullets and the action set off.
+- **Result:** 157 tests pass; PDF for 2022–2024 is 55 pages (31 figures, 11 tables).
+
+### Sun 10-04 · O3 trip chaining ✅
+- **Done:** `optimize/chaining.py` replays every load at its actual times under two dispatch rules
+  (as today: truck idle longest; chaining: a truck already in the pickup city first), 12/24/48 h
+  allowed to reach another city; recommendation of type "estimate"; dashboard section with a
+  cost-per-move input; evaluation doc section. Report cover photo moved below the project facts.
+- **Result:** as-today replay 95.3% of trips needing a move (observed 95.4%); chaining 35.4%,
+  17,018 fewer moves a year, trucks needed −14.6%; $4.63M a year at $272 a move (hypothesis, not
+  in totals). 159 tests pass.
+
+### Sun 10-04 · Interview preparation ✅
+- **Done:** README (at a glance, how to use, modules) and `docs/demo-script` (7-minute walk-through,
+  checklist, likely questions) in EN/VI; fallback reports (VI/EN, PDF/HTML) in `reports/output/`.
+- **Result:** 159 tests pass, `ruff` clean.
+
+### Sun 10-04 · O3 reworked: nearest truck, distances and fuel ✅
+- **Changed (owner):** no $272-a-move hypothesis. Each load goes to the nearest free truck;
+  distances over the lanes (shortest path), an empty mile at $0.605 (fuel price ÷ mpg, from the data).
+  No fixed limit on the empty drive (any limit up to 24 h needs thousands of extra trucks); moves
+  within one 11-hour driving day are reported (33%).
+- **Result:** trips needing a move 89.5% → 41.1%, empty miles −59.5%, trucks 211 → 195 in the replay;
+  the model's $12.56M exceeds the fuel bought off trips, so the cut is applied to that fuel: up to
+  $4.27M a year (estimate, not in totals). 160 tests pass.
+
 ## 6. In progress
 
 **Module 4 `dashboard` is done and awaits your review, then a commit.**
