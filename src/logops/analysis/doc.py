@@ -6,7 +6,7 @@ import duckdb
 import polars as pl
 
 from logops.analysis.bundle import analysis_bundle
-from logops.analysis.insights import REASONS_VI, SOURCES, THRESHOLDS
+from logops.analysis.insights import LEVELS, PARTS, REASONS_VI, SOURCES, THRESHOLDS
 from logops.analysis.profit import BRIDGE_PARTS
 from logops.data_platform.dq_report import NumberFormatter
 
@@ -23,8 +23,6 @@ L = {
         "range": "Period: {start} to {end}. Profit is contribution before driver pay and overhead "
         "(not in the data). Costs are booked on the date they occur.",
         "insights": "## 1. Commentary (generated from the figures by rules)",
-        "level": "Level",
-        "comment": "Comment",
         "pnl": "## 2. P&L by year",
         "pnl_q": "## 3. P&L by quarter",
         "pnl_cols": [
@@ -105,7 +103,7 @@ L = {
             "review_price": "review price",
             "growth_opportunity": "growth opportunity",
             "monitor": "monitor",
-            "consider_exit": "consider exit",
+            "review_low": "review (low volume, low margin)",
         },
         "balance": "## 10. Headhaul / backhaul balance (most imbalanced cities)",
         "bal_cols": ["City", "Loads out", "Loads in", "Net", "Imbalance"],
@@ -161,8 +159,6 @@ L = {
         "range": "Giai đoạn: {start} đến {end}. Lợi nhuận là đóng góp trước lương tài xế và "
         "chi phí chung (không có trong dữ liệu). Chi phí ghi theo ngày phát sinh.",
         "insights": "## 1. Nhận xét (sinh tự động từ số liệu theo quy tắc)",
-        "level": "Mức độ",
-        "comment": "Nhận xét",
         "pnl": "## 2. Lãi lỗ theo năm",
         "pnl_q": "## 3. Lãi lỗ theo quý",
         "pnl_cols": [
@@ -243,7 +239,7 @@ L = {
             "review_price": "xem lại giá",
             "growth_opportunity": "cơ hội tăng trưởng",
             "monitor": "theo dõi",
-            "consider_exit": "cân nhắc rút lui",
+            "review_low": "rà soát (ít chuyến, biên thấp)",
         },
         "balance": "## 10. Cân bằng hàng đi / hàng về (các thành phố lệch nhất)",
         "bal_cols": ["Thành phố", "Lô đi", "Lô đến", "Chênh lệch", "Mức lệch"],
@@ -306,6 +302,28 @@ def _table(header, rows, right=()):
     return out
 
 
+def _findings(items: list[dict], lang: str) -> list[str]:
+    """Findings grouped by level: title, tone and topic, then what happened, impact, action."""
+    parts, out = PARTS[lang], []
+    for level, label in LEVELS[lang].items():
+        group = [i for i in items if i["level"] == level]
+        if not group:
+            continue
+        out += [f"### {label}", ""]
+        for i in group:
+            impact = parts["meaning"] if level == "info" else parts["impact"]
+            out += [
+                f"**{i['title']}** · {i['tone_label']} · {i['topic_label']}",
+                "",
+                f"- **{parts['what']}:** {i['what']}",
+                f"- **{impact}:** {i['impact']}",
+            ]
+            if i["action"]:
+                out.append(f"- **{parts['action']}:** {i['action']}")
+            out.append("")
+    return out
+
+
 def render(b: dict, lang: str) -> str:
     t, f = L[lang], NumberFormatter(lang)
     usd = lambda x: f.value(x, "usd_m")  # noqa: E731
@@ -321,9 +339,7 @@ def render(b: dict, lang: str) -> str:
         t["insights"],
         "",
     ]
-    out += _table(
-        [t["level"], t["comment"]], [[i["level_label"], i["text"]] for i in b["insights"][lang]]
-    )
+    out += _findings(b["insights"][lang], lang)
 
     out += ["", t["pnl"], ""]
     out += _table(

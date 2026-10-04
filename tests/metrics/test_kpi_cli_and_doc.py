@@ -4,7 +4,7 @@ from typer.testing import CliRunner
 
 from logops import cli, config
 from logops.metrics.kpi_doc import LANGUAGES, fleet_values, render
-from logops.metrics.kpis import CATALOG
+from logops.metrics.kpis import CATALOG, TITLES
 
 
 def test_kpi_command_prints_groups_and_fleet(warehouse, monkeypatch):
@@ -32,7 +32,7 @@ def test_kpi_doc_lists_every_kpi_in_both_languages(con):
     for lang in LANGUAGES:
         text = render(values, start, end, lang)
         for k in CATALOG:
-            assert f"| `{k.name}` |" in text, (lang, k.name)
+            assert f"{TITLES[k.name][lang]} (`{k.name}`) |" in text, (lang, k.name)
         assert render(values, start, end, lang) == text  # deterministic
     assert "| 830.0 |" in render(values, start, end, "en")
     assert "| 830,0 |" in render(values, start, end, "vi")

@@ -1,7 +1,7 @@
 # 00 · Nhật ký dự án
 
 > Bản tiếng Anh: [00-project-journal.md](00-project-journal.md) · Cơ sở phân tích: [00-analytical-approach.vi.md](00-analytical-approach.vi.md)
-> **Cập nhật lần cuối:** Thứ 7 03/10/2026, sau module 3 `analysis`. Tổng kết ngắn gọn: [SUMMARY.vi.md](SUMMARY.vi.md).
+> **Cập nhật lần cuối:** CN 04/10/2026, rà soát dashboard lần hai. Tổng kết ngắn gọn: [SUMMARY.vi.md](SUMMARY.vi.md).
 
 **Cách dùng file này**
 - Lần đầu đọc: đọc §1 → §4 để nắm dự án là gì, thư mục có gì, làm theo quy trình nào, đang ở đâu.
@@ -35,6 +35,9 @@ logistics-ops/
 ├── CAPABILITY-MAP.md / .vi.md      6 module, 4 lĩnh vực tối ưu, 6 loại báo cáo, ánh xạ CRISP-DM
 ├── SPEC-data-platform.md / .vi.md  Đặc tả module 1
 ├── SPEC-metrics.md / .vi.md        Đặc tả module 2: định nghĩa output trước khi code
+├── SPEC-analysis.md / .vi.md       Đặc tả module 3
+├── SPEC-dashboard.md / .vi.md      Đặc tả module 4: 8 trang
+├── .streamlit/config.toml          Giao diện dashboard (sáng, bảng màu dự án)
 ├── pyproject.toml, uv.lock         Khai báo thư viện (uv quản lý)
 ├── docs/
 │   ├── 00-project-journal.*        ← file này: nhật ký tiến độ
@@ -52,7 +55,7 @@ logistics-ops/
 │   ├── plan.md / .vi.md            Kế hoạch module đang làm (hiện là data-platform)
 │   └── todo.md / .vi.md            Danh sách việc; todo.md (tiếng Anh) là nguồn chuẩn để đánh dấu
 ├── src/logops/
-│   ├── cli.py                      Lệnh `logops build`, `logops docs`, `logops kpi`
+│   ├── cli.py                      Lệnh `logops build`, `docs`, `kpi`, `insights`, `dashboard`
 │   ├── config.py                   Mọi đường dẫn, tính từ thư mục gốc repo
 │   └── data_platform/
 │       ├── schema.py               Kiểu cột, khóa chính, khóa ngoại của 14 bảng (nguồn chuẩn duy nhất)
@@ -65,11 +68,24 @@ logistics-ops/
 │       ├── views.py                3 view nền: trip_economics, delivery_performance, truck_economics
 │       ├── kpis.py                 Danh mục 21 KPI + hàm kpi()
 │       └── kpi_doc.py              Sinh `docs/03-kpi-definitions`
+│   └── analysis/
+│       ├── profit.py, operations.py  Lãi lỗ, cầu lợi nhuận, các chiều; nhiên liệu, năng lực, tuyến, mạng lưới
+│       ├── service.py              Đúng giờ, thời gian chờ, trạng thái đội xe, số theo ngày cho dashboard
+│       ├── insights.py             Nhận xét theo quy tắc, song ngữ
+│       └── bundle.py, doc.py       analysis_bundle(); sinh `docs/03-analysis-insights`
+│   └── dashboard/
+│       ├── app.py                  Điểm vào Streamlit: thanh bên (ngôn ngữ, ngày) + điều hướng
+│       ├── data.py                 Nơi duy nhất mở kho dữ liệu (chỉ đọc, có cache)
+│       ├── charts.py               Hàm vẽ Plotly: một bảng màu, một định dạng số
+│       ├── pages.py                8 trang
+│       └── i18n.py                 Mọi nhãn tiếng Việt và tiếng Anh
 ├── tests/
 │   ├── fixtures/                   CSV nhỏ tự tạo, có lỗi cố ý để test
 │   ├── test_smoke.py               CLI và đường dẫn
 │   ├── data_platform/              Test nạp dữ liệu, lược đồ, và test tích hợp trên dữ liệu thật
-│   └── metrics/                    Kho mẫu tính tay được + test tích hợp đối chiếu số thật
+│   ├── metrics/                    Kho mẫu tính tay được + test tích hợp đối chiếu số thật
+│   ├── analysis/                   Test đơn vị và test trên dữ liệu thật cho phân tích và nhận xét
+│   └── dashboard/                  Mọi trang chạy (VI/EN), không SQL, số khớp, thời gian tải
 ├── dataset/          (không commit) 14 file CSV gốc từ Kaggle, chỉ đọc
 └── data/             (không commit) Sản phẩm sinh ra: parquet/ và warehouse.duckdb
 ```
@@ -98,8 +114,8 @@ logistics-ops/
 | — | Hiểu nghiệp vụ (`docs/01`) | 1 | T5 01/10 | ✅ Xong |
 | 1 | `data-platform` | 2, 3 | T6 02/10 | ✅ Xong (7 việc; Việc 6 và 8 đã cắt) |
 | 2 | `metrics` | 3 | Sáng T7 03/10 | ✅ Xong (29 test), commit `e99d12a` |
-| 3 | `analysis` | 2, 3 | Tối T7 03/10 | ✅ Xong (12 test). Chờ bạn rà soát và commit |
-| 4 | `dashboard` | 6 | Sáng CN 04/10 | ⏳ |
+| 3 | `analysis` | 2, 3 | Tối T7 03/10 | ✅ Xong (12 test), commit `fc4b1ed` |
+| 4 | `dashboard` | 6 | Sáng CN 04/10 | ✅ Xong T7 03/10 (26 test); đã chỉnh sau hai lần rà soát. Chờ commit |
 | 5 | `optimize` | 4, 5 | Sau phân tích | ⏸️ Ở nhánh `feature/optimize` |
 | 6 | `reports` | 6 | Chiều CN 04/10 | ⏳ |
 | — | Demo, đánh giá, đóng băng | 5 | Tối CN 04/10 | ⏳ |
@@ -301,17 +317,81 @@ Tiến độ module 1: █████████ hoàn tất (7 việc xong, 2
   bắt được).
 - **Đánh giá:** [reviews/03-analysis.vi.md](reviews/03-analysis.vi.md).
 
+### T7 03/10 · Module 4 `dashboard` ✅
+- **Thống nhất với chủ dự án:** duyệt bản nháp component; tiếng Việt mặc định, có nút chuyển tiếng
+  Anh; mọi trang và component responsive; giữ trang Giao hàng & dịch vụ và định nghĩa KPI; thêm
+  `streamlit` và `plotly` (đã đồng ý). Chỉnh bố cục sau khi có thành phẩm.
+- **Đã làm:** `src/logops/dashboard/` (`app.py` điều hướng và thanh bên, `data.py` là nơi duy nhất mở
+  kho dữ liệu, chỉ đọc và có cache, `charts.py` 19 hàm vẽ Plotly theo bảng màu đã kiểm định,
+  `pages.py` 8 trang, `i18n.py` 174 nhãn mỗi ngôn ngữ); `analysis/service.py` cho dịch vụ, đội xe và số
+  theo ngày; lệnh `logops dashboard`; `.streamlit/config.toml` (giao diện sáng).
+- **Kết quả:** 8 trang, 27 biểu đồ, 6 bảng. 114 test pass (21 mới), `ruff` sạch. Lần tải đầu khoảng
+  10 giây (tính bộ phân tích), sau đó mỗi trang dưới 3 giây (có test).
+- **Kiểm tra giao diện:** chụp từng trang ở 1440 px và 390 px; phát hiện và sửa 9 lỗi (danh sách trong
+  bản đánh giá), ví dụ thứ tự tháng bị xáo, nhãn cột bị cắt, nhãn tham chiếu đè nhau.
+- **Đánh giá:** [reviews/04-dashboard.vi.md](reviews/04-dashboard.vi.md).
+
+### T7 03/10 · Dashboard: làm lại trang Tổng quan sau rà soát ✅
+- **Góp ý:** Tổng quan chỉ xem năm cuối, các ô không đều, tên KPI khó hiểu (khung ±2 giờ, xe bận
+  p95), chưa rõ "biên" là gì, nhận xét chia nhiều ô, trình bày chưa gọn.
+- **Đã làm:** nút chọn kỳ (cả giai đoạn / từng năm, so với năm trước); ô KPI HTML cùng kích thước
+  (`dashboard/ui.py`) chia nhóm Tài chính và Vận hành & dịch vụ; đổi tên KPI thành OTD, thời gian
+  chờ, chuyến hoàn thành, hiệu suất sử dụng đội xe, mỗi ô có định nghĩa; mỗi trang một khung nhận
+  xét; biểu đồ trong thẻ trắng; cấu hình giao diện và thanh công cụ; hàm `analysis/service.scorecard()`.
+- **Quyết định:** không hiển thị OTIF (dữ liệu không có số lượng giao so với đặt); hiệu suất sử dụng
+  đội xe = số xe có chuyến bình quân mỗi ngày ÷ số xe sở hữu (55,1%); cột `utilization_rate` của dữ
+  liệu chỉ dùng để so sánh giữa các xe.
+- **Kết quả:** 116 test pass, `ruff` sạch; đã xem ảnh chụp ở cỡ máy tính và điện thoại, cả VI và EN.
+
+### CN 04/10 · Viết lại nhận xét: ba tab, rõ tốt/xấu, ảnh hưởng và đề xuất ✅
+- **Góp ý:** nhận xét lặp "cần hành động" ở mỗi dòng, không rõ tốt hay xấu, ảnh hưởng gì, nên làm gì;
+  tên "cần hành động" chưa rõ nghĩa.
+- **Đã làm:** đổi tên mức thành **Ưu tiên xử lý / Cần theo dõi / Tham khảo**, hiển thị thành tab; mỗi
+  nhận xét có tiêu đề, đánh giá (tích cực / tiêu cực / rủi ro / trung tính), diễn biến, ảnh hưởng (hoặc
+  ý nghĩa) và đề xuất cho mục ưu tiên và theo dõi; thêm dữ kiện xe không chạy vào bundle; sinh lại
+  `docs/03-analysis-insights` với mỗi nhận xét một khối; lệnh CLI in thêm đánh giá.
+- **Kiểm chứng:** phụ phí nhiên liệu mỗi dặm giữ 0,245 USD cả ba năm trong khi giá nhiên liệu giảm từ
+  4,20 xuống 3,65 USD/gallon, nên câu "phụ phí không đổi theo giá nhiên liệu" là đúng.
+- **Kết quả:** 118 test pass, `ruff` sạch; đã xem ảnh chụp trên máy tính và điện thoại.
+
+### CN 04/10 · Rà soát dashboard lần hai: đơn vị, văn phong, bảng, chuẩn đo giao hàng ✅
+- **Góp ý:** chọn ngày bị lỗi; nhận xét chưa chia tab ở mọi trang; thiếu đơn vị; biểu đồ theo ngày,
+  lưới đếm tuyến, diễn giải đội xe và nhãn năng suất khó hiểu; còn tên biến cơ sở dữ liệu; bảng không
+  lọc như Excel; văn phong chưa chuẩn; khung ±2 giờ có hợp lý với chuyến nhiều ngày?
+- **Đã làm:** form chọn ngày có nút Áp dụng (có AppTest); mọi trang chia tab nhận xét; chip đơn vị và
+  hộp diễn giải cho mọi biểu đồ (học từ báo cáo mẫu của chủ dự án); bảng đánh giá tuyến; bốn chuẩn đo
+  đúng hẹn kèm phân bố độ lệch và theo độ dài chuyến (`service.delivery_timing`); đổi tên trang; tên
+  ngữ nghĩa cho KPI (`kpis.TITLES`, công thức bằng chữ), bảng, cột và quy tắc chất lượng dữ liệu;
+  bảng có số thứ tự và bộ lọc; bỏ biểu đồ theo ngày.
+- **Phát hiện:** thời điểm giao trải đều từ sớm 3 giờ đến muộn 6 giờ, không phụ thuộc độ dài chuyến;
+  theo ngày hẹn đạt 91,2% so với 44,6% theo khung ±2 giờ.
+- **Kết quả:** 119 test pass, `ruff` sạch; đã xem ảnh chụp trên máy tính và điện thoại.
+
+### CN 04/10 · Rà soát dashboard lần ba ✅
+- Đổi tên và định nghĩa phân khúc (hợp đồng vận chuyển, xe chuyên trách, thuê chuyến lẻ); thay
+  "cân nhắc ngừng tuyến" bằng "rà soát giá cước" (mọi tuyến đều có lãi; mức chia là tương đối); so
+  tỷ lệ điều xe với giao chuyến ngẫu nhiên (kỳ vọng 95,4%, thực tế 95,5%: không ghép chuyến); biểu đồ
+  độ lệch giờ giao dùng trục giờ. Chạy rỗng chuyển sang `optimize`. 119 test pass.
+
+### CN 04/10 · Tách giao diện dashboard khỏi báo cáo mẫu ✅
+- Màu nhấn giao diện đổi sang xanh rêu đậm `#0F5257` trên nền giấy ấm; băng tiêu đề thành thẻ trắng có vạch màu bên trái (bỏ gradient xanh dương); biểu đồ dùng chung font Source Sans của Streamlit nên cả trang một font. Màu dữ liệu trong biểu đồ giữ nguyên (bảng màu đã kiểm định).
+
+### CN 04/10 · Sửa bố cục dashboard ✅
+- Không còn tràn chữ ở 1440/1280/1024/768/390 px (lưới theo vùng nội dung, bảng ngắt dòng, nhãn cột chỉ ghi số); tab giữ lựa chọn; Điểm chính đóng/mở được, có chú thích màu viền; "tr USD"; sửa thứ tự cột bảng KPI. 120 test pass.
+
 ## 6. Đang làm
 
-**Module 3 `analysis` xong, chờ bạn rà soát rồi commit.** Đọc theo thứ tự:
-1. [03-analysis-insights.vi.md](03-analysis-insights.vi.md) §1: 12 nhận xét tự sinh.
-2. [reviews/03-analysis.vi.md](reviews/03-analysis.vi.md): output so với spec, đối chiếu notebook.
-3. Thử: `python -m uv run logops insights`.
+**Module 4 `dashboard` xong, chờ bạn rà soát rồi commit.**
+1. Chạy: `python -m uv run logops dashboard` (lần đầu khoảng 10 giây), thử nút VI/EN và thu nhỏ cửa sổ
+   bằng màn điện thoại.
+2. Đọc [reviews/04-dashboard.vi.md](reviews/04-dashboard.vi.md): output so với spec, lỗi đã sửa, lưu ý
+   khi demo.
+3. Ghi lại các chỗ bố cục muốn chỉnh; sẽ sửa sau khi bạn rà soát.
 
 ## 7. Sẽ làm
 
-**Chủ nhật:** `dashboard` (đọc `analysis_bundle()`, hiển thị nhận xét) → `optimize` (làm lại từ nhánh
-`feature/optimize`, thêm ghép hàng chiều về) → `reports` → kịch bản demo → đóng băng.
+**Chủ nhật:** chỉnh bố cục dashboard theo ý bạn → `optimize` (làm lại từ nhánh `feature/optimize`,
+thêm ghép hàng chiều về; thêm trang khuyến nghị trên dashboard) → `reports` → kịch bản demo → đóng băng.
 
 ## 8. Các quyết định chính
 
@@ -337,6 +417,8 @@ Mỗi quyết định có lý do đầy đủ trong [00-analytical-approach.vi.m
 | File `.duckdb` bị khóa khi đang mở trong UI/PyCharm/DBeaver | Đóng kết nối trước khi `logops build` (lệnh giờ báo rõ lý do), hoặc mở ở chế độ `-readonly` |
 | Dấu `\|` làm vỡ ô bảng Markdown | Escape thành `\\|` khi sinh báo cáo (`_cell`) |
 | Terminal Windows không in được ký tự khung của DuckDB | Đặt `PYTHONIOENCODING=utf-8` |
+| Dashboard đang chạy vẫn hiện biểu đồ cũ sau khi sửa code | Khởi động lại `logops dashboard` (Streamlit không phải lúc nào cũng nạp lại module) |
+| Đường trên biểu đồ bị răng cưa | Phép nối làm xáo thứ tự dòng: sắp xếp chuỗi thời gian ở lớp phân tích (đã có test) |
 
 ## 10. Chạy và kiểm tra nhanh
 

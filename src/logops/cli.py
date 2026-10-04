@@ -1,7 +1,10 @@
 """`logops` command-line entry point."""
 
 import datetime as dt
+import subprocess
+import sys
 import time
+from pathlib import Path
 
 import duckdb
 import typer
@@ -128,5 +131,26 @@ def insights(
             con, dt.date.fromisoformat(date_from), dt.date.fromisoformat(date_to)
         )
     for item in bundle["insights"][lang]:
-        typer.echo(f"[{item['level_label']}] {item['text']}")
+        typer.echo(f"[{item['level_label']} · {item['tone_label']}] {item['text']}")
         typer.echo("")
+
+
+@app.command()
+def dashboard(port: int = typer.Option(8501, help="Port for the local web server")) -> None:
+    """Open the dashboard in the browser (http://localhost:PORT). Ctrl+C to stop."""
+    app_path = Path(__file__).parent / "dashboard" / "app.py"
+    subprocess.run(
+        [
+            sys.executable,
+            "-m",
+            "streamlit",
+            "run",
+            str(app_path),
+            "--server.port",
+            str(port),
+            "--server.headless",
+            "false",
+        ],
+        cwd=config.REPO_ROOT,
+        check=False,
+    )

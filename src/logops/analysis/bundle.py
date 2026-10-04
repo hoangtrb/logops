@@ -21,6 +21,7 @@ from logops.analysis.profit import (
     pnl,
     unit_economics,
 )
+from logops.analysis.service import idle_trucks
 
 DEFAULT_RANGE = (dt.date(2022, 1, 1), dt.date(2024, 12, 31))
 DIMENSIONS = (
@@ -54,6 +55,7 @@ def analysis_bundle(
     matrix = lane_matrix(con, start, end)
     balance = network_balance(con, start, end)
     moves = repositioning(con, start, end)
+    idle = idle_trucks(con)  # trucks with no trip in the data, with their maintenance cost
 
     segments = dims["customer_type"].filter(~pl.col("is_total"))
     states = dims["origin_state"].filter(~pl.col("is_total")).sort("contribution", descending=True)
@@ -106,7 +108,8 @@ def analysis_bundle(
         "yearly_mean_max": cap["yearly_mean_range"][1],
         "lanes_protect": count("protect"),
         "lanes_reprice": count("reprice"),
-        "lanes_exit": count("consider_exit"),
+        "lanes_review_low": count("review_low"),
+        "lane_margin_min": matrix["margin_pct"].min(),
         "surplus_pct": balance["inbound_surplus_pct"],
         "surplus": balance["inbound_surplus_loads"],
         "cities_imbalanced": balance["cities_over_20pct"],
@@ -116,6 +119,9 @@ def analysis_bundle(
             balance["cities"].filter(pl.col("loads_out") == 0)["city"].to_list()
         ),
         "moved_pct": moves["moved_pct"],
+        "moved_random_pct": moves["random_pct"],
+        "trucks_never_ran": idle.height,
+        "never_ran_maintenance": idle["maintenance_cost"].sum(),
     }
     facts["segment_margin_spread"] = facts["segment_margin_max"] - facts["segment_margin_min"]
     rec = lambda lang: insights.generate(facts, lang)  # noqa: E731

@@ -8,47 +8,47 @@ Giá trị đội xe tính từ 2022-01-01 đến 2025-01-02. Mọi tỷ lệ l�
 
 | KPI | Đơn vị | Công thức | Giá trị đội xe |
 |---|---|---|---:|
-| `revenue` | USD | Σ cước + phụ phí nhiên liệu + phụ phí khác | 298.621.428,9 |
-| `measured_cost` | USD | Σ nhiên liệu + bảo dưỡng + sự cố (dữ liệu không có lương tài xế) | 103.976.737,1 |
-| `cost_per_mile` | USD/mile | measured_cost ÷ Σ dặm | 0,851 |
-| `fuel_cost_per_mile` | USD/mile | Σ chi phí nhiên liệu ÷ Σ dặm | 0,783 |
-| `maintenance_cost_per_mile` | USD/mile | Σ chi phí bảo dưỡng ÷ Σ dặm | 0,047 |
-| `safety_cost_per_mile` | USD/mile | Σ bồi thường sự cố ÷ Σ dặm | 0,022 |
-| `revenue_per_mile` | USD/mile | revenue ÷ Σ dặm | 2,445 |
-| `contribution` | USD | revenue − measured_cost (trước lương tài xế) | 194.644.691,8 |
-| `contribution_margin_pct` | % | contribution ÷ revenue | 65,2 |
-| `out_of_route_pct` | % | Σ (dặm thực tế − dặm chuẩn của tuyến) ÷ Σ dặm chuẩn | 2,951 |
+| Doanh thu (`revenue`) | USD | Doanh thu = cước vận chuyển + phụ phí nhiên liệu + phụ phí khác | 298.621.428,9 |
+| Chi phí vận hành đo được (`measured_cost`) | USD | Chi phí vận hành đo được = nhiên liệu + bảo dưỡng + bồi thường sự cố (dữ liệu không có lương tài xế) | 103.976.737,1 |
+| Chi phí vận hành mỗi dặm (`cost_per_mile`) | USD/dặm | Chi phí vận hành mỗi dặm = chi phí vận hành đo được ÷ tổng số dặm | 0,851 |
+| Chi phí nhiên liệu mỗi dặm (`fuel_cost_per_mile`) | USD/dặm | Chi phí nhiên liệu mỗi dặm = chi phí nhiên liệu ÷ tổng số dặm | 0,783 |
+| Chi phí bảo dưỡng mỗi dặm (`maintenance_cost_per_mile`) | USD/dặm | Chi phí bảo dưỡng mỗi dặm = chi phí bảo dưỡng ÷ tổng số dặm | 0,047 |
+| Chi phí sự cố mỗi dặm (`safety_cost_per_mile`) | USD/dặm | Chi phí sự cố mỗi dặm = bồi thường sự cố ÷ tổng số dặm | 0,022 |
+| Doanh thu mỗi dặm (`revenue_per_mile`) | USD/dặm | Doanh thu mỗi dặm = doanh thu ÷ tổng số dặm | 2,445 |
+| Lợi nhuận đóng góp (`contribution`) | USD | Lợi nhuận đóng góp = doanh thu − chi phí vận hành đo được (chưa trừ lương tài xế) | 194.644.691,8 |
+| Biên đóng góp (`contribution_margin_pct`) | % | Biên đóng góp = lợi nhuận đóng góp ÷ doanh thu | 65,2 |
+| Tỷ lệ chạy vượt quãng chuẩn (`out_of_route_pct`) | % | Tỷ lệ chạy vượt quãng chuẩn = (số dặm thực tế − số dặm chuẩn của tuyến) ÷ số dặm chuẩn | 2,951 |
 
 ## Nhiên liệu
 
 | KPI | Đơn vị | Công thức | Giá trị đội xe |
 |---|---|---|---:|
-| `mpg` | miles/gallon | Σ dặm ÷ Σ gallon tiêu thụ | 6,448 |
-| `fuel_purchased_to_burned` | ratio | Σ gallon mua ÷ Σ gallon tiêu thụ (kiểm soát thẻ nhiên liệu) | 1,294 |
+| Hiệu suất nhiên liệu (`mpg`) | dặm/gallon | Hiệu suất nhiên liệu = tổng số dặm ÷ số gallon tiêu thụ | 6,448 |
+| Tỷ lệ nhiên liệu mua / tiêu thụ (`fuel_purchased_to_burned`) | lần | Tỷ lệ nhiên liệu mua / tiêu thụ = số gallon mua ÷ số gallon tiêu thụ theo chuyến (kiểm soát thẻ nhiên liệu) | 1,294 |
 
 ## Độ tin cậy giao hàng
 
 | KPI | Đơn vị | Công thức | Giá trị đội xe |
 |---|---|---|---:|
-| `on_time_pct` | % | lần giao có \|thực tế − giờ hẹn\| ≤ cửa sổ ÷ số lần giao (cửa sổ 120 phút = on_time_flag) | 44,6 |
-| `not_late_pct` | % | lần giao có thực tế ≤ giờ hẹn ÷ số lần giao | 33,3 |
-| `avg_detention_min` | minutes | Σ phút chờ ÷ số lần lấy và giao | 91,5 |
-| `detention_hours` | hours | Σ phút chờ ÷ 60 | 260.607,1 |
+| Giao hàng đúng hẹn (OTD) (`on_time_pct`) | % | Giao hàng đúng hẹn (OTD) = số lần giao trong ±2 giờ so với giờ hẹn ÷ tổng số lần giao | 44,6 |
+| Giao không trễ hẹn (`not_late_pct`) | % | Giao không trễ hẹn = số lần giao đến trước hoặc đúng giờ hẹn ÷ tổng số lần giao | 33,3 |
+| Thời gian chờ bình quân (`avg_detention_min`) | phút | Thời gian chờ bình quân = tổng số phút chờ ÷ số lần lấy và giao hàng | 91,5 |
+| Tổng thời gian chờ (`detention_hours`) | giờ | Tổng thời gian chờ = tổng số phút chờ ÷ 60 | 260.607,1 |
 
 ## Tài sản
 
 | KPI | Đơn vị | Công thức | Giá trị đội xe |
 |---|---|---|---:|
-| `miles_per_truck_month` | miles | Σ dặm ÷ số tháng-xe có ít nhất một chuyến | 36.883,8 |
-| `utilization` | % | trung bình utilization_rate (chỉ để so sánh xe; có thể vượt 100%) | 83,0 |
-| `downtime_hours` | hours | Σ giờ dừng do bảo dưỡng | 72.230,5 |
+| Quãng đường mỗi xe mỗi tháng (`miles_per_truck_month`) | dặm | Quãng đường mỗi xe mỗi tháng = tổng số dặm ÷ số tháng-xe có ít nhất một chuyến | 36.883,8 |
+| Hệ số sử dụng xe theo báo cáo (`utilization`) | % | Hệ số sử dụng xe theo báo cáo = trung bình hệ số sử dụng hằng tháng của từng xe (dữ liệu không định nghĩa và có thể vượt 100%; chỉ dùng để so sánh các xe) | 83,0 |
+| Thời gian dừng xe bảo dưỡng (`downtime_hours`) | giờ | Thời gian dừng xe bảo dưỡng = tổng số giờ xe ngừng hoạt động để bảo dưỡng, sửa chữa | 72.230,5 |
 
 ## An toàn
 
 | KPI | Đơn vị | Công thức | Giá trị đội xe |
 |---|---|---|---:|
-| `incidents_per_million_miles` | per 1M miles | số sự cố ÷ Σ dặm × 1.000.000 | 1,392 |
-| `preventable_pct` | % | sự cố phòng tránh được ÷ số sự cố | 37,6 |
+| Tần suất sự cố (`incidents_per_million_miles`) | lần/triệu dặm | Tần suất sự cố = số sự cố ÷ tổng số dặm × 1.000.000 | 1,392 |
+| Tỷ lệ sự cố phòng tránh được (`preventable_pct`) | % | Tỷ lệ sự cố phòng tránh được = số sự cố phòng tránh được ÷ tổng số sự cố | 37,6 |
 
 ## Cách gán chi phí vào chuyến
 

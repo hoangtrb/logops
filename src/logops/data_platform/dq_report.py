@@ -441,7 +441,7 @@ class NumberFormatter:
             return x.isoformat()
         if kind == "usd_m":
             m = self.num(x / 1e6, 2)
-            return f"${m}M" if self.lang == "en" else f"{m} triệu USD"
+            return f"${m}M" if self.lang == "en" else f"{m} tr USD"
         if kind == "usd":
             return f"${self.num(x, 3)}" if self.lang == "en" else f"{self.num(x, 3)} USD"
         if kind == "num2":

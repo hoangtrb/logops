@@ -1,7 +1,7 @@
 # Tổng kết dự án: Logistics Ops Optimizer
 
 > Bản tiếng Anh: [SUMMARY.md](SUMMARY.md) · Cập nhật cuối mỗi module · **Lần cập nhật cuối:**
-> 03/10/2026, sau module 3 `analysis` · **Nguyên tắc:** chỉ ghi điều đã kiểm chứng; chi tiết và bằng chứng nằm
+> 03/10/2026, sau module 4 `dashboard` · **Nguyên tắc:** chỉ ghi điều đã kiểm chứng; chi tiết và bằng chứng nằm
 > trong từng file đánh giá ở `docs/reviews/`.
 
 ## 1. Dự án là gì
@@ -22,7 +22,7 @@ hàng, 58 tuyến.
 | 1 | `data-platform` | 2, 3 | ✅ 47 test | [01-data-platform.vi.md](reviews/01-data-platform.vi.md) |
 | 2 | `metrics` | 3 | ✅ 29 test | [02-metrics.vi.md](reviews/02-metrics.vi.md) |
 | 3 | `analysis` | 2, 3 | ✅ 12 test | [03-analysis.vi.md](reviews/03-analysis.vi.md) |
-| 4 | `dashboard` | 6 | ⏳ | |
+| 4 | `dashboard` | 6 | ✅ 26 test | [04-dashboard.vi.md](reviews/04-dashboard.vi.md) |
 | 5 | `optimize` | 4, 5 | ⏸️ Tạm dừng ở nhánh `feature/optimize`, làm lại sau phân tích | |
 | 6 | `reports` | 6 | ⏳ | |
 
@@ -34,7 +34,8 @@ hàng, 58 tuyến.
 | Chi phí đo được (nhiên liệu + bảo dưỡng + sự cố) | 104,0 triệu USD; **nhiên liệu chiếm 92%** |
 | Chi phí / dặm · doanh thu / dặm | 0,851 USD · 2,445 USD |
 | MPG đội xe | 6,45 |
-| Giao trong khung ±2 giờ · không trễ | 44,6% · 33,3% |
+| Giao hàng đúng hẹn (OTD, trong ±2 giờ so với giờ hẹn) · không trễ · đúng ngày hẹn | 44,6% · 33,3% · 91,2% |
+| Hiệu suất sử dụng đội xe (số xe có chuyến bình quân mỗi ngày ÷ số xe sở hữu) | 55,1% (66 trên 120) |
 | Thời gian chờ | 260.607 giờ; trung bình 91,5 phút mỗi lần lấy/giao |
 | Đội xe | 92 xe chạy; **28 xe không chạy chuyến nào trong 3 năm**, tốn 1,40 triệu USD bảo dưỡng |
 | **Mục tiêu tiết kiệm** | **≥ 3,1 triệu USD trong 3 năm** (3% chi phí đo được) |
@@ -58,6 +59,7 @@ hàng, 58 tuyến.
 | 69 quy tắc chất lượng dữ liệu, báo cáo EN/VI | `docs/02-data-quality-report` |
 | 3 view nền + 21 KPI theo SCOR | `logops kpi --by …`, `docs/03-kpi-definitions` |
 | Phân tích lợi nhuận, nhiên liệu, đội xe, mạng lưới + nhận xét theo quy tắc | `logops insights`, `docs/03-analysis-insights` |
+| Dashboard 8 trang, nút chuyển VI/EN, responsive (27 biểu đồ, nhận xét cạnh từng biểu đồ) | `logops dashboard` → http://localhost:8501 |
 | Tài liệu phương pháp, ngưỡng, mô hình dữ liệu | `docs/00-analytical-approach`, `docs/02-*` |
 
 ## 6. Phát hiện chính (module 3 `analysis`)

@@ -9,7 +9,7 @@ from pathlib import Path
 import duckdb
 
 from logops.data_platform.dq_report import NumberFormatter
-from logops.metrics.kpis import CATALOG, FLEET, kpi
+from logops.metrics.kpis import CATALOG, FLEET, TITLES, UNITS, kpi
 
 LANGUAGES = ("en", "vi")
 
@@ -122,7 +122,8 @@ def render(values: dict, start: dt.date, end: dt.date, lang: str) -> str:
             value = values[k.name]
             shown = "—" if value is None else f.num(value, 3 if abs(value) < 10 else 1)
             formula = k.formula[lang].replace("|", r"\|")  # keep table cells intact
-            out.append(f"| `{k.name}` | {k.unit} | {formula} | {shown} |")
+            name = f"{TITLES[k.name][lang]} (`{k.name}`)"
+            out.append(f"| {name} | {UNITS[k.unit][lang]} | {formula} | {shown} |")
         out.append("")
     out += [t["allocation"], ""] + [f"- {r}" for r in t["allocation_rows"]] + [""]
     out += [t["excluded"], ""] + [f"- {r}" for r in t["excluded_rows"]]

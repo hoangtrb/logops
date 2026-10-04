@@ -59,3 +59,29 @@ def test_docs_are_deterministic(bundle):
     b, _ = bundle
     for lang in ("en", "vi"):
         assert render(b, lang) == render(b, lang)
+
+
+def test_time_series_are_in_time_order(bundle):
+    b, _ = bundle
+    for series in (
+        b["margin_vs_fuel"]["period"],
+        b["pnl"]["month"]["period"],
+        b["pnl"]["quarter"]["period"],
+    ):
+        values = series.to_list()
+        assert values == sorted(values)
+
+
+def test_scorecard_matches_the_yearly_pnl_and_capacity(bundle):
+    from logops.analysis.service import scorecard
+
+    b, fleet = bundle
+    with duckdb.connect(str(config.WAREHOUSE_PATH), read_only=True) as con:
+        card = scorecard(con, *RANGE)
+    years = b["pnl"]["year"]
+    assert card["revenue"] == pytest.approx(years["revenue"].sum())
+    assert card["contribution"] == pytest.approx(years["contribution"].sum())
+    assert card["trips"] == years["trips"].sum()
+    assert card["otd_pct"] == pytest.approx(fleet["on_time_pct"])
+    assert card["avg_trucks_busy"] == pytest.approx(b["capacity"]["mean"])
+    assert card["fleet_use_pct"] == pytest.approx(100 * b["capacity"]["mean"] / 120)

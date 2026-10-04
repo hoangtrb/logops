@@ -1,7 +1,7 @@
 # Project Summary: Logistics Ops Optimizer
 
 > Vietnamese: [SUMMARY.vi.md](SUMMARY.vi.md) · Updated at the end of each module · **Last updated:**
-> 2026-10-03, after module 3 `analysis` · **Rule:** verified facts only; details and evidence are in each review
+> 2026-10-03, after module 4 `dashboard` · **Rule:** verified facts only; details and evidence are in each review
 > under `docs/reviews/`.
 
 ## 1. What the project is
@@ -22,7 +22,7 @@ customers, 58 lanes.
 | 1 | `data-platform` | 2, 3 | ✅ 47 tests | [01-data-platform.md](reviews/01-data-platform.md) |
 | 2 | `metrics` | 3 | ✅ 29 tests | [02-metrics.md](reviews/02-metrics.md) |
 | 3 | `analysis` | 2, 3 | ✅ 12 tests | [03-analysis.md](reviews/03-analysis.md) |
-| 4 | `dashboard` | 6 | ⏳ | |
+| 4 | `dashboard` | 6 | ✅ 26 tests | [04-dashboard.md](reviews/04-dashboard.md) |
 | 5 | `optimize` | 4, 5 | ⏸️ Parked on branch `feature/optimize`, redone after the analysis | |
 | 6 | `reports` | 6 | ⏳ | |
 
@@ -34,7 +34,8 @@ customers, 58 lanes.
 | Measured cost (fuel + maintenance + incidents) | $104.0M; **fuel is 92%** |
 | Cost per mile · revenue per mile | $0.851 · $2.445 |
 | Fleet MPG | 6.45 |
-| Deliveries within ±2 h · not late | 44.6% · 33.3% |
+| On-time delivery (OTD, within ±2 h of the appointment) · not late · on the appointment date | 44.6% · 33.3% · 91.2% |
+| Fleet utilization (average trucks with a trip per day ÷ trucks owned) | 55.1% (66 of 120) |
 | Detention | 260,607 hours; 91.5 minutes per pickup or delivery on average |
 | Fleet | 92 trucks in use; **28 trucks ran no trip in 3 years**, costing $1.40M in maintenance |
 | **Savings target** | **≥ $3.1M over 3 years** (3% of measured cost) |
@@ -58,6 +59,7 @@ customers, 58 lanes.
 | 69 data-quality rules, EN/VI report | `docs/02-data-quality-report` |
 | 3 base views + 21 SCOR KPIs | `logops kpi --by …`, `docs/03-kpi-definitions` |
 | Profit, fuel, fleet and network analyses + rule-based commentary | `logops insights`, `docs/03-analysis-insights` |
+| 8-page dashboard, VI/EN toggle, responsive (27 charts, commentary next to each chart) | `logops dashboard` → http://localhost:8501 |
 | Method, threshold and data-model documentation | `docs/00-analytical-approach`, `docs/02-*` |
 
 ## 6. Key findings (module 3 `analysis`)

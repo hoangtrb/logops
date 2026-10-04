@@ -1,7 +1,7 @@
 # 00 · Project Journal
 
 > Vietnamese: [00-project-journal.vi.md](00-project-journal.vi.md) · Analytical approach: [00-analytical-approach.md](00-analytical-approach.md)
-> **Last updated:** Sat 2026-10-03, after module 3 `analysis`. One-page overview: [SUMMARY.md](SUMMARY.md).
+> **Last updated:** Sun 2026-10-04, dashboard second review. One-page overview: [SUMMARY.md](SUMMARY.md).
 
 **How to use this file**
 - First read: §1–§4 explain what the project is, what's in the folder, which workflow it
@@ -38,6 +38,9 @@ logistics-ops/
 ├── CAPABILITY-MAP.md / .vi.md      6 modules, 4 focus areas, 6 report types, CRISP-DM mapping
 ├── SPEC-data-platform.md / .vi.md  Spec for module 1
 ├── SPEC-metrics.md / .vi.md        Spec for module 2: outputs defined before coding
+├── SPEC-analysis.md / .vi.md       Spec for module 3
+├── SPEC-dashboard.md / .vi.md      Spec for module 4: the 8 pages
+├── .streamlit/config.toml          Dashboard theme (light, project palette)
 ├── pyproject.toml, uv.lock         Dependencies (managed by uv)
 ├── docs/
 │   ├── 00-project-journal.*        ← this file: progress log
@@ -55,7 +58,7 @@ logistics-ops/
 │   ├── plan.md / .vi.md            Plan for the current module (data-platform)
 │   └── todo.md / .vi.md            Task list; todo.md (English) is the source of truth for checkboxes
 ├── src/logops/
-│   ├── cli.py                      `logops build`, `logops docs`, `logops kpi` commands
+│   ├── cli.py                      `logops build`, `docs`, `kpi`, `insights`, `dashboard` commands
 │   ├── config.py                   All paths, resolved from the repo root
 │   └── data_platform/
 │       ├── schema.py               Column types, primary and foreign keys of the 14 tables (single source of truth)
@@ -68,11 +71,24 @@ logistics-ops/
 │       ├── views.py                3 base views: trip_economics, delivery_performance, truck_economics
 │       ├── kpis.py                 The 21-KPI catalog + kpi()
 │       └── kpi_doc.py              Generates `docs/03-kpi-definitions`
+│   └── analysis/
+│       ├── profit.py, operations.py  P&L, bridge, dimensions; fuel, capacity, lanes, network
+│       ├── service.py              On-time, detention, fleet status and daily views for the dashboard
+│       ├── insights.py             Rule-based EN/VI commentary
+│       └── bundle.py, doc.py       analysis_bundle(); generates `docs/03-analysis-insights`
+│   └── dashboard/
+│       ├── app.py                  Streamlit entry: sidebar (language, dates) + navigation
+│       ├── data.py                 The only module that opens the warehouse (read-only, cached)
+│       ├── charts.py               Plotly builders: one palette, one number format
+│       ├── pages.py                The 8 pages
+│       └── i18n.py                 Every label in VI and EN
 ├── tests/
 │   ├── fixtures/                   Tiny hand-made CSVs with deliberate defects
 │   ├── test_smoke.py               CLI and paths
 │   ├── data_platform/              Ingest, schema, and integration tests on the real data
-│   └── metrics/                    Hand-computable fixture warehouse + real-data reconciliation tests
+│   ├── metrics/                    Hand-computable fixture warehouse + real-data reconciliation tests
+│   ├── analysis/                   Unit and real-data tests for the analyses and commentary
+│   └── dashboard/                  Every page runs (VI/EN), no SQL, numbers match, load time
 ├── dataset/          (not committed) 14 raw Kaggle CSVs, read-only
 └── data/             (not committed) Generated: parquet/ and warehouse.duckdb
 ```
@@ -101,8 +117,8 @@ logistics-ops/
 | — | Business understanding (`docs/01`) | 1 | Thu 10-01 | ✅ Done |
 | 1 | `data-platform` | 2, 3 | Fri 10-02 | ✅ Done (7 tasks; Tasks 6 and 8 cut) |
 | 2 | `metrics` | 3 | Sat 10-03 AM | ✅ Done (29 tests), commit `e99d12a` |
-| 3 | `analysis` | 2, 3 | Sat 10-03 evening | ✅ Done (12 tests). Awaiting your review and commit |
-| 4 | `dashboard` | 6 | Sun 10-04 AM | ⏳ |
+| 3 | `analysis` | 2, 3 | Sat 10-03 evening | ✅ Done (12 tests), commit `fc4b1ed` |
+| 4 | `dashboard` | 6 | Sun 10-04 AM | ✅ Done Sat 10-03 (26 tests); revised after two reviews. Awaiting commit |
 | 5 | `optimize` | 4, 5 | After the analysis | ⏸️ On branch `feature/optimize` |
 | 6 | `reports` | 6 | Sun 10-04 PM | ⏳ |
 | — | Demo, evaluation, freeze | 5 | Sun 10-04 evening | ⏳ |
@@ -312,17 +328,81 @@ Module 1 progress: █████████ complete (7 tasks done, 2 cut wit
   digit in a comment template (caught by the test).
 - **Review:** [reviews/03-analysis.md](reviews/03-analysis.md).
 
+### Sat 10-03 · Module 4 `dashboard` ✅
+- **Agreed with the project owner:** component draft approved; Vietnamese by default with a VI/EN
+  toggle; every page and component responsive; Delivery & service page and KPI definitions kept;
+  `streamlit` and `plotly` added (approved). Layout tweaks come after the finished product.
+- **Done:** `src/logops/dashboard/` (`app.py` navigation and sidebar, `data.py` the only module that
+  opens the warehouse, read-only and cached, `charts.py` 19 Plotly builders on the validated palette,
+  `pages.py` 8 pages, `i18n.py` 174 labels per language); `analysis/service.py` for service, fleet and
+  daily views; the `logops dashboard` command; `.streamlit/config.toml` (light theme).
+- **Result:** 8 pages, 27 charts, 6 tables. 114 tests pass (21 new), `ruff` clean. First load about
+  10 s (the analysis bundle), then each page under 3 s (tested).
+- **Visual check:** every page screenshotted at 1440 px and 390 px; 9 problems found and fixed (list in
+  the review), e.g. scrambled month order, clipped bar labels, overlapping reference labels.
+- **Review:** [reviews/04-dashboard.md](reviews/04-dashboard.md).
+
+### Sat 10-03 · Dashboard: overview redesign after review ✅
+- **Feedback:** overview stuck on the last year, uneven cards, unclear KPI names (±2 h window, trucks
+  busy at p95), unclear "margin", comments split into many boxes, layout not tidy.
+- **Done:** period selector (whole period / each year, compared with the year before); equal-size
+  HTML KPI cards (`dashboard/ui.py`) grouped as Finance and Operations & service; KPIs renamed to
+  OTD, detention, trips, fleet utilization, each with a definition; one findings card per page;
+  charts in white cards; theme and toolbar settings; `analysis/service.scorecard()`.
+- **Decisions:** OTIF not shown (no delivered vs ordered quantity in the data); fleet utilization =
+  average trucks with a trip per day ÷ trucks owned (55.1%); the dataset's `utilization_rate` kept
+  only for comparing trucks.
+- **Result:** 116 tests pass, `ruff` clean; screenshots checked at desktop and phone widths, VI and EN.
+
+### Sun 10-04 · Findings rewritten: three tabs, explicit good/bad, impact and action ✅
+- **Feedback:** findings repeated "act" on every row and didn't say whether they were good or bad,
+  what they change, or what to do; "act" was a vague name.
+- **Done:** levels renamed **Priority / Watch / For reference** and shown as tabs; each finding now
+  has a title, a tone (positive / negative / risk / neutral), what happened, impact (or meaning) and a
+  recommended action for priority and watch items; idle-truck facts added to the bundle;
+  `docs/03-analysis-insights` regenerated with one block per finding; CLI prints the tone.
+- **Checked:** fuel surcharge per mile is flat ($0.245) in all three years while fuel fell from $4.20
+  to $3.65 per gallon, so "the surcharge doesn't follow fuel prices" holds.
+- **Result:** 118 tests pass, `ruff` clean; screenshots checked on desktop and phone.
+
+### Sun 10-04 · Dashboard second review: units, wording, tables, delivery standards ✅
+- **Feedback:** date picker misbehaving; findings not tabbed everywhere; missing units; unclear
+  daily chart, lane-count grid, fleet notes and productivity labels; database names on screen; no
+  Excel-like filters; unprofessional wording; is ±2 h fair for multi-day trips?
+- **Done:** date form with Apply (AppTest); tabbed findings on every page; unit chip and reading
+  note on every chart (idea from the project owner's reference report); lane assessment table;
+  four on-time standards with lateness spread and by-trip-length view (`service.delivery_timing`);
+  pages renamed; plain names for KPIs (`kpis.TITLES`, formulas in words), data-quality tables,
+  columns and rules; numbered, filterable tables; daily chart removed.
+- **Finding:** delivery timing is spread evenly from 3 h early to 6 h late and doesn't depend on
+  trip length; on the appointment date 91.2% are on time vs 44.6% within ±2 h.
+- **Result:** 119 tests pass, `ruff` clean; screenshots checked on desktop and phone.
+
+### Sun 10-04 · Dashboard third review ✅
+- Segments renamed and defined (contract, dedicated fleet, spot); lane action "consider exiting"
+  replaced by "review rates" (every lane is profitable; tiers are relative); repositioning compared
+  with random assignment (95.4% expected vs 95.5% observed: no trip chaining); delivery deviation
+  chart on a real hour axis. Empty running moved to `optimize`. 119 tests pass.
+
+### Sun 10-04 · Dashboard look made distinct from the reference report ✅
+- UI accent changed to deep teal `#0F5257` on warm paper; page banner is a white card with a teal edge (no blue gradient); charts now use Streamlit's own Source Sans, so the whole page shares one font. Chart data colors unchanged (validated palette).
+
+### Sun 10-04 · Dashboard layout fixes ✅
+- No overflow at 1440/1280/1024/768/390 px (container-query grids, wrapping tables, unit-free bar labels); tabs keep their selection; findings collapsible with a tone legend; "tr USD"; KPI table column order fixed. 120 tests pass.
+
 ## 6. In progress
 
-**Module 3 `analysis` is done and awaits your review, then a commit.** Read in this order:
-1. [03-analysis-insights.md](03-analysis-insights.md) §1: the 12 generated comments.
-2. [reviews/03-analysis.md](reviews/03-analysis.md): outputs vs the spec, notebook comparison.
-3. Try: `python -m uv run logops insights --lang en`.
+**Module 4 `dashboard` is done and awaits your review, then a commit.**
+1. Run: `python -m uv run logops dashboard` (first load about 10 s), try the VI/EN button and a
+   phone-width window.
+2. Read [reviews/04-dashboard.md](reviews/04-dashboard.md): outputs vs the spec, what was fixed,
+   caveats for the demo.
+3. Note the layout changes you want; they are applied after your review.
 
 ## 7. Next
 
-**Sunday:** `dashboard` (reads `analysis_bundle()`, shows the commentary) → `optimize` (redone from
-branch `feature/optimize`, adding backhaul matching) → `reports` → demo script → freeze.
+**Sunday:** your dashboard layout changes → `optimize` (redone from branch `feature/optimize`,
+adding backhaul matching; a recommendations page in the dashboard) → `reports` → demo script → freeze.
 
 ## 8. Key decisions
 
@@ -348,6 +428,8 @@ Full reasoning for each is in [00-analytical-approach.md](00-analytical-approach
 | `.duckdb` file locked while open in the UI, PyCharm or DBeaver | Disconnect before `logops build` (the command now says why), or open in `-readonly` mode |
 | `\|` broke Markdown table cells | Escaped as `\\|` when rendering the report (`_cell`) |
 | Windows terminal can't print DuckDB's box characters | Set `PYTHONIOENCODING=utf-8` |
+| Running dashboard kept showing old charts after a code change | Restart `logops dashboard` (Streamlit doesn't always reload imported modules) |
+| A chart's lines zigzagged | A join scrambled the row order: sort time series in the analysis layer (now tested) |
 
 ## 10. Running and checking
 

@@ -20,11 +20,11 @@ Không dòng nào bị xóa. Mọi vi phạm được ghi vào cột `dq_issues`
 
 | Chỉ số | Giá trị |
 |---|---:|
-| Doanh thu (cước + phụ phí nhiên liệu + phụ phí khác) | 298,62 triệu USD |
-| Chi phí vận hành (nhiên liệu + bảo dưỡng + bồi thường sự cố) | 103,98 triệu USD |
-| Chi phí nhiên liệu | 95,59 triệu USD |
-| Chi phí bảo dưỡng | 5,73 triệu USD |
-| Bồi thường sự cố | 2,65 triệu USD |
+| Doanh thu (cước + phụ phí nhiên liệu + phụ phí khác) | 298,62 tr USD |
+| Chi phí vận hành (nhiên liệu + bảo dưỡng + bồi thường sự cố) | 103,98 tr USD |
+| Chi phí nhiên liệu | 95,59 tr USD |
+| Chi phí bảo dưỡng | 5,73 tr USD |
+| Bồi thường sự cố | 2,65 tr USD |
 | Số dặm đã chạy | 122.159.201 |
 | Chi phí vận hành mỗi dặm | 0,851 USD |
 | MPG đội xe (tổng dặm ÷ tổng gallon) | 6,45 |

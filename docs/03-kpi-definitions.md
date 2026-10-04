@@ -8,47 +8,47 @@ Fleet values cover 2022-01-01 to 2025-01-02. Every ratio is a sum divided by a s
 
 | KPI | Unit | Formula | Fleet value |
 |---|---|---|---:|
-| `revenue` | USD | Σ linehaul + fuel surcharge + accessorials | 298,621,428.9 |
-| `measured_cost` | USD | Σ fuel + maintenance + incident cost (driver pay not in the data) | 103,976,737.1 |
-| `cost_per_mile` | USD/mile | measured_cost ÷ Σ miles | 0.851 |
-| `fuel_cost_per_mile` | USD/mile | Σ fuel cost ÷ Σ miles | 0.783 |
-| `maintenance_cost_per_mile` | USD/mile | Σ maintenance cost ÷ Σ miles | 0.047 |
-| `safety_cost_per_mile` | USD/mile | Σ incident claims ÷ Σ miles | 0.022 |
-| `revenue_per_mile` | USD/mile | revenue ÷ Σ miles | 2.445 |
-| `contribution` | USD | revenue − measured_cost (before driver pay) | 194,644,691.8 |
-| `contribution_margin_pct` | % | contribution ÷ revenue | 65.2 |
-| `out_of_route_pct` | % | Σ (actual miles − lane's typical miles) ÷ Σ typical miles | 2.951 |
+| Revenue (`revenue`) | USD | Revenue = linehaul + fuel surcharge + accessorial charges | 298,621,428.9 |
+| Measured operating cost (`measured_cost`) | USD | Measured operating cost = fuel + maintenance + incident claims (driver pay is not in the data) | 103,976,737.1 |
+| Operating cost per mile (`cost_per_mile`) | USD per mile | Operating cost per mile = measured operating cost ÷ total miles | 0.851 |
+| Fuel cost per mile (`fuel_cost_per_mile`) | USD per mile | Fuel cost per mile = fuel cost ÷ total miles | 0.783 |
+| Maintenance cost per mile (`maintenance_cost_per_mile`) | USD per mile | Maintenance cost per mile = maintenance cost ÷ total miles | 0.047 |
+| Incident cost per mile (`safety_cost_per_mile`) | USD per mile | Incident cost per mile = incident claims ÷ total miles | 0.022 |
+| Revenue per mile (`revenue_per_mile`) | USD per mile | Revenue per mile = revenue ÷ total miles | 2.445 |
+| Contribution profit (`contribution`) | USD | Contribution profit = revenue − measured operating cost (before driver pay) | 194,644,691.8 |
+| Contribution margin (`contribution_margin_pct`) | % | Contribution margin = contribution profit ÷ revenue | 65.2 |
+| Out-of-route miles (`out_of_route_pct`) | % | Out-of-route miles = (actual miles − the lane's standard miles) ÷ standard miles | 2.951 |
 
 ## Fuel
 
 | KPI | Unit | Formula | Fleet value |
 |---|---|---|---:|
-| `mpg` | miles/gallon | Σ miles ÷ Σ gallons burned | 6.448 |
-| `fuel_purchased_to_burned` | ratio | Σ gallons purchased ÷ Σ gallons burned (fuel-card control) | 1.294 |
+| Fuel economy (`mpg`) | miles per gallon | Fuel economy = total miles ÷ gallons burned | 6.448 |
+| Fuel bought vs burned (`fuel_purchased_to_burned`) | times | Fuel bought vs burned = gallons bought ÷ gallons burned on trips (fuel-card control) | 1.294 |
 
 ## Delivery reliability
 
 | KPI | Unit | Formula | Fleet value |
 |---|---|---|---:|
-| `on_time_pct` | % | deliveries with \|actual − appointment\| ≤ window ÷ deliveries (window 120 min = on_time_flag) | 44.6 |
-| `not_late_pct` | % | deliveries with actual ≤ appointment ÷ deliveries | 33.3 |
-| `avg_detention_min` | minutes | Σ detention minutes ÷ pickups and deliveries | 91.5 |
-| `detention_hours` | hours | Σ detention minutes ÷ 60 | 260,607.1 |
+| On-time delivery (OTD) (`on_time_pct`) | % | On-time delivery (OTD) = deliveries within ±2 hours of the appointment ÷ all deliveries | 44.6 |
+| Not late (`not_late_pct`) | % | Not late = deliveries at or before the appointment ÷ all deliveries | 33.3 |
+| Average detention (`avg_detention_min`) | minutes | Average detention = total waiting minutes ÷ pickups and deliveries | 91.5 |
+| Total detention (`detention_hours`) | hours | Total detention = total waiting minutes ÷ 60 | 260,607.1 |
 
 ## Assets
 
 | KPI | Unit | Formula | Fleet value |
 |---|---|---|---:|
-| `miles_per_truck_month` | miles | Σ miles ÷ truck-months with at least one trip | 36,883.8 |
-| `utilization` | % | mean utilization_rate (compare trucks only; can exceed 100%) | 83.0 |
-| `downtime_hours` | hours | Σ maintenance downtime hours | 72,230.5 |
+| Miles per truck per month (`miles_per_truck_month`) | miles | Miles per truck per month = total miles ÷ truck-months with at least one trip | 36,883.8 |
+| Reported utilization (`utilization`) | % | Reported utilization = average of the monthly utilization each truck reports (the data doesn't define it and it can exceed 100%; use only to compare trucks) | 83.0 |
+| Maintenance downtime (`downtime_hours`) | hours | Maintenance downtime = total hours trucks were out of service for maintenance or repair | 72,230.5 |
 
 ## Safety
 
 | KPI | Unit | Formula | Fleet value |
 |---|---|---|---:|
-| `incidents_per_million_miles` | per 1M miles | incidents ÷ Σ miles × 1,000,000 | 1.392 |
-| `preventable_pct` | % | preventable incidents ÷ incidents | 37.6 |
+| Incident rate (`incidents_per_million_miles`) | per million miles | Incident rate = incidents ÷ total miles × 1,000,000 | 1.392 |
+| Preventable incidents (`preventable_pct`) | % | Preventable incidents = preventable incidents ÷ all incidents | 37.6 |
 
 ## How costs are assigned to trips
 

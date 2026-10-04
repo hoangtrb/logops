@@ -6,20 +6,78 @@ Period: 2022-01-01 to 2024-12-31. Profit is contribution before driver pay and o
 
 ## 1. Commentary (generated from the figures by rules)
 
-| Level | Comment |
-|---|---|
-| act | Margin rose from 62.7% to 67.2% (2022 → 2024) while revenue per mile stayed flat ($2.444 → $2.447). Falling fuel prices account for $4.12M of the $4.42M gain in contribution (93.2%). If fuel prices rise again, margin falls. |
-| watch | Monthly margin moves against the fuel price (correlation -0.92): margin is exposed to fuel prices because the fuel surcharge is fixed. |
-| info | Volume is flat: 28,589 trips in 2022, 28,656 in 2024 (0.2%). |
-| info | Customer segments earn almost the same margin (65.5% to 65.8%): profit differences come from lanes, not from contract type. |
-| info | TX contributes the most ($23.33M, 11.9% of contribution); margins by origin state range from 56.5% to 69.9%. |
-| info | Customer concentration: largest customer 0.6% of revenue, top ten 5.7%, 157 of 200 customers make up eighty percent; HHI 50 (moderate from 1,000, high from 1,800). |
-| watch | Every year, gallons bought exceed gallons recorded as burned on trips (1.28 to 1.30 times). The gap has not been reconciled. |
-| watch | Trucks busy per day: 95% of days need at most 73, 99% need at most 75, the busiest day needed 80. The fleet has 92 trucks in use and 120 owned. |
-| info | Peak days can't be predicted: one day barely predicts the next (correlation 0.18), no quarter is busier year after year (0.04), and the yearly average is flat (66.0 to 66.2 trucks). Plan capacity by service level, not by calendar. |
-| info | Lane portfolio (3×3 by volume and margin): 7 lanes to protect (high volume, high margin), 6 to reprice (high volume, low margin), 6 to consider exiting (low volume, low margin). |
-| act | 33.0% of loads (28,178) end in a city with no matching return load; 16 of 20 cities are imbalanced by more than 20%, and the pattern is stable across years (correlation 0.997). Indianapolis, Los Angeles receive loads but send none. |
-| watch | In 95.4% of transitions, a truck's next trip starts in a different city from where its last trip ended. The movement between the two isn't recorded in the data. |
+### Priority
+
+**Profit grew because fuel got cheaper, not because operations improved** · Risk · Profit
+
+- **What happened:** Contribution margin rose from 62.7% to 67.2% (2022 → 2024) while revenue per mile stayed flat ($2.444 → $2.447).
+- **Impact:** Lower fuel prices brought $4.12M of the $4.42M gain in contribution (93.2%). The company doesn't control this: if fuel prices go back to 2022 levels, contribution falls by about $4.12M a year.
+- **Recommended:** Link the fuel surcharge to the actual fuel price (an index-based surcharge) instead of a fixed amount, and look for gains the company controls: rates, lane mix and truck productivity.
+
+**33.0% of loads end where there is no return load** · Negative · Network
+
+- **What happened:** 28,178 loads end in cities that receive more loads than they send; 16 of 20 cities are imbalanced by more than 20%. Indianapolis, Los Angeles receive loads but send none. The pattern repeats every year (correlation 0.997).
+- **Impact:** After these deliveries the truck has nothing to carry back and drives empty to its next pickup: fuel, driver hours and wear with no revenue. The data doesn't record those empty miles, so their cost can't be put in dollars yet.
+- **Recommended:** Find return loads in the cities that receive more than they send, starting with Indianapolis, Los Angeles: approach shippers there, or price return trips lower to fill them.
+
+### Watch
+
+**Margin moves up and down with the fuel price** · Risk · Profit
+
+- **What happened:** Month by month, cheaper fuel means a higher margin and dearer fuel a lower one (correlation -0.92, close to a perfect mirror image).
+- **Impact:** The fuel surcharge customers pay doesn't change with the fuel price, so every change in fuel cost goes straight into profit.
+- **Recommended:** Review the margin next to the fuel price every month, and review the surcharge terms in customer contracts.
+
+**The fleet is larger than demand needs** · Negative · Fleet
+
+- **What happened:** On 95% of days at most 73 trucks are working at once, on 99% at most 75, and the busiest day needed 80. 92 trucks have run trips; the company owns 120.
+- **Impact:** 40 trucks were not needed even on the busiest day, yet they still cost money: 28 trucks never ran a single trip and still took $1.40M in maintenance.
+- **Recommended:** Review the trucks above peak need, starting with the 28 that never ran: sell, transfer or stop servicing them, while keeping enough trucks for 99% of days.
+
+**More fuel is bought than trips record as used** · Negative · Fuel
+
+- **What happened:** Every year, gallons bought are 1.28 to 1.30 times the gallons recorded as burned on trips.
+- **Impact:** Nobody can yet say where the difference goes, legitimate use outside trips or losses: until fuel cards are reconciled with trips, the two can't be told apart.
+- **Recommended:** Reconcile fuel-card purchases with trips per truck and per month, and record the odometer at every fill-up.
+
+**Next trips are not chained to where trucks finish** · Negative · Network
+
+- **What happened:** In 95.4% of cases, a truck's next trip starts in a different city from where its previous trip ended. Picking next trips at random would give 95.4%: the data shows no sign of dispatch matching loads to where trucks already are.
+- **Impact:** Almost every trip is preceded by a move to another city, usually empty. Those moves aren't recorded, so their time and fuel are hidden from cost reports and from the profit of each trip.
+- **Recommended:** Record every move between trips (time, distance, reason), and assign next loads to trucks already in or near the pickup city; how many moves this saves is worked out in the optimization module.
+
+### For reference
+
+**No dependence on any single customer** · Positive · Profit
+
+- **What happened:** The largest customer brings 0.6% of revenue, the top ten 5.7%, and it takes 157 of 200 customers to reach eighty percent of revenue (HHI 50).
+- **What it means:** Losing any one customer would cost at most 0.6% of revenue. HHI is below 1,000, where concentration starts to matter.
+
+**Volume is flat** · Neutral · Profit
+
+- **What happened:** 28,589 trips in 2022, 28,656 in 2024 (0.2%).
+- **What it means:** Profit growth did not come from more business. Truck demand is stable, so capacity can be planned on today's level.
+
+**Customer segments earn the same margin** · Neutral · Profit
+
+- **What happened:** Every customer segment earns a margin between 65.5% and 65.8%.
+- **What it means:** To improve profit, look at lanes and rates rather than contract type.
+
+**TX is the largest profit contributor** · Neutral · Profit
+
+- **What happened:** TX brings $23.33M (11.9% of contribution). Margin by origin state ranges from 56.5% to 69.9%.
+- **What it means:** Margins differ by 13.4 points between states: low-margin states are the first place to review rates or costs.
+
+**Truck demand varies at random from day to day, not by season** · Neutral · Fleet
+
+- **What happened:** On an average day 66.0 to 66.2 trucks are working, the same every year. Busy days come at random: no quarter is busier year after year.
+- **What it means:** Trucks can't be planned season by season. Size the fleet by how many days it must cover, for example enough trucks on 95% of days, rather than by calendar.
+
+**Lane portfolio: 7 core lanes, 6 to renegotiate, 6 low-margin lanes to review** · Neutral · Network
+
+- **What happened:** Lanes are split 3×3 by volume and margin: 7 lanes with high volume and high margin, 6 with high volume and low margin, 6 with low volume and low margin. Even the lowest-margin lane earns 50.4%, so every lane is profitable at contribution level.
+- **What it means:** Driver pay and overhead are not in the data, so there is no ground to drop a lane yet. Renegotiate first where trips are many and margin is low: a rate change there reaches the most trips.
+
 
 ## 2. P&L by year
 
@@ -125,15 +183,15 @@ Over the whole period: 95% of days ≤ 73 trucks, 99% ≤ 75, busiest day 80. 92
 |---|---|---|---|
 | High | 6 (reprice) | 6 (maintain) | 7 (protect) |
 | Mid | 8 (review price) | 5 (maintain) | 6 (grow) |
-| Low | 6 (consider exit) | 8 (monitor) | 6 (growth opportunity) |
+| Low | 6 (review (low volume, low margin)) | 8 (monitor) | 6 (growth opportunity) |
 
 ## 10. Headhaul / backhaul balance (most imbalanced cities)
 
 | City | Loads out | Loads in | Net | Imbalance |
 |---|---:|---:|---:|---:|
-| Phoenix | 4,456 | 0 | 4,456 | 200.0% |
 | Los Angeles | 0 | 8,948 | -8,948 | 200.0% |
 | Indianapolis | 0 | 5,810 | -5,810 | 200.0% |
+| Phoenix | 4,456 | 0 | 4,456 | 200.0% |
 | Chicago | 5,894 | 1,456 | 4,438 | 120.8% |
 | Las Vegas | 5,865 | 1,479 | 4,386 | 119.4% |
 | Denver | 1,505 | 5,863 | -4,358 | 118.3% |
@@ -170,7 +228,7 @@ Over the whole period: 95% of days ≤ 73 trucks, 99% ≤ 75, busiest day 80. 92
 | hhi_high | 1,800.0 | HHI above 1,800 = highly concentrated | [US DOJ/FTC Merger Guidelines 2023](https://www.ftc.gov/system/files/ftc_gov/pdf/2023_merger_guidelines_final_12.18.2023.pdf) |
 | customer_share_risk_pct | 10.0 | A single customer above 10% of revenue is a concentration risk | [Dataset author's notebook (Route_optimization)](https://www.kaggle.com/code/yogape/route-optimization) |
 | city_imbalance_pct | 20.0 | A city whose loads out and in differ by more than 20% is imbalanced | [Dataset author's notebook (Route_optimization)](https://www.kaggle.com/code/yogape/route-optimization) |
-| surplus_act_pct | 20.0 | Act when more than 20% of loads end where there's no return load; same level as the city threshold | project |
+| surplus_act_pct | 20.0 | Priority when more than 20% of loads end where there's no return load; same level as the city threshold | project |
 | predictable_autocorr | 0.5 | Below 0.5, one day explains under 25% of the next day's variation: too weak to plan on | project |
 | moved_watch_pct | 50.0 | Watch when most transitions (over half) need a move between cities | project |
 | fuel_gap_pct | 5.0 | A bought-vs-burned gap above 5% is worth reconciling | project |

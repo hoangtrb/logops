@@ -135,8 +135,20 @@ MATRIX_ACTIONS = {
     (2, 1): "review_price",
     (1, 3): "growth_opportunity",
     (1, 2): "monitor",
-    (1, 1): "consider_exit",
+    (1, 1): "review_low",
 }
+
+# Most urgent first: where a decision on price or the lane itself is due.
+ACTION_PRIORITY = (
+    "reprice",
+    "review_low",
+    "review_price",
+    "grow",
+    "growth_opportunity",
+    "protect",
+    "maintain",
+    "monitor",
+)
 
 
 def _thirds(values: pl.Series) -> pl.Series:
@@ -147,7 +159,7 @@ def _thirds(values: pl.Series) -> pl.Series:
 
 
 def lane_matrix(con: duckdb.DuckDBPyConnection, start: dt.date, end: dt.date) -> pl.DataFrame:
-    """Per lane: trips, revenue, margin, the 3×3 tiers and the direction for its cell."""
+    """Per lane: trips, revenue, margin (and its gap to all lanes), the 3×3 tiers, the action."""
     margins = (
         kpi(con, start, end, by="route")
         .filter(~pl.col("group").is_in([FLEET, UNATTRIBUTED]))
@@ -166,7 +178,12 @@ def lane_matrix(con: duckdb.DuckDBPyConnection, start: dt.date, end: dt.date) ->
         )
     )
     df = margins.join(trips, on="lane")
-    df = df.with_columns(volume_tier=_thirds(df["trips"]), margin_tier=_thirds(df["margin_pct"]))
+    overall = 100 * df["contribution"].sum() / df["revenue"].sum()
+    df = df.with_columns(
+        volume_tier=_thirds(df["trips"]),
+        margin_tier=_thirds(df["margin_pct"]),
+        margin_gap_pts=pl.col("margin_pct") - overall,  # vs the margin of all lanes together
+    )
     return df.with_columns(
         action=pl.struct("volume_tier", "margin_tier").map_elements(
             lambda r: MATRIX_ACTIONS[(r["volume_tier"], r["margin_tier"])], return_dtype=pl.Utf8
@@ -221,7 +238,8 @@ def network_balance(con: duckdb.DuckDBPyConnection, start: dt.date, end: dt.date
 
 
 def repositioning(con: duckdb.DuckDBPyConnection, start: dt.date, end: dt.date) -> dict:
-    """How often a truck's next trip starts in a different city from where the last one ended.
+    """How often a truck's next trip starts in a different city from where the last one ended,
+    against the share expected if next trips were assigned at random (no trip chaining).
 
     Counted only: no distances (4 lane cities have no coordinates in the data).
     """
@@ -238,7 +256,21 @@ def repositioning(con: duckdb.DuckDBPyConnection, start: dt.date, end: dt.date) 
                count(*) FILTER (WHERE origin_city <> previous_end) AS moved
         FROM seq WHERE previous_end IS NOT NULL GROUP BY ALL
     """
-    df = _frame(con.execute(sql, {"start": start, "end": end}))
+    # Benchmark: the share that would need a move if each next trip were picked at random
+    # (origin independent of where the truck stands) = 1 − Σ P(start city) × P(end city).
+    random_sql = """
+        WITH x AS (
+            SELECT r.origin_city AS o, r.destination_city AS d
+            FROM trip_economics te JOIN routes r ON r.route_id = te.route_id
+            WHERE te.truck_id IS NOT NULL AND te.dispatch_date BETWEEN $start AND $end
+        ),
+        po AS (SELECT o AS city, count(*) / sum(count(*)) OVER () AS p FROM x GROUP BY o),
+        pd AS (SELECT d AS city, count(*) / sum(count(*)) OVER () AS p FROM x GROUP BY d)
+        SELECT 100 * (1 - coalesce(sum(po.p * pd.p), 0)) FROM po JOIN pd USING (city)
+    """
+    params = {"start": start, "end": end}
+    df = _frame(con.execute(sql, params))
+    random_pct = con.execute(random_sql, params).fetchone()[0]
     pct = lambda d: 100 * d["moved"].sum() / d["transitions"].sum()  # noqa: E731
     by_year = (
         df.group_by("yr")
@@ -256,6 +288,7 @@ def repositioning(con: duckdb.DuckDBPyConnection, start: dt.date, end: dt.date) 
         "transitions": int(df["transitions"].sum()),
         "moved": int(df["moved"].sum()),
         "moved_pct": pct(df),
+        "random_pct": random_pct,
         "by_year": by_year,
         "by_city": by_city,
     }

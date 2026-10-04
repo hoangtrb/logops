@@ -65,8 +65,8 @@ CATALOG: list[Kpi] = [
         "Cost",
         "USD",
         {
-            "en": "Σ linehaul + fuel surcharge + accessorials",
-            "vi": "Σ cước + phụ phí nhiên liệu + phụ phí khác",
+            "en": "Revenue = linehaul + fuel surcharge + accessorial charges",
+            "vi": "Doanh thu = cước vận chuyển + phụ phí nhiên liệu + phụ phí khác",
         },
         lambda s: s.get("revenue"),
     ),
@@ -75,8 +75,10 @@ CATALOG: list[Kpi] = [
         "Cost",
         "USD",
         {
-            "en": "Σ fuel + maintenance + incident cost (driver pay not in the data)",
-            "vi": "Σ nhiên liệu + bảo dưỡng + sự cố (dữ liệu không có lương tài xế)",
+            "en": "Measured operating cost = fuel + maintenance + incident claims (driver "
+            "pay is not in the data)",
+            "vi": "Chi phí vận hành đo được = nhiên liệu + bảo dưỡng + bồi thường sự cố "
+            "(dữ liệu không có lương tài xế)",
         },
         _cost,
     ),
@@ -84,35 +86,50 @@ CATALOG: list[Kpi] = [
         "cost_per_mile",
         "Cost",
         "USD/mile",
-        {"en": "measured_cost ÷ Σ miles", "vi": "measured_cost ÷ Σ dặm"},
+        {
+            "en": "Operating cost per mile = measured operating cost ÷ total miles",
+            "vi": "Chi phí vận hành mỗi dặm = chi phí vận hành đo được ÷ tổng số dặm",
+        },
         lambda s: _div(_cost(s), s.get("miles")),
     ),
     Kpi(
         "fuel_cost_per_mile",
         "Cost",
         "USD/mile",
-        {"en": "Σ fuel cost ÷ Σ miles", "vi": "Σ chi phí nhiên liệu ÷ Σ dặm"},
+        {
+            "en": "Fuel cost per mile = fuel cost ÷ total miles",
+            "vi": "Chi phí nhiên liệu mỗi dặm = chi phí nhiên liệu ÷ tổng số dặm",
+        },
         lambda s: _div(s.get("fuel_cost"), s.get("miles")),
     ),
     Kpi(
         "maintenance_cost_per_mile",
         "Cost",
         "USD/mile",
-        {"en": "Σ maintenance cost ÷ Σ miles", "vi": "Σ chi phí bảo dưỡng ÷ Σ dặm"},
+        {
+            "en": "Maintenance cost per mile = maintenance cost ÷ total miles",
+            "vi": "Chi phí bảo dưỡng mỗi dặm = chi phí bảo dưỡng ÷ tổng số dặm",
+        },
         lambda s: _div(s.get("maintenance_cost"), s.get("miles")),
     ),
     Kpi(
         "safety_cost_per_mile",
         "Cost",
         "USD/mile",
-        {"en": "Σ incident claims ÷ Σ miles", "vi": "Σ bồi thường sự cố ÷ Σ dặm"},
+        {
+            "en": "Incident cost per mile = incident claims ÷ total miles",
+            "vi": "Chi phí sự cố mỗi dặm = bồi thường sự cố ÷ tổng số dặm",
+        },
         lambda s: _div(s.get("safety_cost"), s.get("miles")),
     ),
     Kpi(
         "revenue_per_mile",
         "Cost",
         "USD/mile",
-        {"en": "revenue ÷ Σ miles", "vi": "revenue ÷ Σ dặm"},
+        {
+            "en": "Revenue per mile = revenue ÷ total miles",
+            "vi": "Doanh thu mỗi dặm = doanh thu ÷ tổng số dặm",
+        },
         lambda s: _div(s.get("revenue"), s.get("miles")),
     ),
     Kpi(
@@ -120,8 +137,9 @@ CATALOG: list[Kpi] = [
         "Cost",
         "USD",
         {
-            "en": "revenue − measured_cost (before driver pay)",
-            "vi": "revenue − measured_cost (trước lương tài xế)",
+            "en": "Contribution profit = revenue − measured operating cost (before driver pay)",
+            "vi": "Lợi nhuận đóng góp = doanh thu − chi phí vận hành đo được (chưa trừ "
+            "lương tài xế)",
         },
         _contribution,
     ),
@@ -129,7 +147,10 @@ CATALOG: list[Kpi] = [
         "contribution_margin_pct",
         "Cost",
         "%",
-        {"en": "contribution ÷ revenue", "vi": "contribution ÷ revenue"},
+        {
+            "en": "Contribution margin = contribution profit ÷ revenue",
+            "vi": "Biên đóng góp = lợi nhuận đóng góp ÷ doanh thu",
+        },
         lambda s: _div(_contribution(s), s.get("revenue"), 100),
     ),
     Kpi(
@@ -137,8 +158,10 @@ CATALOG: list[Kpi] = [
         "Cost",
         "%",
         {
-            "en": "Σ (actual miles − lane's typical miles) ÷ Σ typical miles",
-            "vi": "Σ (dặm thực tế − dặm chuẩn của tuyến) ÷ Σ dặm chuẩn",
+            "en": "Out-of-route miles = (actual miles − the lane's standard miles) ÷ "
+            "standard miles",
+            "vi": "Tỷ lệ chạy vượt quãng chuẩn = (số dặm thực tế − số dặm chuẩn của "
+            "tuyến) ÷ số dặm chuẩn",
         },
         lambda s: _div(
             _add(s.get("miles"), -(s.get("typical_miles") or 0))
@@ -152,7 +175,10 @@ CATALOG: list[Kpi] = [
         "mpg",
         "Fuel",
         "miles/gallon",
-        {"en": "Σ miles ÷ Σ gallons burned", "vi": "Σ dặm ÷ Σ gallon tiêu thụ"},
+        {
+            "en": "Fuel economy = total miles ÷ gallons burned",
+            "vi": "Hiệu suất nhiên liệu = tổng số dặm ÷ số gallon tiêu thụ",
+        },
         lambda s: _div(s.get("miles"), s.get("gallons_burned")),
     ),
     Kpi(
@@ -160,8 +186,10 @@ CATALOG: list[Kpi] = [
         "Fuel",
         "ratio",
         {
-            "en": "Σ gallons purchased ÷ Σ gallons burned (fuel-card control)",
-            "vi": "Σ gallon mua ÷ Σ gallon tiêu thụ (kiểm soát thẻ nhiên liệu)",
+            "en": "Fuel bought vs burned = gallons bought ÷ gallons burned on trips "
+            "(fuel-card control)",
+            "vi": "Tỷ lệ nhiên liệu mua / tiêu thụ = số gallon mua ÷ số gallon tiêu thụ "
+            "theo chuyến (kiểm soát thẻ nhiên liệu)",
         },
         lambda s: _div(s.get("gallons_purchased"), s.get("gallons_burned")),
     ),
@@ -170,10 +198,10 @@ CATALOG: list[Kpi] = [
         "Reliability",
         "%",
         {
-            "en": "deliveries with |actual − appointment| ≤ window ÷ deliveries "
-            "(window 120 min = on_time_flag)",
-            "vi": "lần giao có |thực tế − giờ hẹn| ≤ cửa sổ ÷ số lần giao "
-            "(cửa sổ 120 phút = on_time_flag)",
+            "en": "On-time delivery (OTD) = deliveries within ±2 hours of the appointment "
+            "÷ all deliveries",
+            "vi": "Giao hàng đúng hẹn (OTD) = số lần giao trong ±2 giờ so với giờ hẹn ÷ "
+            "tổng số lần giao",
         },
         lambda s: _div(s.get("on_time"), s.get("deliveries"), 100),
     ),
@@ -182,8 +210,8 @@ CATALOG: list[Kpi] = [
         "Reliability",
         "%",
         {
-            "en": "deliveries with actual ≤ appointment ÷ deliveries",
-            "vi": "lần giao có thực tế ≤ giờ hẹn ÷ số lần giao",
+            "en": "Not late = deliveries at or before the appointment ÷ all deliveries",
+            "vi": "Giao không trễ hẹn = số lần giao đến trước hoặc đúng giờ hẹn ÷ tổng số lần giao",
         },
         lambda s: _div(s.get("not_late"), s.get("deliveries"), 100),
     ),
@@ -192,8 +220,8 @@ CATALOG: list[Kpi] = [
         "Reliability",
         "minutes",
         {
-            "en": "Σ detention minutes ÷ pickups and deliveries",
-            "vi": "Σ phút chờ ÷ số lần lấy và giao",
+            "en": "Average detention = total waiting minutes ÷ pickups and deliveries",
+            "vi": "Thời gian chờ bình quân = tổng số phút chờ ÷ số lần lấy và giao hàng",
         },
         lambda s: _div(s.get("detention_min"), s.get("events")),
     ),
@@ -201,7 +229,10 @@ CATALOG: list[Kpi] = [
         "detention_hours",
         "Reliability",
         "hours",
-        {"en": "Σ detention minutes ÷ 60", "vi": "Σ phút chờ ÷ 60"},
+        {
+            "en": "Total detention = total waiting minutes ÷ 60",
+            "vi": "Tổng thời gian chờ = tổng số phút chờ ÷ 60",
+        },
         lambda s: _div(s.get("detention_min"), 60),
     ),
     Kpi(
@@ -209,8 +240,8 @@ CATALOG: list[Kpi] = [
         "Assets",
         "miles",
         {
-            "en": "Σ miles ÷ truck-months with at least one trip",
-            "vi": "Σ dặm ÷ số tháng-xe có ít nhất một chuyến",
+            "en": "Miles per truck per month = total miles ÷ truck-months with at least one trip",
+            "vi": "Quãng đường mỗi xe mỗi tháng = tổng số dặm ÷ số tháng-xe có ít nhất một chuyến",
         },
         lambda s: _div(s.get("miles"), s.get("truck_months")),
     ),
@@ -219,8 +250,12 @@ CATALOG: list[Kpi] = [
         "Assets",
         "%",
         {
-            "en": "mean utilization_rate (compare trucks only; can exceed 100%)",
-            "vi": "trung bình utilization_rate (chỉ để so sánh xe; có thể vượt 100%)",
+            "en": "Reported utilization = average of the monthly utilization each truck "
+            "reports (the data doesn't define it and it can exceed 100%; use only "
+            "to compare trucks)",
+            "vi": "Hệ số sử dụng xe theo báo cáo = trung bình hệ số sử dụng hằng tháng "
+            "của từng xe (dữ liệu không định nghĩa và có thể vượt 100%; chỉ dùng để "
+            "so sánh các xe)",
         },
         lambda s: _div(s.get("utilization"), 1, 100),
     ),
@@ -228,24 +263,86 @@ CATALOG: list[Kpi] = [
         "downtime_hours",
         "Assets",
         "hours",
-        {"en": "Σ maintenance downtime hours", "vi": "Σ giờ dừng do bảo dưỡng"},
+        {
+            "en": "Maintenance downtime = total hours trucks were out of service for "
+            "maintenance or repair",
+            "vi": "Thời gian dừng xe bảo dưỡng = tổng số giờ xe ngừng hoạt động để bảo "
+            "dưỡng, sửa chữa",
+        },
         lambda s: s.get("downtime_hours"),
     ),
     Kpi(
         "incidents_per_million_miles",
         "Safety",
         "per 1M miles",
-        {"en": "incidents ÷ Σ miles × 1,000,000", "vi": "số sự cố ÷ Σ dặm × 1.000.000"},
+        {
+            "en": "Incident rate = incidents ÷ total miles × 1,000,000",
+            "vi": "Tần suất sự cố = số sự cố ÷ tổng số dặm × 1.000.000",
+        },
         lambda s: _div(s.get("incidents"), s.get("miles"), 1e6),
     ),
     Kpi(
         "preventable_pct",
         "Safety",
         "%",
-        {"en": "preventable incidents ÷ incidents", "vi": "sự cố phòng tránh được ÷ số sự cố"},
+        {
+            "en": "Preventable incidents = preventable incidents ÷ all incidents",
+            "vi": "Tỷ lệ sự cố phòng tránh được = số sự cố phòng tránh được ÷ tổng số sự cố",
+        },
         lambda s: _div(s.get("preventable"), s.get("incidents"), 100),
     ),
 ]
+
+TITLES = {  # display names, same order as CATALOG
+    "revenue": {"en": "Revenue", "vi": "Doanh thu"},
+    "measured_cost": {"en": "Measured operating cost", "vi": "Chi phí vận hành đo được"},
+    "cost_per_mile": {"en": "Operating cost per mile", "vi": "Chi phí vận hành mỗi dặm"},
+    "fuel_cost_per_mile": {"en": "Fuel cost per mile", "vi": "Chi phí nhiên liệu mỗi dặm"},
+    "maintenance_cost_per_mile": {
+        "en": "Maintenance cost per mile",
+        "vi": "Chi phí bảo dưỡng mỗi dặm",
+    },
+    "safety_cost_per_mile": {"en": "Incident cost per mile", "vi": "Chi phí sự cố mỗi dặm"},
+    "revenue_per_mile": {"en": "Revenue per mile", "vi": "Doanh thu mỗi dặm"},
+    "contribution": {"en": "Contribution profit", "vi": "Lợi nhuận đóng góp"},
+    "contribution_margin_pct": {"en": "Contribution margin", "vi": "Biên đóng góp"},
+    "out_of_route_pct": {"en": "Out-of-route miles", "vi": "Tỷ lệ chạy vượt quãng chuẩn"},
+    "mpg": {"en": "Fuel economy", "vi": "Hiệu suất nhiên liệu"},
+    "fuel_purchased_to_burned": {
+        "en": "Fuel bought vs burned",
+        "vi": "Tỷ lệ nhiên liệu mua / tiêu thụ",
+    },
+    "on_time_pct": {"en": "On-time delivery (OTD)", "vi": "Giao hàng đúng hẹn (OTD)"},
+    "not_late_pct": {"en": "Not late", "vi": "Giao không trễ hẹn"},
+    "avg_detention_min": {"en": "Average detention", "vi": "Thời gian chờ bình quân"},
+    "detention_hours": {"en": "Total detention", "vi": "Tổng thời gian chờ"},
+    "miles_per_truck_month": {
+        "en": "Miles per truck per month",
+        "vi": "Quãng đường mỗi xe mỗi tháng",
+    },
+    "utilization": {"en": "Reported utilization", "vi": "Hệ số sử dụng xe theo báo cáo"},
+    "downtime_hours": {"en": "Maintenance downtime", "vi": "Thời gian dừng xe bảo dưỡng"},
+    "incidents_per_million_miles": {"en": "Incident rate", "vi": "Tần suất sự cố"},
+    "preventable_pct": {"en": "Preventable incidents", "vi": "Tỷ lệ sự cố phòng tránh được"},
+}
+UNITS = {  # unit labels per language
+    "USD": {"en": "USD", "vi": "USD"},
+    "USD/mile": {"en": "USD per mile", "vi": "USD/dặm"},
+    "%": {"en": "%", "vi": "%"},
+    "miles/gallon": {"en": "miles per gallon", "vi": "dặm/gallon"},
+    "ratio": {"en": "times", "vi": "lần"},
+    "minutes": {"en": "minutes", "vi": "phút"},
+    "hours": {"en": "hours", "vi": "giờ"},
+    "miles": {"en": "miles", "vi": "dặm"},
+    "per 1M miles": {"en": "per million miles", "vi": "lần/triệu dặm"},
+}
+AREAS = {
+    "Cost": {"en": "Cost & profit", "vi": "Chi phí & lợi nhuận"},
+    "Fuel": {"en": "Fuel", "vi": "Nhiên liệu"},
+    "Reliability": {"en": "Delivery reliability", "vi": "Độ tin cậy giao hàng"},
+    "Assets": {"en": "Assets", "vi": "Tài sản (xe)"},
+    "Safety": {"en": "Safety", "vi": "An toàn"},
+}
 
 _TRIP_SUMS = """
     SELECT {key} AS grp, count(*) AS trips, sum(miles) AS miles,

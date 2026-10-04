@@ -2,6 +2,9 @@
 
 > Vietnamese: [roadmap.vi.md](roadmap.vi.md) · Modules: [CAPABILITY-MAP.md](../CAPABILITY-MAP.md)
 > **Deadline: interview on Monday 2026-10-05.** Freeze Sunday 2026-10-04 evening.
+> **Status (Sat 2026-10-03):** order revised to `data-platform` → `metrics` → `analysis` → `dashboard`
+> → `optimize` → `reports`. Modules 1–4 done; `optimize` parked on branch `feature/optimize`. Live
+> progress: [docs/00-project-journal.md](../docs/00-project-journal.md) §4.
 
 ## Rules for the weekend
 

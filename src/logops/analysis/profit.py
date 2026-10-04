@@ -12,17 +12,26 @@ import polars as pl
 
 from logops.metrics.kpis import FLEET, UNATTRIBUTED, kpi
 
-PERIODS = ("month", "quarter", "year")
-_LAGS = {"month": 12, "quarter": 4, "year": 1}  # periods back to the same period last year
+PERIODS = ("day", "month", "quarter", "year")
+_LAGS = {
+    "day": 364,
+    "month": 12,
+    "quarter": 4,
+    "year": 1,
+}  # 364 days = same weekday  # periods back to the same period last year
 
 
 def _period(column: str, period: str) -> str:
+    if period == "day":
+        return f"strftime(CAST({column} AS DATE), '%Y-%m-%d')"
     if period == "month":
         return f"strftime(date_trunc('month', {column}), '%Y-%m')"
     if period == "quarter":
         return f"CAST(year({column}) AS VARCHAR) || '-Q' || CAST(quarter({column}) AS VARCHAR)"
     if period == "year":
         return f"CAST(year({column}) AS VARCHAR)"
+    if period == "total":
+        return "'total'"
     raise ValueError(f"period must be one of {PERIODS}")
 
 
@@ -104,6 +113,11 @@ def pnl(con: duckdb.DuckDBPyConnection, start: dt.date, end: dt.date, period: st
             .drop("year")
         )
     return df
+
+
+def totals(con: duckdb.DuckDBPyConnection, start: dt.date, end: dt.date) -> dict:
+    """The P&L for the whole range as one row (same booking rules as pnl())."""
+    return _with_totals(_sums(con, start, end, "total")).row(0, named=True)
 
 
 def unit_economics(df: pl.DataFrame) -> pl.DataFrame:
@@ -219,7 +233,9 @@ def margin_vs_fuel(
         "WHERE purchase_date::DATE BETWEEN $start AND $end GROUP BY ALL",
         {"start": start, "end": end},
     ).fetchall()
-    table = months.drop("fuel_price").join(
-        pl.DataFrame(price, schema=["period", "avg_fuel_price"], orient="row"), on="period"
+    table = (
+        months.drop("fuel_price")
+        .join(pl.DataFrame(price, schema=["period", "avg_fuel_price"], orient="row"), on="period")
+        .sort("period")
     )
     return table, table.select(pl.corr("margin_pct", "avg_fuel_price")).item()

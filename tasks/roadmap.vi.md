@@ -2,6 +2,9 @@
 
 > Bản tiếng Anh: [roadmap.md](roadmap.md) · Các module: [CAPABILITY-MAP.vi.md](../CAPABILITY-MAP.vi.md)
 > **Hạn chót: phỏng vấn thứ Hai 05/10/2026.** Đóng băng tối Chủ nhật 04/10/2026.
+> **Trạng thái (T7 03/10/2026):** thứ tự đổi thành `data-platform` → `metrics` → `analysis` → `dashboard`
+> → `optimize` → `reports`. Module 1–4 đã xong; `optimize` tạm để ở nhánh `feature/optimize`. Tiến độ
+> cập nhật: [docs/00-project-journal.vi.md](../docs/00-project-journal.vi.md) §4.
 
 ## Nguyên tắc cho cuối tuần
 

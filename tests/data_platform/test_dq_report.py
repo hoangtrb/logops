@@ -55,7 +55,7 @@ def test_report_shows_violations_samples_and_clean_rules():
 def test_same_numbers_in_both_languages_with_local_formatting():
     en, vi = render(DATA, "en"), render(DATA, "vi")
 
-    assert "$298.60M" in en and "298,60 triệu USD" in vi
+    assert "$298.60M" in en and "298,60 tr USD" in vi
     assert "| 122,200,000 |" in en and "| 122.200.000 |" in vi
     assert "44.6%" in en and "44,6%" in vi
 

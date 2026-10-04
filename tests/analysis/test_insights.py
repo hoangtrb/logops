@@ -47,7 +47,8 @@ FACTS = {
     "yearly_mean_max": 66.2,
     "lanes_protect": 7,
     "lanes_reprice": 6,
-    "lanes_exit": 6,
+    "lanes_review_low": 6,
+    "lane_margin_min": 50.4,
     "surplus_pct": 33.0,
     "surplus": 28178,
     "cities_imbalanced": 16,
@@ -55,14 +56,24 @@ FACTS = {
     "balance_persistence": 0.997,
     "receive_only_cities": ["Los Angeles"],
     "moved_pct": 95.4,
+    "moved_random_pct": 95.4,
+    "trucks_never_ran": 28,
+    "never_ran_maintenance": 1_400_000.0,
 }
+
+
+def _all_templates(rule):
+    yield from rule.templates.items()
+    for by_lang in rule.by_level.values():
+        yield from by_lang.items()
 
 
 def test_templates_contain_no_digits():
     for rule in RULES:
-        for lang, text in rule.templates.items():
-            literal = "".join(part for part, *_ in string.Formatter().parse(text))
-            assert not re.search(r"\d", literal), (rule.id, lang, literal)
+        for lang, parts in _all_templates(rule):
+            for text in parts.values():
+                literal = "".join(part for part, *_ in string.Formatter().parse(text))
+                assert not re.search(r"\d", literal), (rule.id, lang, literal)
 
 
 def test_every_rule_fires_on_the_sample_facts_in_both_languages():
@@ -74,7 +85,28 @@ def test_every_rule_fires_on_the_sample_facts_in_both_languages():
 def test_numbers_come_from_the_facts():
     text = {i["id"]: i["text"] for i in generate(FACTS, "en")}
     assert "28,178" in text["imbalance"] and "Los Angeles" in text["imbalance"]
-    assert "92 trucks in use and 120 owned" in text["capacity"]
+    assert "92 trucks have run trips; the company owns 120" in text["capacity"]
+    assert "40 trucks were not needed" in text["capacity"] and "$1.40M" in text["capacity"]
+
+
+def test_every_finding_says_whether_it_is_good_or_bad_and_what_to_do():
+    for lang in ("en", "vi"):
+        for item in generate(FACTS, lang):
+            assert item["title"] and item["what"] and item["impact"], item["id"]
+            assert item["tone"] in ("good", "bad", "risk", "neutral"), item["id"]
+            if item["level"] in ("act", "watch"):
+                assert item["action"], item["id"]
+
+
+def test_message_and_tone_follow_the_level():
+    def find(facts, rule_id):
+        return {i["id"]: i for i in generate(facts, "en")}[rule_id]
+
+    assert find(FACTS, "concentration")["tone"] == "good"
+    risky = find(FACTS | {"hhi": 1200.0}, "concentration")
+    assert risky["tone"] == "risk" and risky["action"] and "depends" in risky["title"]
+    enough = find(FACTS | {"trucks_owned": 80}, "capacity")
+    assert enough["level"] == "info" and enough["tone"] == "neutral" and not enough["action"]
 
 
 def test_concentration_level_follows_thresholds():
