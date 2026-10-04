@@ -214,7 +214,7 @@ def network_balance(con: duckdb.DuckDBPyConnection, start: dt.date, end: dt.date
             * pl.col("net").abs()
             / ((pl.col("loads_out") + pl.col("loads_in")) / 2)
         )
-        .sort("imbalance_pct", descending=True)
+        .sort(["imbalance_pct", "city"], descending=[True, False])  # ties in a fixed order
     )
     last = by_year["yr"].max()
     nets = (

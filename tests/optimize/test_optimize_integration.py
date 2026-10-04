@@ -93,19 +93,8 @@ def test_report_totals_and_docs(con, tmp_path):
         "upper bound",
         "risk sharing",
         "unexplained",
-        "estimate",
         "no signal",
     }
-    # trip chaining: fewer moves and empty miles; money never above the fuel bought off trips
-    c = data["chaining"]
-    assert c["nearest"]["moved_pct"] < c["today"]["moved_pct"]
-    assert 0 < c["empty_miles_cut"] < 1
-    assert c["saving_per_year"] <= c["costs"]["off_trip_fuel_per_year"]
-    estimate = rec.filter(rec["impact_type"] == "estimate")["annual_impact_usd"].sum()
-    assert estimate == pytest.approx(c["saving_per_year"])
-    assert t["measured"] + t["upper"] == pytest.approx(  # estimates never join the totals
-        rec.filter(rec["impact_type"].is_in(["measured", "upper bound"]))["annual_impact_usd"].sum()
-    )
     for lang in ("en", "vi"):
         assert render_evaluation(data, lang) == render_evaluation(data, lang)
         assert "http" in render_gaps(data, lang)  # every device cost cites its source

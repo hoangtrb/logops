@@ -72,9 +72,7 @@ customers, 58 lanes.
 | Upper bound: 13 lowest-mileage trucks, fuel surcharge to the median, +5% rates on low-margin lanes | $2.42M | 233% |
 | Total potential | $2.89M | 278% |
 | Unexplained, not counted: fuel bought but not recorded as burned | $7.24M | — |
-| Estimate (maximum), not counted: trip chaining, empty miles −59.5% × $7.18M of fuel bought off trips | $4.27M | — |
 
-Trip chaining (sending the nearest free truck to each load) cuts trips needing a move from 89.5% to 41.1% and empty miles by 59.5% in a replay of every load at actual times; distances come from the lanes and fuel per mile from the data.
 
 Late deliveries (44.4% more than 2 h late) have no repeatable cause in the data, so no recommendation is made for them. Details: [05-evaluation.md](05-evaluation.md).
 

@@ -72,9 +72,7 @@ hàng, 58 tuyến.
 | Mức trần: 13 xe ít dặm nhất, phụ phí nhiên liệu về trung vị, tăng cước +5% tuyến biên thấp | 2,42 tr USD | 233% |
 | Tổng tiềm năng | 2,89 tr USD | 278% |
 | Chưa giải thích được, không cộng: nhiên liệu mua nhưng không ghi nhận tiêu thụ | 7,24 tr USD | — |
-| Ước tính (tối đa), không cộng: ghép chuyến, dặm chạy rỗng −59,5% × 7,18 tr USD nhiên liệu mua ngoài chuyến | 4,27 tr USD | — |
 
-Ghép chuyến (điều xe rảnh gần nhất cho mỗi lô) làm tỷ lệ chuyến phải điều xe giảm từ 89,5% xuống 41,1% và dặm chạy rỗng giảm 59,5% khi mô phỏng lại mọi lô theo giờ thực tế; quãng đường lấy từ mạng tuyến, nhiên liệu mỗi dặm từ dữ liệu.
 
 Giao trễ (44,4% lần giao trễ quá 2 giờ) không có nguyên nhân lặp lại trong dữ liệu nên không có đề xuất. Chi tiết: [05-evaluation.vi.md](05-evaluation.vi.md).
 

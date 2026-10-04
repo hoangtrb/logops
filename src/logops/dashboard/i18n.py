@@ -457,6 +457,8 @@ T = {
         "mức độ chắc chắn.",
         "o_scope": "Tính trên toàn bộ dữ liệu từ {a} đến {b}; không đổi theo khoảng thời gian ở "
         "thanh bên.",
+        "o_scope_report": "Khuyến nghị tính trên toàn bộ dữ liệu từ {a} đến {b}, không theo kỳ báo "
+        "cáo.",
         "proj_heading": "Đề tài và nguồn dữ liệu",
         "proj": {
             "title": "Đề tài",
@@ -524,7 +526,6 @@ T = {
             "Fleet": "Đội xe",
             "Lanes": "Giá cước tuyến",
             "Data": "Dữ liệu",
-            "Network": "Mạng lưới",
             "Checked": "Đã kiểm tra",
         },
         "o_types": {
@@ -532,7 +533,6 @@ T = {
             "upper bound": "Tiềm năng tối đa",
             "risk sharing": "Chia sẻ rủi ro",
             "unexplained": "Chưa giải thích được",
-            "estimate": "Ước tính (giả thuyết)",
             "no signal": "Không có tín hiệu",
         },
         "o_checked": "Đã kiểm tra và không đề xuất",
@@ -600,41 +600,6 @@ T = {
         },
         "o_s3": "S3 · Phụ phí theo giá nhiên liệu (mô phỏng)",
         "o_s3_group": "Phụ phí nhiên liệu theo giá",
-        "o_chain": "Ghép chuyến: điều xe rảnh gần nhất (mô phỏng)",
-        "o_chain_moved": "Chuyến phải điều xe",
-        "n_chain_moved": "Như hiện tại {today} (thực tế {seen})",
-        "o_chain_miles": "Dặm chạy rỗng",
-        "n_chain_miles": "{near} so với {today} triệu dặm mỗi năm trong mô phỏng",
-        "o_chain_move": "Quãng điều xe bình quân",
-        "n_chain_move": "Khoảng {h} giờ lái; {day} số lần trong một ngày lái ({limit} giờ)",
-        "o_chain_value": "Tiết kiệm nhiên liệu tối đa mỗi năm",
-        "n_chain_value": "−{cut} × {fuel} nhiên liệu mua ngoài chuyến; ước tính, không cộng vào "
-        "tổng",
-        "o_chain_tip": [
-            "Từ dữ liệu: tốc độ {speed} dặm/giờ, {mpg} dặm/gallon, giá {price}/gallon → "
-            "mỗi dặm chạy rỗng {per_mile}.",
-            "Mô hình: dặm chạy rỗng giảm {cut}, tức {model} nhiên liệu mỗi năm.",
-            "Nhưng nhiên liệu mua ngoài chuyến chỉ có {off_trip} mỗi năm (khoảng {off_miles} triệu "
-            "dặm), ít hơn số dặm rỗng của mô hình.",
-            "Vì vậy chỉ áp tỷ lệ giảm: {cut} × {off_trip} = {saving} mỗi năm, là mức tối đa.",
-        ],
-        "o_chain_table": "Như hiện tại và điều xe gần nhất",
-        "o_chain_note": "Mô phỏng lại {loads} lô với giờ lấy và giao thực tế. Mỗi lô được giao cho "
-        "xe rảnh gần thành phố lấy hàng nhất, kịp chạy rỗng tới (xe đang ở đó được ưu tiên). Quãng "
-        "đường lấy theo mạng tuyến của dữ liệu, đi vòng khi hai thành phố không có tuyến trực "
-        "tiếp, nên dài hơn đường thực tế. Không đặt giới hạn cứng cho quãng chạy rỗng: xe dồn ở "
-        "các thành phố ít hàng đi phải chạy xa, và mọi giới hạn đến 24 giờ đều cần thêm hàng nghìn "
-        "xe. Quãng điều xe nên giữ trong một ngày lái ({h} giờ); xa hơn thì nên tìm hàng chiều về "
-        "tại chỗ thay vì chạy rỗng.",
-        "o_chain_cols": ["Chỉ số", "Như hiện tại", "Điều xe gần nhất"],
-        "o_chain_rows": [
-            "Chuyến phải điều xe",
-            "Lần điều xe mỗi năm",
-            "Dặm chạy rỗng mỗi năm",
-            "Dặm mỗi lần điều xe",
-            "Lần điều xe trong một ngày lái ({h} giờ)",
-            "Số xe cần (mô phỏng)",
-        ],
         "o_s3_note": "Phụ phí tính theo giá nhiên liệu hằng tháng, với giá cơ sở {base} mỗi gallon "
         "để tổng doanh thu 3 năm không đổi. Năm giá cao thu nhiều hơn, năm giá thấp thu ít hơn: "
         "lợi nhuận bớt phụ thuộc giá nhiên liệu. Không tính là tiết kiệm.",
@@ -1085,6 +1050,8 @@ T = {
         "certain each is.",
         "o_scope": "Computed over all the data from {a} to {b}; the sidebar date range doesn't "
         "change it.",
+        "o_scope_report": "Recommendations use all the data from {a} to {b}, not the report "
+        "period.",
         "proj_heading": "Project and data source",
         "proj": {
             "title": "Project",
@@ -1152,7 +1119,6 @@ T = {
         ],
         "o_areas": {
             "Fleet": "Fleet",
-            "Network": "Network",
             "Lanes": "Lane pricing",
             "Data": "Data",
             "Checked": "Checked",
@@ -1162,7 +1128,6 @@ T = {
             "upper bound": "Maximum potential",
             "risk sharing": "Risk sharing",
             "unexplained": "Unexplained",
-            "estimate": "Estimate (hypothesis)",
             "no signal": "No signal",
         },
         "o_checked": "Checked and not recommended",
@@ -1231,40 +1196,6 @@ T = {
         },
         "o_s3": "S3 · Surcharge indexed to the fuel price (simulation)",
         "o_s3_group": "Fuel surcharge that follows the price",
-        "o_chain": "Trip chaining: nearest free truck (simulation)",
-        "o_chain_moved": "Trips needing a move",
-        "n_chain_moved": "As today {today} (observed {seen})",
-        "o_chain_miles": "Empty miles",
-        "n_chain_miles": "{near} against {today} million miles a year in the replay",
-        "o_chain_move": "Average empty move",
-        "n_chain_move": "About {h} h of driving; {day} of moves within one driving day ({limit} h)",
-        "o_chain_value": "Maximum fuel saving per year",
-        "n_chain_value": "−{cut} × {fuel} of fuel bought off trips; an estimate, not in the total",
-        "o_chain_tip": [
-            "From the data: {speed} mph, {mpg} miles a gallon, {price} a gallon → an empty "
-            "mile costs {per_mile}.",
-            "Model: empty miles fall by {cut}, i.e. {model} of fuel a year.",
-            "But the fuel bought off trips is only {off_trip} a year (about {off_miles} "
-            "million miles), less than the model's empty miles.",
-            "So only the cut is applied: {cut} × {off_trip} = {saving} a year, a maximum.",
-        ],
-        "o_chain_table": "Today's dispatching and the nearest truck",
-        "o_chain_note": "Replays the {loads} loads at their actual pickup and delivery times. Each "
-        "load goes to the free truck closest to its pickup city that can drive there in time (a "
-        "truck already there first). Distances follow the data's lanes, detouring where two cities "
-        "have no lane, so they are longer than real roads. No fixed limit on the empty drive: "
-        "trucks piling up in cities that send little back must drive far, and any limit up to 24 h "
-        "needs thousands of extra trucks. Keep moves within one driving day ({h} h); beyond that, "
-        "look for a return load on the spot rather than driving empty.",
-        "o_chain_cols": ["Measure", "As today", "Nearest truck"],
-        "o_chain_rows": [
-            "Trips needing a move",
-            "Moves a year",
-            "Empty miles a year",
-            "Miles per move",
-            "Moves within one driving day ({h} h)",
-            "Trucks needed (replay)",
-        ],
         "o_s3_note": "The surcharge follows the monthly fuel price, with a base of {base} per "
         "gallon so that 3-year revenue is unchanged. High-price years earn more, low-price years "
         "less: profit depends less on fuel prices. Not counted as a saving.",

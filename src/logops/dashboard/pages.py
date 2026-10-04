@@ -1069,6 +1069,19 @@ def opt_group(ctx, title: str) -> None:
     st.html(ui.group_label(title))
 
 
+def scope_note(ctx) -> str | None:
+    """The recommendations cover all the data: say so on the dashboard (the sidebar range doesn't
+    apply) and in a report only when its period is shorter than the data."""
+    t = ctx["t"]
+    first, last = data.bounds()
+    span = {"a": day(ctx, first), "b": day(ctx, last)}
+    if not ctx.get("static"):
+        return t["o_scope"].format(**span)
+    if (ctx["start"], ctx["end"]) != (first, last):
+        return t["o_scope_report"].format(**span)
+    return None
+
+
 def _musd(ctx):
     return lambda x: ctx["f"].value(x, "usd_m")
 
@@ -1123,8 +1136,8 @@ def optimize(ctx) -> None:
     t, f, lang = ctx["t"], ctx["f"], ctx["lang"]
     musd = _musd(ctx)
     d = data.optimization(0.0)
-    first, last = data.bounds()
-    st.caption(t["o_scope"].format(a=day(ctx, first), b=day(ctx, last)))
+    if note := scope_note(ctx):
+        st.caption(note)
     rec = optimize_report.recommendations(d, lang)
     tot = optimize_report.totals(d)
     target = tot["target"]
@@ -1194,7 +1207,6 @@ def optimize(ctx) -> None:
     fleet_plan(ctx)
     lane_pricing(ctx)
     fuel_surcharge(ctx)
-    trip_chaining(ctx)
     lateness_check(ctx)
     data_gaps(ctx)
 
@@ -1356,94 +1368,6 @@ def fuel_surcharge(ctx) -> None:
         t["u_musd"],
         t["o_s3_note"].format(base=f.value(d["indexed_base"], "usd")),
     )
-
-
-def trip_chaining(ctx) -> None:
-    """Nearest-truck dispatching against today's: moves, empty miles, trucks, fuel (O3)."""
-    t, f = ctx["t"], ctx["f"]
-    opt_group(ctx, t["o_chain"])
-    c = data.optimization(0.0)["chaining"]
-    k, today, near = c["costs"], c["today"], c["nearest"]
-    hours = lambda miles: f.num(miles / k["speed_mph"], 0)  # noqa: E731
-    cards(
-        [
-            Kpi(
-                t["o_chain_moved"],
-                pct(ctx, near["moved_pct"]),
-                note=t["n_chain_moved"].format(
-                    today=pct(ctx, today["moved_pct"]), seen=pct(ctx, c["observed_moved_pct"])
-                ),
-            ),
-            Kpi(
-                t["o_chain_miles"],
-                f"−{f.pct(c['empty_miles_cut'])}",
-                note=t["n_chain_miles"].format(
-                    near=f.num(near["empty_miles_per_year"] / 1e6, 1),
-                    today=f.num(today["empty_miles_per_year"] / 1e6, 1),
-                ),
-            ),
-            Kpi(
-                t["o_chain_move"],
-                f"{f.int(near['miles_per_move'])} {t['u_miles']}",
-                note=t["n_chain_move"].format(
-                    h=hours(near["miles_per_move"]),
-                    day=pct(ctx, near["within_a_day_pct"]),
-                    limit=optimize_report.DRIVING_DAY_HOURS,
-                ),
-            ),
-            Kpi(
-                t["o_chain_value"],
-                f.value(c["saving_per_year"], "usd_m"),
-                note=t["n_chain_value"].format(
-                    cut=f.pct(c["empty_miles_cut"]),
-                    fuel=f.value(k["off_trip_fuel_per_year"], "usd_m"),
-                ),
-                tip=[
-                    line.format(
-                        speed=f.num(k["speed_mph"], 1),
-                        mpg=f.num(k["mpg"], 2),
-                        price=f.value(k["fuel_price"], "usd"),
-                        per_mile=f.value(k["cost_per_mile"], "usd"),
-                        model=f.value(c["model_fuel_saving"], "usd_m"),
-                        cut=f.pct(c["empty_miles_cut"]),
-                        off_trip=f.value(k["off_trip_fuel_per_year"], "usd_m"),
-                        off_miles=f.num(k["off_trip_miles_per_year"] / 1e6, 1),
-                        saving=f.value(c["saving_per_year"], "usd_m"),
-                    )
-                    for line in t["o_chain_tip"]
-                ],
-            ),
-        ]
-    )
-    rows = [
-        (t["o_chain_rows"][0], lambda x: pct(ctx, x["moved_pct"])),
-        (t["o_chain_rows"][1], lambda x: f.int(x["moves_per_year"])),
-        (t["o_chain_rows"][2], lambda x: f.int(x["empty_miles_per_year"])),
-        (t["o_chain_rows"][3], lambda x: f.int(x["miles_per_move"])),
-        (
-            t["o_chain_rows"][4].format(h=optimize_report.DRIVING_DAY_HOURS),
-            lambda x: pct(ctx, x["within_a_day_pct"]),
-        ),
-        (t["o_chain_rows"][5], lambda x: f.int(x["trucks"])),
-    ]
-    with card(t["o_chain_table"]):
-        st.html(ui.chart_header(t["o_chain_table"]))
-        st.html(
-            ui.callout(
-                t["explain"],
-                t["o_chain_note"].format(
-                    loads=f.int(c["loads"]), h=optimize_report.DRIVING_DAY_HOURS
-                ),
-            )
-        )
-        st.html(
-            ui.html_table(
-                t["o_chain_cols"],
-                [[name, cell(today), cell(near)] for name, cell in rows],
-                numeric={1, 2},
-                numbered=False,
-            )
-        )
 
 
 def lateness_check(ctx) -> None:

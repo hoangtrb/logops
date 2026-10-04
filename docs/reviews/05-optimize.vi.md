@@ -9,7 +9,7 @@
 
 Làm lại từ nhánh `feature/optimize` sau module phân tích và dashboard. Phạm vi đã thống nhất với chủ
 dự án: O1 đội xe, O2 giá cước tuyến, O4 giao trễ, O5 quy trình dữ liệu, O6 khuyến nghị và trang
-dashboard; O3 ghép chuyến chỉ làm nếu còn thời gian (đã làm 04/10/2026). Mục tiêu 3,1 tr USD/3 năm được phép
+dashboard; O3 ghép chuyến chỉ làm nếu còn thời gian (đã làm 04/10/2026, chủ dự án bỏ 05/10/2026). Mục tiêu 3,1 tr USD/3 năm được phép
 vượt.
 
 ## 2. Output so với spec
@@ -21,7 +21,7 @@ vượt.
 | O4 giao trễ | ✅ Không có nguyên nhân lặp lại: tương quan giữa hai giai đoạn từ −0,23 đến 0,14 (cần 0,7) theo thành phố, khách hàng, giờ hẹn, tuyến, tài xế | Test trên dữ liệu thật |
 | O5 cải tiến quy trình dữ liệu | ✅ 7 lỗ hổng; mới: chuyến điều xe giữa hai chuyến không được ghi | Mọi chi phí thiết bị có nguồn |
 | O6 khuyến nghị, tài liệu, trang | ✅ Bảng `recommendations`, lệnh `logops optimize`, `docs/04`, `docs/05`, trang dashboard "Khuyến nghị tối ưu" (VI/EN), một trang đặt trước trang dữ liệu (04/10/2026) | Trang chạy ở cả hai ngôn ngữ, tải lại dưới 3 giây |
-| O3 ghép chuyến | ✅ Mô phỏng lại mọi lô theo giờ thực tế: điều phối như hiện tại (xe rảnh lâu nhất) so với điều xe rảnh gần nhất; quãng đường theo mạng tuyến, nhiên liệu mỗi dặm từ dữ liệu; có phần trên dashboard và trong tài liệu đánh giá | Test dữ liệu nhỏ (xe gần nhất, đường ngắn nhất, kịp giờ); số tiền không vượt lượng nhiên liệu mua ngoài chuyến (test) |
+| O3 ghép chuyến | ❌ Đã làm, rồi chủ dự án bỏ (05/10/2026) | Kết quả phụ thuộc quá nhiều vào giả định mà dữ liệu không trả lời được: xe thùng khô và xe lạnh, xe chuyên trách (50% số lô: dặm chạy rỗng giảm 59,5% → 35,2%), quãng đường theo mạng tuyến dài hơn đường thật, và số dặm rỗng mô phỏng gấp khoảng ba lần mức nhiên liệu mua ngoài chuyến cho phép. Dễ bị chất vấn nên không trình bày |
 
 **Test:** 26 trong `tests/optimize` + 2 lượt chạy trang; tổng 148, tất cả pass; `ruff` sạch.
 
@@ -44,15 +44,8 @@ vượt.
 - **Giao trễ:** 44,4% lần giao trễ quá 2 giờ nhưng không có nguyên nhân lặp lại trong dữ liệu: không
   đề xuất, thay vào đó đề xuất ghi mã lý do (O5).
 
-- **Ghép chuyến (O3):** điều xe rảnh gần nhất cho mỗi lô làm tỷ lệ chuyến phải điều xe giảm từ
-  89,5% xuống 41,1% và dặm chạy rỗng giảm 59,5% (mô phỏng; quãng đường theo mạng tuyến, mỗi dặm
-  chạy rỗng 0,605 USD = 3,899 USD/gallon ÷ 6,45 dặm/gallon). Số dặm rỗng của mô phỏng gấp khoảng
-  ba lần mức nhiên liệu mua ngoài chuyến cho phép, nên chỉ áp tỷ lệ giảm lên phần nhiên liệu đó
-  (7,18 tr USD): 4,27 tr USD mỗi năm, là mức tối đa. Không đặt giới hạn cứng cho quãng chạy rỗng:
-  mọi giới hạn đến 24 giờ đều cần thêm hàng nghìn xe; 33% lần điều xe gần nhất nằm trong một
-  ngày lái 11 giờ.
-
 ## 4. Lưu ý khi trình bày
+
 
 - Riêng tiết kiệm đo được đạt 45% mục tiêu; vượt mục tiêu chỉ khi có các đòn bẩy giá, cần khách hàng
   chấp nhận.

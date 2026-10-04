@@ -379,9 +379,8 @@ RULES = [
                 "impact": "Almost every trip is preceded by a move to another city, usually "
                 "empty. Those moves aren't recorded, so their time and fuel are hidden from cost "
                 "reports and from the profit of each trip.",
-                "action": "Record every move between trips (time, distance, reason), and assign "
-                "next loads to trucks already in or near the pickup city; how many moves this "
-                "saves is worked out in the optimization module.",
+                "action": "Record every move between trips (time, distance, reason), so the cost "
+                "of driving empty can be measured before the dispatch rules are changed.",
             },
             "vi": {
                 "title": "Chuyến kế tiếp không được ghép với nơi xe vừa giao xong",
@@ -392,8 +391,7 @@ RULES = [
                 "là chạy rỗng. Quãng di chuyển này không được ghi lại, nên thời gian và nhiên liệu "
                 "bị ẩn khỏi báo cáo chi phí và lợi nhuận từng chuyến.",
                 "action": "Ghi nhận mọi lần điều xe giữa hai chuyến (thời gian, quãng đường, lý "
-                "do), và giao lô kế tiếp cho xe đang ở hoặc gần điểm lấy hàng; số lần điều xe "
-                "tiết kiệm được sẽ tính ở module tối ưu.",
+                "do), để đo được chi phí chạy rỗng trước khi thay đổi cách điều phối.",
             },
         },
         lambda x, f: {"moved": _pp(f, x["moved_pct"]), "random": _pp(f, x["moved_random_pct"])},

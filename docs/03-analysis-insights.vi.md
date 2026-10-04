@@ -44,7 +44,7 @@ Giai đoạn: 2022-01-01 đến 2024-12-31. Lợi nhuận là đóng góp trư�
 
 - **Diễn biến:** Ở 95,4% số trường hợp, chuyến kế tiếp của xe bắt đầu ở thành phố khác nơi chuyến trước kết thúc. Nếu giao chuyến hoàn toàn ngẫu nhiên, tỷ lệ này là 95,4%: dữ liệu không cho thấy việc điều phối ghép hàng theo vị trí xe.
 - **Ảnh hưởng:** Gần như mọi chuyến đều phải điều xe sang thành phố khác trước, thường là chạy rỗng. Quãng di chuyển này không được ghi lại, nên thời gian và nhiên liệu bị ẩn khỏi báo cáo chi phí và lợi nhuận từng chuyến.
-- **Đề xuất:** Ghi nhận mọi lần điều xe giữa hai chuyến (thời gian, quãng đường, lý do), và giao lô kế tiếp cho xe đang ở hoặc gần điểm lấy hàng; số lần điều xe tiết kiệm được sẽ tính ở module tối ưu.
+- **Đề xuất:** Ghi nhận mọi lần điều xe giữa hai chuyến (thời gian, quãng đường, lý do), để đo được chi phí chạy rỗng trước khi thay đổi cách điều phối.
 
 ### Tham khảo
 

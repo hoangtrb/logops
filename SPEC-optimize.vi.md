@@ -114,3 +114,5 @@ qua chi phí mỗi lần điều xe do người xem nhập, ghi rõ là ước t
 > trong dữ liệu (các chuyến chồng thời gian); tiền thuộc loại "ước tính" (giả thuyết), không cộng vào tổng.
 > **O3 sửa 04/10/2026 (chủ dự án):** xe rảnh gần nhất, quãng đường theo mạng tuyến, nhiên liệu
 > mỗi dặm từ dữ liệu; tiền = tỷ lệ giảm dặm chạy rỗng × nhiên liệu mua ngoài chuyến (mức tối đa).
+> **O3 bỏ 05/10/2026 (chủ dự án):** kết quả thay đổi mạnh theo xe thùng khô/xe lạnh, xe chuyên trách
+> và quãng đường; dễ bị chất vấn. Đã gỡ khỏi code, dashboard và báo cáo.

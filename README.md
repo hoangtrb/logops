@@ -14,7 +14,7 @@ one-click PDF/HTML reports.
 | **Problem** | Cut operating cost by at least 3% a year ($1.04M) and improve delivery performance, from the company's own operating data |
 | **Data** | [Logistics Operations Database](https://www.kaggle.com/datasets/yogape/logistics-operations-database) (Kaggle, synthetic): a US road freight carrier, 14 tables, 549,706 rows, 85,410 trips in 2022–2024, 120 trucks, 200 customers, 58 lanes |
 | **Method** | CRISP-DM in six modules: data platform → KPIs → analysis → dashboard → optimization → reports |
-| **Result** | Measured saving $0.47M a year (45% of the target); maximum potential $2.42M more if customers accept the pricing changes; total $2.89M (278%). Not counted: $7.24M of fuel to reconcile, trip chaining up to $4.27M of fuel (estimate) |
+| **Result** | Measured saving $0.47M a year (45% of the target); maximum potential $2.42M more if customers accept the pricing changes; total $2.89M (278%). Not counted: $7.24M of fuel to reconcile |
 
 ## Use
 
@@ -37,7 +37,7 @@ Chrome.
 | 2 | `metrics` | 21 KPIs (SCOR) by period and group, definitions in words |
 | 3 | `analysis` | Profit bridge, lane matrix, fleet capacity, delivery standards, rule-based findings |
 | 4 | `dashboard` | Streamlit: 9 pages, findings by priority, units and reading notes on every chart |
-| 5 | `optimize` | Fleet size, lane pricing, late-delivery check, data-process gaps, trip chaining |
+| 5 | `optimize` | Fleet size, lane pricing, late-delivery check, data-process gaps |
 | 6 | `reports` | One report with every page: responsive HTML or a typeset PDF (cover, contents, lists of figures and tables, executive summary) |
 
 Reviews per module: [docs/reviews/](docs/reviews/). Interview walk-through:

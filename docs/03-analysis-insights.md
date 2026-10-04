@@ -44,7 +44,7 @@ Period: 2022-01-01 to 2024-12-31. Profit is contribution before driver pay and o
 
 - **What happened:** In 95.4% of cases, a truck's next trip starts in a different city from where its previous trip ended. Picking next trips at random would give 95.4%: the data shows no sign of dispatch matching loads to where trucks already are.
 - **Impact:** Almost every trip is preceded by a move to another city, usually empty. Those moves aren't recorded, so their time and fuel are hidden from cost reports and from the profit of each trip.
-- **Recommended:** Record every move between trips (time, distance, reason), and assign next loads to trucks already in or near the pickup city; how many moves this saves is worked out in the optimization module.
+- **Recommended:** Record every move between trips (time, distance, reason), so the cost of driving empty can be measured before the dispatch rules are changed.
 
 ### For reference
 

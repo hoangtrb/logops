@@ -114,3 +114,5 @@ viewer-entered cost per move, labelled an estimate.
 > assignment (its trips overlap in time); money typed "estimate" (hypothesis), never in totals.
 > **O3 revised 2026-10-04 (owner):** nearest free truck, distances over the lanes, fuel per mile
 > from the data; money = the replay's cut in empty miles × fuel bought off trips (a maximum).
+> **O3 dropped 2026-10-05 (owner):** results swing with dry-van vs refrigerated trucks, dedicated
+> trucks and distances; too easy to challenge. Removed from code, dashboard and reports.

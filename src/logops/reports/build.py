@@ -416,13 +416,14 @@ def _summary(ctx: dict) -> str:
             f'<h3 class="p-h3 watch">{escape(t["r_sum_watch"])} ({len(watch)})</h3>'
             f'<ul class="p-bullets">{"".join(finding(i) for i in watch)}</ul>'
         )
-    first, last = data.bounds()
     savings = [f"{t['o_target']}: {tips['target'][-1]}", *tips["total"]]
-    scope = t["o_scope"].format(a=pages.day(ctx, first), b=pages.day(ctx, last))
+    scope = pages.scope_note(ctx)
     parts.append(
         f'<h3 class="p-h3">{escape(t["r_sum_savings"])}</h3>'
-        f'<p class="r-caption">{escape(scope)}</p>'
-        '<ul class="p-bullets">' + "".join(f"<li>{escape(line)}</li>" for line in savings) + "</ul>"
+        + (f'<p class="r-caption">{escape(scope)}</p>' if scope else "")
+        + '<ul class="p-bullets">'
+        + "".join(f"<li>{escape(line)}</li>" for line in savings)
+        + "</ul>"
     )
     return f'<section class="r-summary" id="summary">{"".join(parts)}</section>'
 

@@ -56,14 +56,6 @@ Hover over each card to show how it is computed.
 | Maximum potential | $2.42M | Fuel surcharge to the median, up to +5% on 20 low-margin lanes, review 13 little-used trucks: needs customers to accept |
 | Total | $2.89M (278%) | The target is reached with the certain part plus $0.57M more, e.g. customers accepting 59.6% of the surcharge increase |
 
-- **Trip chaining (simulation):** send the nearest free truck to each load → trips needing a
-  move fall from 89.5% to 41.1%, empty miles by 59.5%. Distances come from the lanes and an
-  empty mile costs $0.605 (fuel price ÷ miles per gallon, both from the data). Hover the card:
-  the model alone says $12.56M, more than the fuel bought off trips, so I apply only the cut to
-  that fuel: **up to $4.27M a year**, kept out of the total.
-- **How long should an empty move be?** Keep it within one driving day (11 h, about 630 miles);
-  beyond that, find a return load on the spot. A hard limit doesn't work here: a third of loads
-  end in cities that send little back, and any limit up to 24 h needs thousands more trucks.
 - **Checked and not recommended:** late deliveries have no repeatable cause by customer, lane,
   driver or appointment hour (year-to-year correlation ≤ 0.14): instead of inventing a fix, record a
   reason code for every late delivery.
@@ -90,7 +82,7 @@ Hover over each card to show how it is computed.
 | Isn't a 65% margin unusually high? | It is contribution profit, before driver pay and overhead (not in the data). A break-even driver cost replaces it: the weakest lane loses money only above $0.857 per mile. |
 | Why is on-time only 44.6%? | The data's on-time flag is ±2 h, early arrivals included. By appointment day it is 91.2%. Deviations are spread evenly from −3 to +6 h whatever the trip length. |
 | Won't higher rates lose customers? | Each lane has a break-even volume loss: median 9.6% at +5%, the volume it can lose and still earn as much as today. That is why pricing is a maximum potential, not a certain saving. |
-| How is the trip-chaining saving computed? | Distance between cities from the lanes (shortest path where there is no direct lane), fuel per mile = $3.899 a gallon ÷ 6.45 miles a gallon, both from the data. The replay cuts empty miles by 59.5%; applied to the $7.18M of fuel bought off trips that is $4.27M a year at most. The lane-based distances are longer than real roads, so real coordinates would sharpen it. |
+| Why no trip chaining (sending the nearest truck)? | I built and tested it, then dropped it: the result swings with assumptions the data can't settle (dry-van vs refrigerated trucks, dedicated trucks for 50% of loads, distances between cities). The step that comes first is recording every move between trips, so the empty miles can be measured. |
 | Why nothing on drivers or staffing? | The scope is operational productivity and quality; the data has no driver pay either. |
 | Tools? | Python, DuckDB, Polars, Streamlit, Plotly; 160 automated tests; runs on one laptop, no server. |
 | What would Co.op need? | Extract trip, truck, fuel and delivery data from the TMS/ERP into the same structure; run the data-quality rules first, then the KPIs and recommendations. |

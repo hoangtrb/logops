@@ -56,14 +56,6 @@ Rê chuột vào từng ô để hiện cách tính.
 | Tiềm năng tối đa | 2,42 tr USD | Phụ phí nhiên liệu về trung vị, tăng cước tối đa +5% cho 20 tuyến biên thấp, rà soát 13 xe ít chạy: cần khách chấp nhận |
 | Tổng | 2,89 tr USD (278%) | Đạt mục tiêu khi làm phần chắc chắn và thu thêm 0,57 tr USD, ví dụ khách chấp nhận 59,6% mức nâng phụ phí |
 
-- **Ghép chuyến (mô phỏng):** điều xe rảnh gần nhất cho mỗi lô → chuyến phải điều xe giảm từ
-  89,5% xuống 41,1%, dặm chạy rỗng giảm 59,5%. Quãng đường lấy từ mạng tuyến, mỗi dặm chạy
-  rỗng 0,605 USD (giá nhiên liệu ÷ số dặm mỗi gallon, đều từ dữ liệu). Rê chuột vào ô: riêng mô
-  hình tính ra 12,56 tr USD, vượt lượng nhiên liệu mua ngoài chuyến, nên em chỉ áp tỷ lệ giảm
-  lên phần nhiên liệu đó: **tối đa 4,27 tr USD mỗi năm**, không cộng vào tổng.
-- **Quãng điều xe bao lâu là hợp lý?** Nên trong một ngày lái (11 giờ, khoảng 630 dặm); xa hơn
-  thì tìm hàng chiều về tại chỗ. Không đặt giới hạn cứng được: một phần ba số lô kết thúc ở nơi
-  ít hàng đi, và mọi giới hạn đến 24 giờ đều cần thêm hàng nghìn xe.
 - **Đã kiểm tra và không đề xuất:** giao trễ không có nguyên nhân lặp lại theo khách, tuyến, tài xế,
   giờ hẹn (tương quan giữa các năm ≤ 0,14): em không bịa ra giải pháp mà đề xuất ghi mã lý do trễ.
 
@@ -89,7 +81,7 @@ Rê chuột vào từng ô để hiện cách tính.
 | Biên 65% có cao bất thường? | Đó là lợi nhuận đóng góp, chưa trừ lương tài xế và chi phí chung (không có trong dữ liệu). Em thay bằng "chi phí tài xế hòa vốn": tuyến yếu nhất chỉ lỗ nếu chi phí tài xế vượt 0,857 USD/dặm. |
 | Vì sao OTD chỉ 44,6%? | Cờ đúng giờ của dữ liệu là ±2 giờ, tính cả đến sớm. Theo ngày hẹn là 91,2%. Độ lệch phân bố đều từ −3 đến +6 giờ, không phụ thuộc độ dài chuyến. |
 | Tăng giá có mất khách? | Mỗi tuyến có "sụt sản lượng hòa vốn": trung vị 9,6% ở mức +5%, tức tuyến có thể mất chừng đó sản lượng mà lợi nhuận không thấp hơn hiện nay. Vì vậy tăng giá là tiềm năng tối đa, không phải tiết kiệm chắc chắn. |
-| Tiết kiệm từ ghép chuyến tính thế nào? | Quãng đường giữa các thành phố lấy từ mạng tuyến (đường ngắn nhất khi không có tuyến trực tiếp), nhiên liệu mỗi dặm = 3,899 USD/gallon ÷ 6,45 dặm/gallon, đều từ dữ liệu. Mô phỏng giảm 59,5% dặm chạy rỗng; áp lên 7,18 tr USD nhiên liệu mua ngoài chuyến thì tối đa 4,27 tr USD mỗi năm. Quãng đường theo mạng tuyến dài hơn đường thật, có tọa độ thật sẽ chính xác hơn. |
+| Sao không đề xuất ghép chuyến (điều xe gần nhất)? | Em đã làm và kiểm tra, rồi bỏ: kết quả thay đổi mạnh theo các giả định mà dữ liệu không trả lời được (xe thùng khô và xe lạnh, xe chuyên trách chiếm 50% số lô, quãng đường giữa các thành phố). Việc cần làm trước là ghi lại mọi lần điều xe giữa hai chuyến để đo được dặm chạy rỗng. |
 | Vì sao không đề xuất về tài xế, nhân sự? | Phạm vi tập trung vào năng suất và chất lượng vận hành; dữ liệu cũng không có lương tài xế. |
 | Công cụ? | Python, DuckDB, Polars, Streamlit, Plotly; 160 test tự động; chạy trên một laptop, không cần máy chủ. |
 | Triển khai cho Co.op cần gì? | Trích xuất dữ liệu chuyến, xe, nhiên liệu, giao nhận từ TMS/ERP vào cùng cấu trúc; chạy lại bộ quy tắc chất lượng dữ liệu trước, rồi mới đến KPI và khuyến nghị. |

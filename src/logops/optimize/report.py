@@ -5,8 +5,6 @@ show the same figures. Impact types:
 - measured: a cost that stops (maintenance of trucks given up);
 - upper bound: revenue that depends on customers accepting a change, assuming volume is kept;
 - unexplained: money the data can't account for yet (not proven loss), never added to totals;
-- estimate: a model result the data can only partly confirm (trip chaining: the replay's cut in
-  empty miles applied to the fuel bought off trips), never added to totals;
 - no signal: checked and rejected, shown with its evidence.
 """
 
@@ -18,7 +16,6 @@ import polars as pl
 
 from logops.analysis.operations import lane_matrix
 from logops.data_platform.dq_report import NumberFormatter
-from logops.optimize.chaining import DRIVING_DAY_HOURS, chaining
 from logops.optimize.data_gaps import GAPS, SOURCES, measure
 from logops.optimize.fleet import cross_check, disposal_tiers, fleet_plan
 from logops.optimize.lanes import LOW_MARGIN_TIER, indexed_surcharge, lane_table, scenarios
@@ -181,7 +178,6 @@ def collect(con: duckdb.DuckDBPyConnection, growth: float = 0.0) -> dict:
         "late_share": late_share(con, *PERIOD),
         "lateness": persistence(con, *PERIOD),
         "gaps": measure(con, headline["break_even_driver_cost_per_mile"].min()),
-        "chaining": chaining(con, *PERIOD),
     }
 
 
@@ -207,13 +203,6 @@ REC_TEXT = {
         "fuel_item": "Fuel reconciliation",
         "fuel_action": "Monthly bought-vs-burned check per truck",
         "fuel_evidence": "Gallons bought are {ratio} times the gallons burned on trips",
-        "chain_item": "{miles} fewer empty miles a year ({cut})",
-        "chain_action": "Send the nearest free truck to each load (one already in the pickup city "
-        "first)",
-        "chain_evidence": "Replay of {loads} loads at actual times, distances over the lanes, an "
-        "empty mile at {per_mile} ({price} a gallon ÷ {mpg} miles a gallon): empty miles {cut}. "
-        "The model's {model} a year is above the fuel actually bought off trips, so the cut is "
-        "applied to that fuel ({off_trip}): a maximum",
         "no_action": "No action",
     },
     "vi": {
@@ -238,12 +227,6 @@ REC_TEXT = {
         "fuel_item": "Đối soát nhiên liệu",
         "fuel_action": "Đối chiếu hằng tháng lượng mua với lượng tiêu thụ theo từng xe",
         "fuel_evidence": "Lượng mua bằng {ratio} lần lượng ghi nhận tiêu thụ trên chuyến",
-        "chain_item": "Bớt {miles} dặm chạy rỗng mỗi năm ({cut})",
-        "chain_action": "Điều xe rảnh gần nhất cho mỗi lô (ưu tiên xe đang ở thành phố lấy hàng)",
-        "chain_evidence": "Mô phỏng lại {loads} lô theo giờ thực tế, quãng đường theo mạng tuyến, "
-        "mỗi dặm chạy rỗng {per_mile} ({price} mỗi gallon ÷ {mpg} dặm mỗi gallon): dặm chạy rỗng "
-        "{cut}. Mô hình tính ra {model} mỗi năm, vượt lượng nhiên liệu thực mua ngoài chuyến, nên "
-        "chỉ áp tỷ lệ giảm lên phần nhiên liệu đó ({off_trip}): là mức tối đa",
         "no_action": "Không đề xuất",
     },
 }
@@ -311,31 +294,6 @@ def recommendations(data: dict, lang: str = "en") -> pl.DataFrame:
             g.unreconciled_value_per_year,
             "unexplained",
             r["fuel_evidence"].format(ratio=f.num(g.gallons_purchased / g.gallons_burned, 2)),
-        )
-    )
-    c = data["chaining"]
-    k = c["costs"]
-    rows.append(
-        (
-            "Network",
-            r["chain_item"].format(
-                miles=f.int(
-                    c["today"]["empty_miles_per_year"] - c["nearest"]["empty_miles_per_year"]
-                ),
-                cut=f"−{f.pct(c['empty_miles_cut'])}",
-            ),
-            r["chain_action"],
-            c["saving_per_year"],
-            "estimate",
-            r["chain_evidence"].format(
-                loads=f.int(c["loads"]),
-                per_mile=f.value(k["cost_per_mile"], "usd"),
-                price=f.value(k["fuel_price"], "usd"),
-                mpg=f.num(k["mpg"], 2),
-                cut=f"−{f.pct(c['empty_miles_cut'])}",
-                model=f.value(c["model_fuel_saving"], "usd_m"),
-                off_trip=f.value(k["off_trip_fuel_per_year"], "usd_m"),
-            ),
         )
     )
     rows.append(
@@ -461,24 +419,6 @@ T = {
         "index_cols": ["Year", "Average price", "Actual surcharge", "Indexed surcharge"],
         "checked": "## 4. Checked and rejected",
         "checked_cols": ["Lever", "Evidence"],
-        "chain_title": "### Trip chaining: nearest truck (simulation, estimate)",
-        "chain_intro": "All {loads} loads replayed at their actual times under two dispatch rules: "
-        "as today (truck idle longest, anywhere) and nearest truck. Distances come from the lanes "
-        "(shortest path where two cities have no lane), an empty mile costs {per_mile} ({price} a "
-        "gallon ÷ {mpg} miles a gallon). The model's empty miles are about three times what the "
-        "fuel bought off trips allows, so only its cut ({cut}) is applied to that fuel "
-        "({off_trip}): {saving} a year, a maximum, never added to the totals. No fixed limit on "
-        "the empty drive: trucks in cities that send little back must drive far, and any limit up "
-        "to 24 h needs thousands of extra trucks.",
-        "chain_cols": ["", "As today", "Nearest truck"],
-        "chain_rows": [
-            "Trips needing a move",
-            "Moves a year",
-            "Empty miles a year",
-            "Miles per move",
-            "Moves within one driving day ({h} h)",
-            "Trucks needed",
-        ],
         "gaps_intro": "Each gap: the measured cost of leaving it, and feasible fixes. Tier 1 = "
         "process or configuration in existing systems. Tier 2 = devices. Device prices are "
         "indicative public figures, to be replaced by vendor quotes.",
@@ -570,24 +510,6 @@ T = {
         "index_cols": ["Năm", "Giá trung bình", "Phụ phí thực tế", "Phụ phí theo chỉ số"],
         "checked": "## 4. Đã kiểm tra và loại bỏ",
         "checked_cols": ["Đòn bẩy", "Bằng chứng"],
-        "chain_title": "### Ghép chuyến: điều xe gần nhất (mô phỏng, ước tính)",
-        "chain_intro": "Mô phỏng lại toàn bộ {loads} lô theo giờ thực tế với hai cách điều phối: "
-        "như hiện tại (xe rảnh lâu nhất, ở đâu cũng được) và điều xe gần nhất. Quãng đường lấy từ "
-        "mạng tuyến (đường ngắn nhất khi hai thành phố không có tuyến trực tiếp), mỗi dặm chạy "
-        "rỗng {per_mile} ({price} mỗi gallon ÷ {mpg} dặm mỗi gallon). Số dặm chạy rỗng của mô hình "
-        "gấp khoảng ba lần mức mà nhiên liệu mua ngoài chuyến cho phép, nên chỉ áp tỷ lệ giảm "
-        "({cut}) lên phần nhiên liệu đó ({off_trip}): {saving} mỗi năm, là mức tối đa, không cộng "
-        "vào tổng. Không đặt giới hạn cứng cho quãng chạy rỗng: xe ở các thành phố ít hàng đi phải "
-        "chạy xa, và mọi giới hạn đến 24 giờ đều cần thêm hàng nghìn xe.",
-        "chain_cols": ["", "Như hiện tại", "Điều xe gần nhất"],
-        "chain_rows": [
-            "Chuyến phải điều xe",
-            "Lần điều xe mỗi năm",
-            "Dặm chạy rỗng mỗi năm",
-            "Dặm mỗi lần điều xe",
-            "Lần điều xe trong một ngày lái ({h} giờ)",
-            "Số xe cần",
-        ],
         "gaps_intro": "Mỗi lỗ hổng: chi phí đo được nếu để nguyên, và biện pháp khả thi. Mức 1 = "
         "quy trình hoặc cấu hình trên hệ thống sẵn có. Mức 2 = thiết bị. Giá thiết bị là số liệu "
         "công khai tham khảo, cần thay bằng báo giá thực tế.",
@@ -745,38 +667,6 @@ def render_evaluation(data: dict, lang: str) -> str:
             for r in data["indexed_by_year"].iter_rows(named=True)
         ],
         {1, 2, 3},
-    )
-    c, k = data["chaining"], data["chaining"]["costs"]
-    out += [
-        "",
-        t["chain_title"],
-        "",
-        t["chain_intro"].format(
-            loads=f.int(c["loads"]),
-            per_mile=f.value(k["cost_per_mile"], "usd"),
-            price=f.value(k["fuel_price"], "usd"),
-            mpg=f.num(k["mpg"], 2),
-            cut=f"−{f.pct(c['empty_miles_cut'])}",
-            off_trip=usd(k["off_trip_fuel_per_year"]),
-            saving=usd(c["saving_per_year"]),
-        ),
-        "",
-    ]
-    cells = [
-        lambda x: f.pct(x["moved_pct"] / 100),
-        lambda x: f.int(x["moves_per_year"]),
-        lambda x: f.int(x["empty_miles_per_year"]),
-        lambda x: f.int(x["miles_per_move"]),
-        lambda x: f.pct(x["within_a_day_pct"] / 100),
-        lambda x: f.int(x["trucks"]),
-    ]
-    out += _table(
-        t["chain_cols"],
-        [
-            [name.format(h=DRIVING_DAY_HOURS), cell(c["today"]), cell(c["nearest"])]
-            for name, cell in zip(t["chain_rows"], cells, strict=True)
-        ],
-        {1, 2},
     )
     out += ["", t["checked"], ""]
     out += _table(

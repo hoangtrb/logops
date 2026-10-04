@@ -457,6 +457,21 @@ Tiến độ module 1: █████████ hoàn tất (7 việc xong, 2
   phỏng; mô hình tính 12,56 tr USD, vượt lượng nhiên liệu mua ngoài chuyến, nên áp tỷ lệ giảm lên phần
   đó: tối đa 4,27 tr USD mỗi năm (ước tính, không cộng vào tổng). 160 test pass.
 
+### T2 05/10 · Hướng dẫn chuyển máy, chữ trong báo cáo, kiểm tra ghép chuyến ✅
+- **Đã làm:** `docs/handoff` (EN/VI): cài đặt trên máy khác, các file phải chép tay, cách chạy, danh
+  sách chuẩn bị, lỗi thường gặp, số liệu chính, quy tắc làm việc cho Claude. Báo cáo: bỏ câu nhắc "thanh
+  bên" (chỉ ghi khuyến nghị tính trên toàn bộ dữ liệu khi kỳ báo cáo ngắn hơn). Cố định thứ tự thành
+  phố khi bằng nhau (build lại không làm đổi tài liệu). Kiểm tra ghép chuyến: tách xe thùng khô và xe
+  lạnh giảm 63,4%; giữ nguyên xe chuyên trách giảm 33,0% (2,37 tr USD).
+- **Kết quả:** 160 test pass; `logops build` 20,5 giây; xuất PDF bằng lệnh khoảng 28 giây.
+
+### T2 05/10 · Bỏ ghép chuyến ✅
+- **Quyết định (chủ dự án):** gỡ O3 ghép chuyến khỏi code, dashboard, báo cáo và tài liệu: kết quả
+  thay đổi mạnh theo xe thùng khô/xe lạnh, xe chuyên trách (50% số lô) và quãng đường mà dữ liệu không
+  cho. Nhận xét về điều xe giờ đề xuất ghi lại mọi lần điều xe trước.
+- **Kết quả:** 157 test pass; số tiết kiệm không đổi (đo được 0,47 tr USD, tiềm năng tối đa 2,42 tr
+  USD, tổng 2,89 tr USD).
+
 ## 6. Đang làm
 
 **Module 4 `dashboard` xong, chờ bạn rà soát rồi commit.**

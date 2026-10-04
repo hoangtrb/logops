@@ -9,7 +9,7 @@
 
 Redone from branch `feature/optimize` after the analysis and dashboard modules. Scope agreed with
 the project owner: O1 fleet, O2 lane pricing, O4 late deliveries, O5 data process, O6
-recommendations and dashboard page; O3 trip chaining only if time allows (done 2026-10-04). The target
+recommendations and dashboard page; O3 trip chaining only if time allows (built 2026-10-04, dropped by the owner 2026-10-05). The target
 of $3.1M over 3 years may be exceeded.
 
 ## 2. Outputs vs the spec
@@ -21,7 +21,7 @@ of $3.1M over 3 years may be exceeded.
 | O4 late deliveries | ✅ No persistent cause: correlation between periods −0.23 to 0.14 (needs 0.7) for city, customer, appointment hour, lane and driver | Test on the real data |
 | O5 data-process improvements | ✅ 7 gaps; new: moves between trips not recorded | Every device cost cites a source |
 | O6 recommendations, docs, page | ✅ `recommendations` table, `logops optimize`, `docs/04`, `docs/05`, dashboard page "Optimization recommendations" (VI/EN), one page placed before the data page (2026-10-04) | The page runs in both languages and reloads under 3 s |
-| O3 trip chaining | ✅ Replay of every load at actual times: today's dispatching (truck idle longest) against the nearest free truck; distances over the lanes, fuel per mile from the data; dashboard section and evaluation doc | Fixture tests (nearest truck, shortest path, arrival in time); the money never exceeds the fuel bought off trips (test) |
+| O3 trip chaining | ❌ Built, then dropped by the owner (2026-10-05) | Results depended too much on assumptions the data can't settle: dry-van vs refrigerated trucks, dedicated trucks (50% of loads: cut in empty miles 59.5% → 35.2%), lane-based distances longer than real roads, and replayed empty miles about three times what the fuel bought off trips allows. Too easy to challenge, so not presented |
 
 **Tests:** 26 in `tests/optimize` + 2 page runs; 148 in total, all passing; `ruff` clean.
 
@@ -33,14 +33,7 @@ of $3.1M over 3 years may be exceeded.
 | **Upper bound:** review 13 lowest-mileage trucks ($0.20M), surcharge to the median ($0.96M), rates on low-margin lanes capped at +5% ($1.26M) | $2.42M | 233% |
 | **Total potential** | $2.89M | 278% |
 | Unexplained, not counted: fuel bought but not recorded as burned | $7.24M | — |
-| Estimate (maximum), not counted: trip chaining, empty miles −59.5% × $7.18M of fuel bought off trips | $4.27M | — |
 
-- **Trip chaining (O3):** sending the nearest free truck to each load cuts trips needing a move
-  from 89.5% to 41.1% and empty miles by 59.5% (replay; distances over the lanes, an empty mile
-  at $0.605 = $3.899 a gallon ÷ 6.45 miles a gallon). The replay's empty miles are about three
-  times what the fuel bought off trips allows, so only the cut is applied to that fuel ($7.18M):
-  $4.27M a year, a maximum. No fixed limit on the empty drive: any limit up to 24 h needs
-  thousands of extra trucks; 33% of nearest-truck moves fit in one 11-hour driving day.
 - **Fleet:** 79 / 83 / 87 / 94 trucks needed at 0 / 5 / 10 / 20% growth vs 120 owned and 92 in use;
   availability 97.7%; 8 of 1,096 days needed more than 79 trucks (short-term rental).
 - **Lanes:** every lane profitable on measured cost; the weakest loses money only if driver cost
@@ -52,6 +45,7 @@ of $3.1M over 3 years may be exceeded.
   recommendation, reason codes proposed instead (O5).
 
 ## 4. Caveats for presenting
+
 
 - Measured savings alone reach 45% of the target; the target is exceeded only with the pricing
   levers, which need customers to accept them.

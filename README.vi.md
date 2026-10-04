@@ -14,7 +14,7 @@ và báo cáo PDF/HTML xuất bằng một cú nhấp.
 | **Bài toán** | Giảm ít nhất 3% chi phí vận hành mỗi năm (1,04 tr USD) và nâng chất lượng giao hàng, từ chính dữ liệu vận hành của doanh nghiệp |
 | **Dữ liệu** | [Logistics Operations Database](https://www.kaggle.com/datasets/yogape/logistics-operations-database) (Kaggle, dữ liệu mô phỏng): doanh nghiệp vận tải đường bộ tại Mỹ, 14 bảng, 549.706 dòng, 85.410 chuyến giai đoạn 2022–2024, 120 xe tải, 200 khách hàng, 58 tuyến |
 | **Phương pháp** | CRISP-DM qua sáu module: nền tảng dữ liệu → KPI → phân tích → dashboard → tối ưu → báo cáo |
-| **Kết quả** | Tiết kiệm đo được 0,47 tr USD mỗi năm (45% mục tiêu); tiềm năng tối đa thêm 2,42 tr USD nếu khách chấp nhận điều chỉnh giá; tổng 2,89 tr USD (278%). Không cộng vào tổng: 7,24 tr USD nhiên liệu cần đối soát, ghép chuyến tiết kiệm tối đa 4,27 tr USD nhiên liệu (ước tính) |
+| **Kết quả** | Tiết kiệm đo được 0,47 tr USD mỗi năm (45% mục tiêu); tiềm năng tối đa thêm 2,42 tr USD nếu khách chấp nhận điều chỉnh giá; tổng 2,89 tr USD (278%). Không cộng vào tổng: 7,24 tr USD nhiên liệu cần đối soát |
 
 ## Sử dụng
 
@@ -37,7 +37,7 @@ Chrome.
 | 2 | `metrics` | 21 KPI (SCOR) theo kỳ và nhóm, định nghĩa bằng lời |
 | 3 | `analysis` | Cầu lợi nhuận, ma trận tuyến, năng lực đội xe, chuẩn giao hàng, nhận xét theo quy tắc |
 | 4 | `dashboard` | Streamlit: 9 trang, điểm chính theo mức ưu tiên, đơn vị và diễn giải trên mọi biểu đồ |
-| 5 | `optimize` | Quy mô đội xe, giá cước tuyến, kiểm tra giao trễ, cải tiến quy trình dữ liệu, ghép chuyến |
+| 5 | `optimize` | Quy mô đội xe, giá cước tuyến, kiểm tra giao trễ, cải tiến quy trình dữ liệu |
 | 6 | `reports` | Một báo cáo gồm mọi trang: HTML responsive hoặc PDF dàn trang (bìa, mục lục, danh mục hình và bảng, tóm tắt điều hành) |
 
 Đánh giá từng module: [docs/reviews/](docs/reviews/). Kịch bản trình bày khi phỏng vấn:

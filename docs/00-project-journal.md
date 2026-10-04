@@ -469,6 +469,21 @@ Module 1 progress: █████████ complete (7 tasks done, 2 cut wit
   the model's $12.56M exceeds the fuel bought off trips, so the cut is applied to that fuel: up to
   $4.27M a year (estimate, not in totals). 160 tests pass.
 
+### Mon 10-05 · Handoff, report wording, chaining check ✅
+- **Done:** `docs/handoff` (EN/VI): setup on another computer, files to copy by hand, run, checklist,
+  common problems, key figures, working rules for Claude. Report: the "sidebar" sentence removed (the
+  report says the recommendations use all the data only when its period is shorter). Lane balance
+  order fixed for ties (rebuilds leave the docs unchanged). Trip chaining checked: dry-van and
+  refrigerated fleets apart 63.4% cut; dedicated loads kept as today 33.0% ($2.37M).
+- **Result:** 160 tests pass; `logops build` 20.5 s; PDF export about 28 s from the CLI.
+
+### Mon 10-05 · Trip chaining dropped ✅
+- **Decided (owner):** O3 trip chaining removed from code, dashboard, reports and docs: its result
+  swings with dry-van vs refrigerated trucks, dedicated trucks (50% of loads) and distances the data
+  can't give. The repositioning finding now recommends recording every move between trips first.
+- **Result:** 157 tests pass; savings figures unchanged ($0.47M measured, $2.42M maximum potential,
+  $2.89M total).
+
 ## 6. In progress
 
 **Module 4 `dashboard` is done and awaits your review, then a commit.**

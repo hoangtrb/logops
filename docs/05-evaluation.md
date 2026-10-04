@@ -67,19 +67,6 @@ All 58 lanes are profitable on measured cost; margins are before driver pay. The
 | 2023 | $3.850 | $9.94M | $9.63M |
 | 2024 | $3.650 | $10.01M | $8.43M |
 
-### Trip chaining: nearest truck (simulation, estimate)
-
-All 85,410 loads replayed at their actual times under two dispatch rules: as today (truck idle longest, anywhere) and nearest truck. Distances come from the lanes (shortest path where two cities have no lane), an empty mile costs $0.605 ($3.899 a gallon ÷ 6.45 miles a gallon). The model's empty miles are about three times what the fuel bought off trips allows, so only its cut (−59.5%) is applied to that fuel ($7.18M): $4.27M a year, a maximum, never added to the totals. No fixed limit on the empty drive: trucks in cities that send little back must drive far, and any limit up to 24 h needs thousands of extra trucks.
-
-|  | As today | Nearest truck |
-|---|---:|---:|
-| Trips needing a move | 89.5% | 41.1% |
-| Moves a year | 25,436 | 11,690 |
-| Empty miles a year | 34,911,718 | 14,145,598 |
-| Miles per move | 1,373 | 1,210 |
-| Moves within one driving day (11 h) | 14.3% | 33.4% |
-| Trucks needed | 211 | 195 |
-
 ## 4. Checked and rejected
 
 | Lever | Evidence |

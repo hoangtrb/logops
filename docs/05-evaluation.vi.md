@@ -67,19 +67,6 @@ Cả 58 tuyến đều có lời trên chi phí đo được; biên là trước
 | 2023 | 3,850 USD | 9,94 tr USD | 9,63 tr USD |
 | 2024 | 3,650 USD | 10,01 tr USD | 8,43 tr USD |
 
-### Ghép chuyến: điều xe gần nhất (mô phỏng, ước tính)
-
-Mô phỏng lại toàn bộ 85.410 lô theo giờ thực tế với hai cách điều phối: như hiện tại (xe rảnh lâu nhất, ở đâu cũng được) và điều xe gần nhất. Quãng đường lấy từ mạng tuyến (đường ngắn nhất khi hai thành phố không có tuyến trực tiếp), mỗi dặm chạy rỗng 0,605 USD (3,899 USD mỗi gallon ÷ 6,45 dặm mỗi gallon). Số dặm chạy rỗng của mô hình gấp khoảng ba lần mức mà nhiên liệu mua ngoài chuyến cho phép, nên chỉ áp tỷ lệ giảm (−59,5%) lên phần nhiên liệu đó (7,18 tr USD): 4,27 tr USD mỗi năm, là mức tối đa, không cộng vào tổng. Không đặt giới hạn cứng cho quãng chạy rỗng: xe ở các thành phố ít hàng đi phải chạy xa, và mọi giới hạn đến 24 giờ đều cần thêm hàng nghìn xe.
-
-|  | Như hiện tại | Điều xe gần nhất |
-|---|---:|---:|
-| Chuyến phải điều xe | 89,5% | 41,1% |
-| Lần điều xe mỗi năm | 25.436 | 11.690 |
-| Dặm chạy rỗng mỗi năm | 34.911.718 | 14.145.598 |
-| Dặm mỗi lần điều xe | 1.373 | 1.210 |
-| Lần điều xe trong một ngày lái (11 giờ) | 14,3% | 33,4% |
-| Số xe cần | 211 | 195 |
-
 ## 4. Đã kiểm tra và loại bỏ
 
 | Đòn bẩy | Bằng chứng |
